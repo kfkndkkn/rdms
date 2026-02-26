@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8">
 
-<!-- ===== PRODUCTION STABLE ANTI CACHE ===== -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -95,21 +94,24 @@ L.control.layers(
 }
 ).addTo(map);
 
-// ================= HEXAGON =================
-function hexIcon(color,blink=false){
+// ================= HEX ICON =================
+function hexIcon(color, options={}){
 return L.divIcon({
-className: blink ? "blink" : "",
+className: options.blink ? "blink" : "",
 html:`<svg width="16" height="16" viewBox="0 0 24 24">
 <polygon points="12,2 22,7 22,17 12,22 2,17 2,7"
-fill="${color}" stroke="white" stroke-width="1"/>
+fill="${color}"
+fill-opacity="${options.opacity || 1}"
+stroke="${options.stroke || 'white'}"
+stroke-width="1.5"/>
 </svg>`,
 iconSize:[16,16]
 });
 }
 
-// ================= COLOR IAEA OIL =================
+// ================= COLOR =================
 function getColor(d){
-if(d==="Out of service") return "black";
+if(d==="Out of service") return "#6ad12b";
 d=parseFloat(d);
 if(d<1000) return "#6ad12b";
 if(d<100000) return "#ffe600";
@@ -118,10 +120,8 @@ return "#ff2b2b";
 }
 
 // ================= LOAD CSV =================
-// gunakan RELATIVE PATH agar tidak konflik cache GitHub Pages
 function loadCSV(){
 
-// cache-buster supaya selalu ambil terbaru
 var url="output.csv?nocache="+Date.now();
 
 fetch(url)
@@ -149,11 +149,31 @@ dose=parseFloat(dose);
 if(dose>1000000) blink=true;
 }
 
-var marker=L.marker([lat,lon],{
-icon:hexIcon(color,blink)
-}).bindPopup(
+var marker;
+
+if(row["Gamma Dose Rate (nSv/h)"]==="Out of service"){
+
+marker=L.marker([lat,lon],{
+icon:hexIcon("#6ad12b",{
+opacity:0.35,
+stroke:"yellow",
+blink:false
+})
+});
+
+}else{
+
+marker=L.marker([lat,lon],{
+icon:hexIcon(color,{
+blink:blink
+})
+});
+
+}
+
+marker.bindPopup(
 "<b>"+row["NAMA UNIT"]+"</b><br>"+
-"Dose: "+row["Gamma Dose Rate (nSv/h)"]+" nSv/h<br>"+
+"Dose: "+row["Gamma Dose Rate (nSv/h)"]+"<br>"+
 "Update: "+row["LAST UPDATE (WIB)"]
 );
 
