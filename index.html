@@ -226,8 +226,44 @@ Gamma Dose Rate (nSv/h)
 return div;
 };
 legend.addTo(map);
+// ================= BOX ZOOM TOOL =================
+var boxZoomControl = L.control({ position: 'topleft' });
 
+boxZoomControl.onAdd = function(map){
+    var btn = L.DomUtil.create('button','leaflet-bar');
+    btn.innerHTML = "🔍";
+    btn.title = "Drag zoom area";
+    btn.style.width = "34px";
+    btn.style.height = "34px";
+    btn.style.cursor = "pointer";
+    btn.style.background = "white";
+    btn.style.border = "none";
+    btn.style.fontSize = "18px";
+
+    var active = false;
+
+    L.DomEvent.on(btn,'click',function(e){
+        L.DomEvent.stopPropagation(e);
+
+        if(!active){
+            map.boxZoom.enable();
+            btn.style.background = "#0b1e3f";
+            btn.style.color = "white";
+            active = true;
+        }else{
+            map.boxZoom.disable();
+            btn.style.background = "white";
+            btn.style.color = "black";
+            active = false;
+        }
+    });
+
+    return btn;
+};
+
+boxZoomControl.addTo(map);
 </script>
 
 </body>
 </html>
+
