@@ -10,6 +10,8 @@
 <title>Indonesia Radiation Data Monitoring System</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
 
 <style>
 html,body{margin:0;padding:0;font-family:Arial;}
@@ -24,7 +26,6 @@ z-index:9999;
 }
 
 #header img{height:42px;margin-right:15px;}
-
 #map{position:absolute;top:70px;bottom:0;width:100%;}
 
 .blink{
@@ -55,44 +56,20 @@ box-shadow:0 2px 6px rgba(0,0,0,0.3);
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <script>
-// ================= BASEMAP =================
-var osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-var dark=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png');
-
-var googleHybrid=L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{
-maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']
-});
-
-var googleSat=L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
-maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']
-});
-
-var googleTerrain=L.tileLayer('https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',{
-maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']
-});
 
 // ================= MAP =================
+var osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 var map=L.map('map',{center:[-2,118],zoom:5,layers:[osm]});
 
-// ================= LAYERS =================
-var activeLayer=L.layerGroup().addTo(map);
-var oosLayer=L.layerGroup();
-
-L.control.layers(
-{
-"OSM":osm,
-"Dark":dark,
-"Google Hybrid":googleHybrid,
-"Google Satellite":googleSat,
-"Google Terrain":googleTerrain
-},
-{
-"Out of Service":oosLayer
-}
-).addTo(map);
+// ================= CLUSTER GROUP =================
+var markers=L.markerClusterGroup({
+disableClusteringAtZoom:12
+});
+map.addLayer(markers);
 
 // ================= HEX ICON =================
 function hexIcon(color, options={}){
@@ -128,8 +105,9 @@ fetch(url)
 .then(r=>r.text())
 .then(text=>{
 
-activeLayer.clearLayers();
-oosLayer.clearLayers();
+markers.clearLayers();
+
+var grouped={};
 
 var data=Papa.parse(text,{header:true}).data;
 
@@ -139,58 +117,57 @@ if(!row["LATITUDE"]) return;
 
 var lat=parseFloat(row["LATITUDE"]);
 var lon=parseFloat(row["LONGITUDE"]);
-var dose=row["Gamma Dose Rate (nSv/h)"];
+var key=lat+","+lon;
 
-var color=getColor(dose);
+if(!grouped[key]) grouped[key]=[];
+grouped[key].push(row);
+
+});
+
+// ================= CREATE MARKERS =================
+Object.keys(grouped).forEach(key=>{
+
+var rows=grouped[key];
+var lat=parseFloat(rows[0]["LATITUDE"]);
+var lon=parseFloat(rows[0]["LONGITUDE"]);
+
+var firstDose=rows[0]["Gamma Dose Rate (nSv/h)"];
+var color=getColor(firstDose);
 var blink=false;
 
-if(dose!=="Out of service"){
-dose=parseFloat(dose);
-if(dose>1000000) blink=true;
+if(firstDose!=="Out of service"){
+if(parseFloat(firstDose)>1000000) blink=true;
 }
 
-var marker;
+var icon;
 
-// ================= OUT OF SERVICE STYLE =================
-if(row["Gamma Dose Rate (nSv/h)"]==="Out of service"){
-
-marker=L.marker([lat,lon],{
-icon:hexIcon("#6ad12b",{
-opacity:0.35,
-stroke:"yellow",
-blink:false
-})
-});
-
+if(firstDose==="Out of service"){
+icon=hexIcon("#6ad12b",{opacity:0.35,stroke:"yellow"});
 }else{
-
-marker=L.marker([lat,lon],{
-icon:hexIcon(color,{
-blink:blink
-})
-});
-
+icon=hexIcon(color,{blink:blink});
 }
 
-// ================= FORMAT DOSE =================
-var displayDose=row["Gamma Dose Rate (nSv/h)"];
+var popupContent="";
+
+rows.forEach(r=>{
+
+var displayDose=r["Gamma Dose Rate (nSv/h)"];
 
 if(displayDose!=="Out of service" && displayDose!==""){
 displayDose=parseFloat(displayDose).toFixed(2);
 }
 
-// ================= POPUP =================
-marker.bindPopup(
-"<b>"+row["NAMA UNIT"]+"</b><br>"+
+popupContent+=
+"<b>"+r["NAMA UNIT"]+"</b><br>"+
 "Dose Rate (nSv/h): "+displayDose+"<br>"+
-"Last Update (WIB): "+row["LAST UPDATE (WIB)"]
-);
+"Last Update (WIB): "+r["LAST UPDATE (WIB)"]+
+"<hr style='margin:6px 0'>";
+});
 
-if(row["Gamma Dose Rate (nSv/h)"]==="Out of service"){
-marker.addTo(oosLayer);
-}else{
-marker.addTo(activeLayer);
-}
+var marker=L.marker([lat,lon],{icon:icon})
+.bindPopup(popupContent);
+
+markers.addLayer(marker);
 
 });
 
@@ -199,33 +176,6 @@ marker.addTo(activeLayer);
 
 loadCSV();
 setInterval(loadCSV,30000);
-
-// ================= LEGEND =================
-var legend=L.control({position:"bottomleft"});
-legend.onAdd=function(){
-var div=L.DomUtil.create("div","legend");
-
-div.innerHTML=`
-<b>IAEA Operational Intervention Levels</b><br><br>
-
-<div style="width:260px;height:14px;
-background:linear-gradient(to right,#6ad12b,#ffe600,#ff9b00,#ff2b2b);
-margin-bottom:6px;border:1px solid #999;"></div>
-
-<div style="display:flex;justify-content:space-between;width:260px;font-size:11px;">
-<span>0</span>
-<span>1,000</span>
-<span>100,000</span>
-<span>1,000,000</span>
-</div>
-
-<div style="font-size:11px;margin-top:4px;">
-Gamma Dose Rate (nSv/h)
-</div>
-`;
-return div;
-};
-legend.addTo(map);
 
 </script>
 
