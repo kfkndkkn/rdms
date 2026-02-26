@@ -151,6 +151,7 @@ if(dose>1000000) blink=true;
 
 var marker;
 
+// ================= OUT OF SERVICE STYLE =================
 if(row["Gamma Dose Rate (nSv/h)"]==="Out of service"){
 
 marker=L.marker([lat,lon],{
@@ -171,10 +172,18 @@ blink:blink
 
 }
 
+// ================= FORMAT DOSE =================
+var displayDose=row["Gamma Dose Rate (nSv/h)"];
+
+if(displayDose!=="Out of service" && displayDose!==""){
+displayDose=parseFloat(displayDose).toFixed(2);
+}
+
+// ================= POPUP =================
 marker.bindPopup(
 "<b>"+row["NAMA UNIT"]+"</b><br>"+
-"Dose: "+row["Gamma Dose Rate (nSv/h)"]+"<br>"+
-"Update: "+row["LAST UPDATE (WIB)"]
+"Dose Rate (nSv/h): "+displayDose+"<br>"+
+"Last Update (WIB): "+row["LAST UPDATE (WIB)"]
 );
 
 if(row["Gamma Dose Rate (nSv/h)"]==="Out of service"){
