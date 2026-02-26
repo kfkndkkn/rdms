@@ -227,74 +227,7 @@ return div;
 };
 legend.addTo(map);
 
-// ================= DRAG ZOOM TOOL =================
-
-// layer untuk rectangle
-var drawnItems = new L.FeatureGroup();
-map.addLayer(drawnItems);
-
-// draw control (hanya rectangle)
-var drawControl = new L.Control.Draw({
-draw: {
-polygon: false,
-polyline: false,
-circle: false,
-marker: false,
-circlemarker: false,
-rectangle: {
-shapeOptions: {
-color: '#ff2b2b',
-weight: 2
-}
-}
-},
-edit: false
-});
-
-// tombol magnifier custom
-var zoomBoxControl = L.control({position:'topleft'});
-
-zoomBoxControl.onAdd = function(){
-var div = L.DomUtil.create('div','leaflet-bar');
-div.style.background='white';
-div.style.width='34px';
-div.style.height='34px';
-div.style.display='flex';
-div.style.alignItems='center';
-div.style.justifyContent='center';
-div.style.cursor='pointer';
-div.style.fontSize='18px';
-div.innerHTML='🔍';
-
-div.onclick = function(){
-map.addControl(drawControl);
-document.querySelector('.leaflet-draw-draw-rectangle').click();
-};
-
-return div;
-};
-
-zoomBoxControl.addTo(map);
-
-// saat rectangle selesai dibuat
-map.on(L.Draw.Event.CREATED, function (e) {
-
-var layer = e.layer;
-drawnItems.clearLayers();
-drawnItems.addLayer(layer);
-
-var bounds = layer.getBounds();
-map.fitBounds(bounds);
-
-// hapus rectangle setelah zoom (opsional)
-setTimeout(function(){
-drawnItems.clearLayers();
-}, 1000);
-
-});  
-
 </script>
 
 </body>
 </html>
-
