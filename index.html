@@ -75,7 +75,12 @@ maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']
 });
 
 // ================= MAP =================
-var map=L.map('map',{center:[-2,118],zoom:5,layers:[osm]});
+var map = L.map('map', {
+    center: [-2,118],
+    zoom: 6,        // default lebih dekat dari sebelumnya
+    minZoom: 5,     // jangan terlalu jauh zoom out
+    maxZoom: 12,    // jangan terlalu jauh zoom in
+    layers: [osm]
 
 // ================= LAYERS =================
 var activeLayer=L.layerGroup().addTo(map);
@@ -266,4 +271,5 @@ boxZoomControl.addTo(map);
 
 </body>
 </html>
+
 
