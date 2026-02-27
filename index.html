@@ -172,6 +172,19 @@ var osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 var dark=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png');
 var googleHybrid=L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']});
 var googleSat=L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']});
+  var esriGray=L.tileLayer(
+'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+{
+maxZoom:16,
+attribution:'Esri'
+});
+
+var esriGrayLabel=L.tileLayer(
+'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+{
+maxZoom:16
+});
+  
 
 // MAP
 
@@ -201,9 +214,11 @@ L.control.layers(
 "OpenStreetMap":osm,
 "Dark":dark,
 "Google Hybrid":googleHybrid,
-"Google Satellite":googleSat
+"Google Satellite":googleSat,
+"ESRI Light Gray":esriGray
 },
 {
+"ESRI Labels":esriGrayLabel,
 "Station Polygons":polygonLayer,
 "Station Labels":labelLayer
 }
@@ -500,5 +515,6 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
