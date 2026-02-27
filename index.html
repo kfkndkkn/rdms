@@ -212,15 +212,13 @@ L.control.layers(
 // RADIUS
 
 function getRadius(){
-var z=map.getZoom();
-if(z<=5) return 25000;
-if(z<=6) return 20000;
-if(z<=7) return 15000;
-if(z<=8) return 9000;
-if(z<=9) return 6000;
-if(z<=10) return 3500;
-if(z<=11) return 2000;
-return 1200;
+
+var zoom=map.getZoom();
+
+var base=40000;
+
+return Math.max(base / Math.pow(2, zoom-5), 80);
+
 }
 
 // HEXAGON
@@ -502,4 +500,5 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
