@@ -474,6 +474,94 @@ updateChart(index);
 
 function updateChart(index){
 
+var tsChart=null;
+var allLabels=[];
+var allValues=[];
+
+function openTS(station){
+
+document.getElementById("tsModal").style.display="block";
+document.getElementById("tsTitle").innerHTML="Time Series - "+station;
+
+// reset data
+allLabels=[];
+allValues=[];
+
+// reset grafik lama
+if(tsChart){
+tsChart.destroy();
+tsChart=null;
+}
+
+// reset canvas
+var canvas=document.getElementById("tsChart");
+var ctx=canvas.getContext("2d");
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+// reset text
+document.getElementById("selectedTime").innerHTML="";
+document.getElementById("tsStats").innerHTML="";
+
+// reset slider
+var slider=document.getElementById("timeSlider");
+slider.oninput=null;
+slider.value=0;
+
+fetch("timeseries.csv?nocache="+Date.now())
+.then(r=>r.text())
+.then(text=>{
+
+var data=Papa.parse(text,{header:true}).data;
+
+data.forEach(r=>{
+
+if(r.station===station){
+
+allLabels.push(r.time);
+allValues.push(parseFloat(r.dose));
+
+}
+
+});
+
+if(allValues.length===0){
+
+document.getElementById("tsStats").innerHTML="No data available";
+return;
+
+}
+
+// setup slider
+slider.min=0;
+slider.max=allValues.length-1;
+slider.step=5;
+
+// paksa slider di posisi terakhir
+var lastIndex=allValues.length-1;
+slider.value=lastIndex;
+
+// gambar grafik langsung
+updateChart(lastIndex);
+
+// aktifkan slider
+slider.oninput=function(){
+
+var index=parseInt(this.value);
+
+if(index>=allValues.length){
+index=allValues.length-1;
+}
+
+updateChart(index);
+
+};
+
+});
+
+}
+
+function updateChart(index){
+
 var labels=allLabels.slice(0,index+1);
 var values=allValues.slice(0,index+1);
 
@@ -483,19 +571,23 @@ var endTime=labels[labels.length-1];
 document.getElementById("selectedTime").innerHTML=
 "Selected Time : "+startTime+" – "+endTime;
 
-// hitung statistik
-var avg = values.reduce((a,b)=>a+b,0)/values.length;
-var min = Math.min(...values);
-var max = Math.max(...values);
+// statistik
+var avg=values.reduce((a,b)=>a+b,0)/values.length;
+var min=Math.min(...values);
+var max=Math.max(...values);
 
-// margin supaya grafik tidak terlalu rapat
-var ymin = min - (max-min)*0.2;
-var ymax = max + (max-min)*0.2;
+// margin grafik
+var ymin=min-(max-min)*0.2;
+var ymax=max+(max-min)*0.2;
 
 if(ymin<0) ymin=0;
 
-if(tsChart) tsChart.destroy();
+// reset chart
+if(tsChart){
+tsChart.destroy();
+}
 
+// buat chart baru
 tsChart=new Chart(document.getElementById("tsChart"),{
 
 type:'line',
@@ -529,6 +621,7 @@ text:"nSv/h"
 
 });
 
+// tampilkan statistik
 document.getElementById("tsStats").innerHTML=
 "<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
 "<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
@@ -579,6 +672,7 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
 
