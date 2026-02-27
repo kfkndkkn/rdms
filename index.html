@@ -56,6 +56,8 @@ font-size:11px;
 font-weight:bold;
 color:#111;
 border:1px solid rgba(0,0,0,0.25);
+box-shadow:0 1px 3px rgba(0,0,0,0.3);
+white-space:nowrap;
 }
 
 .legend{
@@ -160,6 +162,20 @@ cursor:pointer">Close</button>
 
 var osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 
+var dark=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png');
+
+var googleHybrid=L.tileLayer(
+'https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}
+);
+
+var googleSat=L.tileLayer(
+'https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}
+);
+
+// MAP
+
 var map=L.map('map',{
 center:[-2,118],
 zoom:5,
@@ -170,6 +186,21 @@ layers:[osm]
 
 var polygonLayer=L.layerGroup().addTo(map);
 var labelLayer=L.layerGroup().addTo(map);
+
+// LAYER CONTROL
+
+L.control.layers(
+{
+"OpenStreetMap":osm,
+"Dark":dark,
+"Google Hybrid":googleHybrid,
+"Google Satellite":googleSat
+},
+{
+"Station Polygons":polygonLayer,
+"Station Labels":labelLayer
+}
+).addTo(map);
 
 // RADIUS
 
@@ -189,9 +220,9 @@ return 1200;
 
 }
 
-// HEX
+// HEXAGON
 
-function createHex(lat,lon,radius,color){
+function createHex(lat,lon,radius,color,options={}){
 
 var coords=[];
 
@@ -210,10 +241,10 @@ lon+(dx/(111111*Math.cos(lat*Math.PI/180)))
 }
 
 return L.polygon(coords,{
-color:"#222",
-weight:1,
+color:options.stroke || "#222",
+weight:options.weight || 1,
 fillColor:color,
-fillOpacity:0.85
+fillOpacity:options.opacity || 0.85
 });
 
 }
@@ -237,9 +268,7 @@ return "#ff2b2b";
 
 function loadCSV(){
 
-var url="output.csv?nocache="+Date.now();
-
-fetch(url)
+fetch("output.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
@@ -271,6 +300,17 @@ hex.bindPopup(
 
 hex.addTo(polygonLayer);
 
+// LABEL
+
+var label=L.marker([lat,lon],{
+icon:L.divIcon({
+className:'',
+html:'<div class="unit-label">'+row["NAMA UNIT"]+'</div>'
+})
+});
+
+label.addTo(labelLayer);
+
 });
 
 });
@@ -279,6 +319,7 @@ hex.addTo(polygonLayer);
 
 loadCSV();
 setInterval(loadCSV,30000);
+map.on("zoomend",loadCSV);
 
 // TIME SERIES
 
@@ -311,11 +352,11 @@ allValues.push(parseFloat(r.dose));
 
 });
 
-if(tsChart) tsChart.destroy();
-
 if(allValues.length===0){
 
 document.getElementById("tsStats").innerHTML="No data available";
+
+if(tsChart) tsChart.destroy();
 
 tsChart=new Chart(document.getElementById("tsChart"),{
 type:'line',
@@ -385,6 +426,41 @@ document.getElementById("tsStats").innerHTML=
 function closeTS(){
 document.getElementById("tsModal").style.display="none";
 }
+
+// LEGEND
+
+var legend=L.control({position:"bottomleft"});
+
+legend.onAdd=function(){
+
+var div=L.DomUtil.create("div","legend");
+
+div.innerHTML=`
+
+<b>IAEA Operational Intervention Levels</b><br><br>
+
+<div style="width:260px;height:14px;
+background:linear-gradient(to right,#2b83ba,#ffe600,#ff9b00,#ff2b2b);
+margin-bottom:6px;border:1px solid #999;"></div>
+
+<div style="display:flex;justify-content:space-between;width:260px;font-size:11px;">
+<span>0</span>
+<span>1,000</span>
+<span>100,000</span>
+<span>1,000,000</span>
+</div>
+
+<div style="font-size:11px;margin-top:4px;">
+Gamma Dose Rate (nSv/h)
+</div>
+
+`;
+
+return div;
+
+};
+
+legend.addTo(map);
 
 </script>
 
