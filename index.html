@@ -348,7 +348,7 @@ popupContent=
 "<b>"+row["NAMA UNIT"]+"</b><br>"+
 "Dose Rate: "+displayDose+" nSv/h<br>"+
 "Last Update: "+row["LAST UPDATE (WIB)"]+"<br><br>"+
-"<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">📈 Time Series</a>";
+"<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">View Time Series</a>";
 
 hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
 
@@ -511,9 +511,9 @@ text:"nSv/h"
 });
 
 document.getElementById("tsStats").innerHTML=
-"Average: "+avg.toFixed(2)+" nSv/h | "+
-"Min: "+min.toFixed(2)+" nSv/h | "+
-"Max: "+max.toFixed(2)+" nSv/h";
+"<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
+"<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
+"<b>Max:</b> "+max.toFixed(2)+" nSv/h";
 
 }
 
@@ -560,6 +560,7 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
 
