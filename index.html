@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<title>Indonesia Radiation Data Monitoring System</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+html,body{margin:0;padding:0;font-family:Arial;}
+
+#header{
+position:absolute;
+top:0;left:0;width:100%;height:70px;
+background:#0b1e3f;
+display:flex;align-items:center;
+padding:0 25px;color:white;
+z-index:9999;
+}
+
+#header img{height:42px;margin-right:15px;}
+
+#map{position:absolute;top:70px;bottom:0;width:100%;}
+
+.blink{
+animation:blink 1s infinite;
+}
+@keyframes blink{
+0%{opacity:1;}
+50%{opacity:0.3;}
+100%{opacity:1;}
+}
+
+.legend{
+background:white;
+padding:12px;
+font-size:12px;
+box-shadow:0 2px 6px rgba(0,0,0,0.3);
+}
+</style>
+</head>
+
+<body>
+
+<div id="header">
+<img src="logo/logo-bapeten.png">
+<h2>Indonesia Radiation Data Monitoring System</h2>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<script>
+// ================= BASEMAP =================
+var osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+var dark=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png');
+
+var googleHybrid=L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{
+maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']
+});
+
+var googleSat=L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']
+});
+
+var googleTerrain=L.tileLayer('https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',{
+maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']
+});
+
+// ================= MAP =================
+var map = L.map('map', {
+    center: [-2,118],
+    zoom: 6,        // default lebih dekat dari sebelumnya
+    minZoom: 5,     // jangan terlalu jauh zoom out
+    maxZoom: 12,    // jangan terlalu jauh zoom in
+    layers: [osm]
+});
+// ================= LAYERS =================
+var activeLayer=L.layerGroup().addTo(map);
+var oosLayer=L.layerGroup();
+
+L.control.layers(
+{
+"OSM":osm,
+"Dark":dark,
+"Google Hybrid":googleHybrid,
+"Google Satellite":googleSat,
+"Google Terrain":googleTerrain
+},
+{
+"Out of Service":oosLayer
+}
+).addTo(map);
+
+// ================= HEX ICON =================
+function hexIcon(color, options={}){
+return L.divIcon({
+className: options.blink ? "blink" : "",
+html:`<svg width="16" height="16" viewBox="0 0 24 24">
+<polygon points="12,2 22,7 22,17 12,22 2,17 2,7"
+fill="${color}"
+fill-opacity="${options.opacity || 1}"
+stroke="${options.stroke || 'white'}"
+stroke-width="1.5"/>
+</svg>`,
+iconSize:[16,16]
+});
+}
+
+// ================= COLOR =================
+function getColor(d){
+if(d==="Out of service") return "#6ad12b";
+d=parseFloat(d);
+if(d<1000) return "#6ad12b";
+if(d<100000) return "#ffe600";
+if(d<1000000) return "#ff9b00";
+return "#ff2b2b";
+}
+
+// ================= LOAD CSV =================
+function loadCSV(){
+
+var url="output.csv?nocache="+Date.now();
+
+fetch(url)
+.then(r=>r.text())
+.then(text=>{
+
+activeLayer.clearLayers();
+oosLayer.clearLayers();
+
+var data=Papa.parse(text,{header:true}).data;
+
+data.forEach(row=>{
+
+if(!row["LATITUDE"]) return;
+
+var lat=parseFloat(row["LATITUDE"]);
+var lon=parseFloat(row["LONGITUDE"]);
+var dose=row["Gamma Dose Rate (nSv/h)"];
+
+var color=getColor(dose);
+var blink=false;
+
+if(dose!=="Out of service"){
+dose=parseFloat(dose);
+if(dose>1000000) blink=true;
+}
+
+var marker;
+
+// ================= OUT OF SERVICE STYLE =================
+if(row["Gamma Dose Rate (nSv/h)"]==="Out of service"){
+
+marker=L.marker([lat,lon],{
+icon:hexIcon("#6ad12b",{
+opacity:0.35,
+stroke:"yellow",
+blink:false
+})
+});
+
+}else{
+
+marker=L.marker([lat,lon],{
+icon:hexIcon(color,{
+blink:blink
+})
+});
+
+}
+
+// ================= FORMAT DOSE =================
+var displayDose=row["Gamma Dose Rate (nSv/h)"];
+
+if(displayDose!=="Out of service" && displayDose!==""){
+displayDose=parseFloat(displayDose).toFixed(2);
+}
+
+// ================= POPUP =================
+marker.bindPopup(
+"<b>"+row["NAMA UNIT"]+"</b><br>"+
+"Dose Rate (nSv/h): "+displayDose+"<br>"+
+"Last Update (WIB): "+row["LAST UPDATE (WIB)"]
+);
+
+if(row["Gamma Dose Rate (nSv/h)"]==="Out of service"){
+marker.addTo(oosLayer);
+}else{
+marker.addTo(activeLayer);
+}
+
+});
+
+});
+}
+
+loadCSV();
+setInterval(loadCSV,30000);
+
+// ================= LEGEND =================
+var legend=L.control({position:"bottomleft"});
+legend.onAdd=function(){
+var div=L.DomUtil.create("div","legend");
+
+div.innerHTML=`
+<b>IAEA Operational Intervention Levels</b><br><br>
+
+<div style="width:260px;height:14px;
+background:linear-gradient(to right,#6ad12b,#ffe600,#ff9b00,#ff2b2b);
+margin-bottom:6px;border:1px solid #999;"></div>
+
+<div style="display:flex;justify-content:space-between;width:260px;font-size:11px;">
+<span>0</span>
+<span>1,000</span>
+<span>100,000</span>
+<span>1,000,000</span>
+</div>
+
+<div style="font-size:11px;margin-top:4px;">
+Gamma Dose Rate (nSv/h)
+</div>
+`;
+return div;
+};
+legend.addTo(map);
+// ================= BOX ZOOM TOOL =================
+var boxZoomControl = L.control({ position: 'topleft' });
+
+boxZoomControl.onAdd = function(map){
+    var btn = L.DomUtil.create('button','leaflet-bar');
+    btn.innerHTML = "🔍";
+    btn.title = "Drag zoom area";
+    btn.style.width = "34px";
+    btn.style.height = "34px";
+    btn.style.cursor = "pointer";
+    btn.style.background = "white";
+    btn.style.border = "none";
+    btn.style.fontSize = "18px";
+
+    var active = false;
+
+    L.DomEvent.on(btn,'click',function(e){
+        L.DomEvent.stopPropagation(e);
+
+        if(!active){
+            map.boxZoom.enable();
+            btn.style.background = "#0b1e3f";
+            btn.style.color = "white";
+            active = true;
+        }else{
+            map.boxZoom.disable();
+            btn.style.background = "white";
+            btn.style.color = "black";
+            active = false;
+        }
+    });
+
+    return btn;
+};
+
+boxZoomControl.addTo(map);
+</script>
+
+</body>
+</html>
+
+
+
