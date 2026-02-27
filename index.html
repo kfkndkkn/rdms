@@ -77,8 +77,6 @@ font-size:18px;
 }
 }
 
-/* TIME SERIES MODAL */
-
 #tsModal{
 display:none;
 position:fixed;
@@ -118,8 +116,6 @@ font-size:14px;
 </div>
 
 <div id="map"></div>
-
-<!-- TIME SERIES MODAL -->
 
 <div id="tsModal">
 
@@ -317,7 +313,7 @@ popupContent=
 "<b>"+row["NAMA UNIT"]+"</b><br>"+
 "<b>Status:</b> Out of Service<br>"+
 "Last Update: "+row["LAST UPDATE (WIB)"]+"<br><br>"+
-"<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">📈 Time Series 7 Days</a>";
+"<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">📈 Time Series</a>";
 
 }else{
 
@@ -325,14 +321,11 @@ popupContent=
 "<b>"+row["NAMA UNIT"]+"</b><br>"+
 "Dose Rate: "+displayDose+" nSv/h<br>"+
 "Last Update: "+row["LAST UPDATE (WIB)"]+"<br><br>"+
-"<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">📈 Time Series 7 Days</a>";
+"<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">📈 Time Series</a>";
 
 }
 
-hex.bindPopup(popupContent,{
-maxWidth:280,
-minWidth:180
-});
+hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
 
 hex.addTo(polygonLayer);
 
@@ -372,7 +365,7 @@ function openTS(station){
 document.getElementById("tsModal").style.display="block";
 document.getElementById("tsTitle").innerHTML="Time Series - "+station;
 
-var url="history/"+station+".csv?nocache="+Date.now();
+var url="timeseries.csv?nocache="+Date.now();
 
 fetch(url)
 .then(r=>r.text())
@@ -385,12 +378,23 @@ var values=[];
 
 data.forEach(r=>{
 
-if(!r["dose"]) return;
+if(!r["station"]) return;
+
+if(r["station"]===station){
 
 labels.push(r["time"]);
 values.push(parseFloat(r["dose"]));
 
+}
+
 });
+
+if(values.length===0){
+
+document.getElementById("tsStats").innerHTML="No data available";
+return;
+
+}
 
 var avg = values.reduce((a,b)=>a+b,0)/values.length;
 var min = Math.min(...values);
@@ -410,11 +414,10 @@ type:'line',
 data:{
 labels:labels,
 datasets:[{
-label:'Gamma Dose Rate (nSv/h)',
 data:values,
 borderColor:'#2b83ba',
 backgroundColor:'rgba(43,131,186,0.15)',
-tension:0.2,
+tension:0.25,
 pointRadius:2
 }]
 },
