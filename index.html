@@ -315,14 +315,21 @@ hex=createHex(lat,lon,radius,color,{opacity:0.85});
 }
 
 var displayDose=row["Gamma Dose Rate (nSv/h)"];
+var doseText="";
 
-if(displayDose!=="Out of service" && displayDose!==""){
-displayDose=parseFloat(displayDose).toFixed(2);
+if(displayDose==="Out of service"){
+
+doseText="Dose Rate: Out of service";
+
+}else if(displayDose!==""){
+
+doseText="Dose Rate: "+parseFloat(displayDose).toFixed(2)+" nSv/h";
+
 }
 
 var popupContent=
 "<b>"+row["NAMA UNIT"]+"</b><br>"+
-"Dose Rate: "+displayDose+" nSv/h<br>"+
+doseText+"<br>"+
 "Last Update: "+row["LAST UPDATE (WIB)"]+"<br><br>"+
 "<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">View Time Series</a>";
 
@@ -515,6 +522,7 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
 
