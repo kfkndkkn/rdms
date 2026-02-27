@@ -11,6 +11,9 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 
 html,body{
@@ -64,18 +67,44 @@ font-size:12px;
 box-shadow:0 2px 6px rgba(0,0,0,0.3);
 }
 
-/* POPUP */
-
 .leaflet-popup-content{
 font-size:14px;
 }
 
 @media (max-width:768px){
-
 .leaflet-popup-content{
 font-size:18px;
 }
+}
 
+/* TIME SERIES MODAL */
+
+#tsModal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.6);
+z-index:99999;
+}
+
+#tsBox{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:white;
+width:90%;
+max-width:900px;
+padding:20px;
+border-radius:10px;
+}
+
+#tsStats{
+margin-top:10px;
+font-size:14px;
 }
 
 </style>
@@ -90,8 +119,35 @@ font-size:18px;
 
 <div id="map"></div>
 
+<!-- TIME SERIES MODAL -->
+
+<div id="tsModal">
+
+<div id="tsBox">
+
+<div style="display:flex;justify-content:space-between;align-items:center">
+
+<h3 id="tsTitle">Time Series</h3>
+
+<button onclick="closeTS()" style="
+background:#c00;
+color:white;
+border:none;
+padding:6px 12px;
+border-radius:6px;
+cursor:pointer">Close</button>
+
+</div>
+
+<canvas id="tsChart" height="120"></canvas>
+
+<div id="tsStats"></div>
+
+</div>
+
+</div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <script>
 
@@ -139,7 +195,7 @@ L.control.layers(
 }
 ).addTo(map);
 
-// DYNAMIC RADIUS (lebih kecil saat zoom)
+// RADIUS
 
 function getRadius(){
 
@@ -186,7 +242,7 @@ fillOpacity:options.opacity || 0.85
 
 }
 
-// COLOR SCALE
+// COLOR
 
 function getColor(d){
 
@@ -208,9 +264,7 @@ function loadCSV(){
 var url="output.csv?nocache="+Date.now();
 
 fetch(url)
-
 .then(r=>r.text())
-
 .then(text=>{
 
 polygonLayer.clearLayers();
@@ -262,14 +316,16 @@ if(dose==="Out of service"){
 popupContent=
 "<b>"+row["NAMA UNIT"]+"</b><br>"+
 "<b>Status:</b> Out of Service<br>"+
-"Last Update: "+row["LAST UPDATE (WIB)"];
+"Last Update: "+row["LAST UPDATE (WIB)"]+"<br><br>"+
+"<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">📈 Time Series 7 Days</a>";
 
 }else{
 
 popupContent=
 "<b>"+row["NAMA UNIT"]+"</b><br>"+
 "Dose Rate: "+displayDose+" nSv/h<br>"+
-"Last Update: "+row["LAST UPDATE (WIB)"];
+"Last Update: "+row["LAST UPDATE (WIB)"]+"<br><br>"+
+"<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">📈 Time Series 7 Days</a>";
 
 }
 
@@ -280,7 +336,7 @@ minWidth:180
 
 hex.addTo(polygonLayer);
 
-// LABEL DI KANAN ATAS POLYGON
+// LABEL
 
 var labelOffsetLat = lat + (radius/111111)*0.9;
 var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
@@ -305,8 +361,78 @@ label.addTo(labelLayer);
 
 loadCSV();
 setInterval(loadCSV,30000);
-
 map.on("zoomend",loadCSV);
+
+// TIME SERIES
+
+var tsChart;
+
+function openTS(station){
+
+document.getElementById("tsModal").style.display="block";
+document.getElementById("tsTitle").innerHTML="Time Series - "+station;
+
+var url="history/"+station+".csv?nocache="+Date.now();
+
+fetch(url)
+.then(r=>r.text())
+.then(text=>{
+
+var data=Papa.parse(text,{header:true}).data;
+
+var labels=[];
+var values=[];
+
+data.forEach(r=>{
+
+if(!r["dose"]) return;
+
+labels.push(r["time"]);
+values.push(parseFloat(r["dose"]));
+
+});
+
+var avg = values.reduce((a,b)=>a+b,0)/values.length;
+var min = Math.min(...values);
+var max = Math.max(...values);
+
+document.getElementById("tsStats").innerHTML=
+"Average: "+avg.toFixed(2)+" nSv/h | "+
+"Min: "+min.toFixed(2)+" nSv/h | "+
+"Max: "+max.toFixed(2)+" nSv/h";
+
+if(tsChart) tsChart.destroy();
+
+tsChart=new Chart(document.getElementById("tsChart"),{
+
+type:'line',
+
+data:{
+labels:labels,
+datasets:[{
+label:'Gamma Dose Rate (nSv/h)',
+data:values,
+borderColor:'#2b83ba',
+backgroundColor:'rgba(43,131,186,0.15)',
+tension:0.2,
+pointRadius:2
+}]
+},
+
+options:{
+responsive:true,
+plugins:{legend:{display:false}}
+}
+
+});
+
+});
+
+}
+
+function closeTS(){
+document.getElementById("tsModal").style.display="none";
+}
 
 // LEGEND
 
