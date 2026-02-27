@@ -67,6 +67,16 @@ font-size:12px;
 box-shadow:0 2px 6px rgba(0,0,0,0.3);
 }
 
+.leaflet-popup-content{
+font-size:14px;
+}
+
+@media (max-width:768px){
+.leaflet-popup-content{
+font-size:18px;
+}
+}
+
 #tsModal{
 display:none;
 position:fixed;
@@ -86,26 +96,8 @@ transform:translate(-50%,-50%);
 background:white;
 width:90%;
 max-width:900px;
-border-radius:10px;
-overflow:hidden;
-}
-
-#tsHeader{
-background:#0b1e3f;
-color:white;
-padding:12px 16px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
-
-#tsContent{
 padding:20px;
-}
-
-#timeSlider{
-width:100%;
-margin-top:10px;
+border-radius:10px;
 }
 
 #tsStats{
@@ -129,8 +121,10 @@ font-size:14px;
 
 <div id="tsBox">
 
-<div id="tsHeader">
-<div id="tsTitle">Time Series</div>
+<div style="display:flex;justify-content:space-between;align-items:center">
+
+<h3 id="tsTitle">Time Series</h3>
+
 <button onclick="closeTS()" style="
 background:#c00;
 color:white;
@@ -138,17 +132,12 @@ border:none;
 padding:6px 12px;
 border-radius:6px;
 cursor:pointer">Close</button>
-</div>
 
-<div id="tsContent">
+</div>
 
 <canvas id="tsChart" height="120"></canvas>
 
-<input type="range" id="timeSlider">
-
 <div id="tsStats"></div>
-
-</div>
 
 </div>
 
@@ -268,7 +257,9 @@ return "#ff2b2b";
 
 function loadCSV(){
 
-fetch("output.csv?nocache="+Date.now())
+var url="output.csv?nocache="+Date.now();
+
+fetch(url)
 .then(r=>r.text())
 .then(text=>{
 
@@ -290,22 +281,66 @@ var dose=row["Gamma Dose Rate (nSv/h)"];
 
 var color=getColor(dose);
 
-var hex=createHex(lat,lon,radius,color);
+var hex;
 
-hex.bindPopup(
+if(dose==="Out of service"){
+
+hex=createHex(lat,lon,radius,color,{
+opacity:0.35,
+stroke:"#004a8f",
+weight:2
+});
+
+}else{
+
+hex=createHex(lat,lon,radius,color,{
+opacity:0.85
+});
+
+}
+
+var displayDose=row["Gamma Dose Rate (nSv/h)"];
+
+if(displayDose!=="Out of service" && displayDose!==""){
+displayDose=parseFloat(displayDose).toFixed(2);
+}
+
+var popupContent;
+
+if(dose==="Out of service"){
+
+popupContent=
 "<b>"+row["NAMA UNIT"]+"</b><br>"+
-"Dose Rate: "+dose+" nSv/h<br>"+
-"<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">📈 Time Series</a>"
-);
+"<b>Status:</b> Out of Service<br>"+
+"Last Update: "+row["LAST UPDATE (WIB)"]+"<br><br>"+
+"<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">📈 Time Series</a>";
+
+}else{
+
+popupContent=
+"<b>"+row["NAMA UNIT"]+"</b><br>"+
+"Dose Rate: "+displayDose+" nSv/h<br>"+
+"Last Update: "+row["LAST UPDATE (WIB)"]+"<br><br>"+
+"<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">📈 Time Series</a>";
+
+}
+
+hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
 
 hex.addTo(polygonLayer);
 
 // LABEL
 
-var label=L.marker([lat,lon],{
+var labelOffsetLat = lat + (radius/111111)*0.9;
+var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
+
+var label=L.marker(
+[labelOffsetLat,labelOffsetLon],
+{
 icon:L.divIcon({
 className:'',
-html:'<div class="unit-label">'+row["NAMA UNIT"]+'</div>'
+html:'<div class="unit-label">'+row["NAMA UNIT"]+'</div>',
+iconSize:null
 })
 });
 
@@ -352,11 +387,11 @@ allValues.push(parseFloat(r.dose));
 
 });
 
+if(tsChart) tsChart.destroy();
+
 if(allValues.length===0){
 
 document.getElementById("tsStats").innerHTML="No data available";
-
-if(tsChart) tsChart.destroy();
 
 tsChart=new Chart(document.getElementById("tsChart"),{
 type:'line',
