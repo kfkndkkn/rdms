@@ -45,8 +45,6 @@ bottom:0;
 width:100%;
 }
 
-/* LABEL STYLE */
-
 .unit-label{
 background:rgba(255,255,255,0.75);
 border-radius:6px;
@@ -87,8 +85,11 @@ box-shadow:0 2px 6px rgba(0,0,0,0.3);
 
 var osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 
-var dark=L.tileLayer(
-'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+var dark=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png');
+
+var googleHybrid=L.tileLayer(
+'https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}
 );
 
 var googleSat=L.tileLayer(
@@ -115,6 +116,7 @@ L.control.layers(
 {
 "OpenStreetMap":osm,
 "Dark":dark,
+"Google Hybrid":googleHybrid,
 "Google Satellite":googleSat
 },
 {
@@ -123,10 +125,26 @@ L.control.layers(
 }
 ).addTo(map);
 
+// ================= DYNAMIC RADIUS =================
+
+function getRadius(){
+
+var z=map.getZoom();
+
+if(z<=5) return 20000;
+if(z<=6) return 15000;
+if(z<=7) return 10000;
+if(z<=8) return 7000;
+if(z<=9) return 5000;
+if(z<=10) return 3000;
+
+return 1500;
+
+}
 
 // ================= HEXAGON FUNCTION =================
 
-function createHex(lat,lon,radius,color){
+function createHex(lat,lon,radius,color,options={}){
 
 var coords=[];
 
@@ -145,10 +163,11 @@ lon+(dx/(111111*Math.cos(lat*Math.PI/180)))
 }
 
 return L.polygon(coords,{
-color:"white",
-weight:1.5,
+color:options.stroke || "white",
+weight:options.weight || 1.5,
 fillColor:color,
-fillOpacity:0.85
+fillOpacity:options.opacity || 0.85,
+dashArray:options.dash || null
 });
 
 }
@@ -157,17 +176,16 @@ fillOpacity:0.85
 
 function getColor(d){
 
-if(d==="Out of service") return "#cccccc";
+if(d==="Out of service") return "#2b83ba";
 
 d=parseFloat(d);
 
-if(d<1) return "#7fc97f";
-if(d<100) return "#2c7fb8";
-if(d<1000) return "#253494";
-return "#4b0082";
+if(d<1000) return "#2b83ba";
+if(d<100000) return "#ffe600";
+if(d<1000000) return "#ff9b00";
+return "#ff2b2b";
 
 }
-
 
 // ================= LOAD CSV =================
 
@@ -184,6 +202,8 @@ fetch(url)
 polygonLayer.clearLayers();
 labelLayer.clearLayers();
 
+var radius=getRadius();
+
 var data=Papa.parse(text,{header:true}).data;
 
 data.forEach(row=>{
@@ -197,9 +217,26 @@ var dose=row["Gamma Dose Rate (nSv/h)"];
 
 var color=getColor(dose);
 
-// ================= HEX POLYGON =================
+var hex;
 
-var hex=createHex(lat,lon,20000,color);
+if(dose==="Out of service"){
+
+hex=createHex(lat,lon,radius,color,{
+opacity:0.25,
+stroke:"#004a8f",
+weight:2,
+dash:"4"
+});
+
+}else{
+
+hex=createHex(lat,lon,radius,color,{
+opacity:0.85,
+stroke:"white",
+weight:1.5
+});
+
+}
 
 var displayDose=row["Gamma Dose Rate (nSv/h)"];
 
@@ -207,30 +244,38 @@ if(displayDose!=="Out of service" && displayDose!==""){
 displayDose=parseFloat(displayDose).toFixed(2);
 }
 
-hex.bindPopup(
+var popupContent;
 
+if(dose==="Out of service"){
+
+popupContent=
+"<b>"+row["NAMA UNIT"]+"</b><br>"+
+"<b>Status:</b> Out of Service<br>"+
+"Last Update: "+row["LAST UPDATE (WIB)"];
+
+}else{
+
+popupContent=
 "<b>"+row["NAMA UNIT"]+"</b><br>"+
 "Dose Rate: "+displayDose+" nSv/h<br>"+
-"Last Update: "+row["LAST UPDATE (WIB)"]
+"Last Update: "+row["LAST UPDATE (WIB)"];
 
-);
+}
+
+hex.bindPopup(popupContent);
 
 hex.addTo(polygonLayer);
 
-// ================= LABEL =================
+// LABEL
 
-var label=L.marker([lat,lon],{
-
+var label=L.marker(
+[lat+0.15,lon],
+{
 icon:L.divIcon({
-
 className:'',
-
 html:'<div class="unit-label">'+row["NAMA UNIT"]+'</div>',
-
 iconSize:null
-
 })
-
 });
 
 label.addTo(labelLayer);
@@ -242,9 +287,11 @@ label.addTo(labelLayer);
 }
 
 loadCSV();
-
 setInterval(loadCSV,30000);
 
+// reload polygon saat zoom berubah
+
+map.on("zoomend",loadCSV);
 
 // ================= LEGEND =================
 
@@ -256,21 +303,21 @@ var div=L.DomUtil.create("div","legend");
 
 div.innerHTML=`
 
-<b>Gamma Dose Rate</b><br><br>
+<b>IAEA Operational Intervention Levels</b><br><br>
 
 <div style="width:260px;height:14px;
-background:linear-gradient(to right,#7fc97f,#2c7fb8,#253494,#4b0082);
+background:linear-gradient(to right,#2b83ba,#ffe600,#ff9b00,#ff2b2b);
 margin-bottom:6px;border:1px solid #999;"></div>
 
 <div style="display:flex;justify-content:space-between;width:260px;font-size:11px;">
 <span>0</span>
-<span>1</span>
-<span>100</span>
-<span>1000</span>
+<span>1,000</span>
+<span>100,000</span>
+<span>1,000,000</span>
 </div>
 
 <div style="font-size:11px;margin-top:4px;">
-nSv/h
+Gamma Dose Rate (nSv/h)
 </div>
 
 `;
