@@ -175,7 +175,19 @@ var googleSat=L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
 
 // MAP
 
-var map=L.map('map',{center:[-2,118],zoom:5,layers:[osm]});
+var map=L.map('map',{
+zoomControl:true,
+layers:[osm]
+});
+
+// batas wilayah Indonesia
+var indonesiaBounds = [
+[-11,94],   // SW (selatan barat)
+[6,141]     // NE (utara timur)
+];
+
+// set view pertama kali
+map.fitBounds(indonesiaBounds);
 
 // LAYERS
 
@@ -490,3 +502,4 @@ legend.addTo(map);
 
 </body>
 </html>
+
