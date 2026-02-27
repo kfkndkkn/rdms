@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 
-<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 
 <title>Indonesia Radiation Data Monitoring System</title>
 
@@ -31,45 +33,67 @@ color:white;
 z-index:9999;
 }
 
+#header img{
+height:42px;
+margin-right:15px;
+}
+
 #map{
 position:absolute;
 top:70px;
-bottom:60px;
-width:100%;
-}
-
-#timeline{
-position:absolute;
 bottom:0;
-left:0;
-width:100%;
-height:60px;
-background:white;
-border-top:1px solid #aaa;
-display:flex;
-align-items:center;
-padding:10px;
-z-index:9999;
-}
-
-#slider{
 width:100%;
 }
 
 .unit-label{
-background:rgba(255,255,255,0.8);
+background:rgba(255,255,255,0.75);
 border-radius:6px;
 padding:3px 6px;
 font-size:11px;
 font-weight:bold;
-border:1px solid rgba(0,0,0,0.2);
+color:#111;
+border:1px solid rgba(0,0,0,0.25);
+box-shadow:0 1px 3px rgba(0,0,0,0.3);
+white-space:nowrap;
 }
 
 .legend{
 background:white;
-padding:10px;
-box-shadow:0 2px 6px rgba(0,0,0,0.3);
+padding:12px;
 font-size:12px;
+box-shadow:0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* ================= POPUP STYLE ================= */
+
+.leaflet-popup-content{
+font-size:14px;
+line-height:1.4;
+}
+
+.leaflet-popup-content-wrapper{
+border-radius:10px;
+}
+
+/* ================= MOBILE POPUP ================= */
+
+@media (max-width:768px){
+
+.leaflet-popup-content{
+font-size:18px;
+line-height:1.6;
+}
+
+.leaflet-popup-content-wrapper{
+padding:14px;
+border-radius:12px;
+}
+
+.leaflet-popup-tip{
+width:16px;
+height:16px;
+}
+
 }
 
 </style>
@@ -78,22 +102,22 @@ font-size:12px;
 <body>
 
 <div id="header">
-<img src="logo/logo-bapeten.png" height="40">
-<h2 style="margin-left:15px;">Indonesia Radiation Data Monitoring System</h2>
+<img src="logo/logo-bapeten.png">
+<h2>Indonesia Radiation Data Monitoring System</h2>
 </div>
 
 <div id="map"></div>
-
-<div id="timeline">
-<input type="range" id="slider" min="0" max="100" value="100">
-</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <script>
 
+// ================= BASEMAP =================
+
 var osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+
+var dark=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png');
 
 var googleHybrid=L.tileLayer(
 'https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
@@ -105,43 +129,52 @@ var googleSat=L.tileLayer(
 {maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}
 );
 
+// ================= MAP =================
+
 var map=L.map('map',{
 center:[-2,118],
 zoom:5,
 layers:[osm]
 });
 
-var stationLayer=L.layerGroup().addTo(map);
+// ================= LAYERS =================
+
+var polygonLayer=L.layerGroup().addTo(map);
 var labelLayer=L.layerGroup().addTo(map);
-var windLayer=L.layerGroup().addTo(map);
+
+// ================= LAYER CONTROL =================
 
 L.control.layers(
 {
 "OpenStreetMap":osm,
+"Dark":dark,
 "Google Hybrid":googleHybrid,
 "Google Satellite":googleSat
 },
 {
-"Stations":stationLayer,
-"Labels":labelLayer,
-"Wind":windLayer
+"Station Polygons":polygonLayer,
+"Station Labels":labelLayer
 }
 ).addTo(map);
+
+// ================= DYNAMIC RADIUS =================
 
 function getRadius(){
 
 var z=map.getZoom();
 
-if(z<=5) return 30000;
-if(z<=6) return 20000;
-if(z<=7) return 12000;
-if(z<=8) return 8000;
-if(z<=9) return 5000;
-if(z<=10) return 3000;
+if(z<=5) return 35000;
+if(z<=6) return 28000;
+if(z<=7) return 20000;
+if(z<=8) return 14000;
+if(z<=9) return 10000;
+if(z<=10) return 7000;
 
-return 1500;
+return 4000;
 
 }
+
+// ================= HEXAGON FUNCTION =================
 
 function createHex(lat,lon,radius,color,options={}){
 
@@ -162,13 +195,15 @@ lon+(dx/(111111*Math.cos(lat*Math.PI/180)))
 }
 
 return L.polygon(coords,{
-color:options.stroke || "white",
-weight:options.weight || 1.8,
+color:options.stroke || "#222",
+weight:options.weight || 1,
 fillColor:color,
 fillOpacity:options.opacity || 0.85
 });
 
 }
+
+// ================= COLOR SCALE =================
 
 function getColor(d){
 
@@ -179,19 +214,28 @@ d=parseFloat(d);
 if(d<1000) return "#2b83ba";
 if(d<100000) return "#ffe600";
 if(d<1000000) return "#ff9b00";
-
 return "#ff2b2b";
 
 }
 
-function loadStations(csv){
+// ================= LOAD CSV =================
 
-stationLayer.clearLayers();
+function loadCSV(){
+
+var url="output.csv?nocache="+Date.now();
+
+fetch(url)
+
+.then(r=>r.text())
+
+.then(text=>{
+
+polygonLayer.clearLayers();
 labelLayer.clearLayers();
 
 var radius=getRadius();
 
-var data=Papa.parse(csv,{header:true}).data;
+var data=Papa.parse(text,{header:true}).data;
 
 data.forEach(row=>{
 
@@ -199,6 +243,7 @@ if(!row["LATITUDE"]) return;
 
 var lat=parseFloat(row["LATITUDE"]);
 var lon=parseFloat(row["LONGITUDE"]);
+
 var dose=row["Gamma Dose Rate (nSv/h)"];
 
 var color=getColor(dose);
@@ -208,87 +253,65 @@ var hex;
 if(dose==="Out of service"){
 
 hex=createHex(lat,lon,radius,color,{
-opacity:0.25,
+opacity:0.35,
 stroke:"#004a8f",
-weight:2.5
+weight:2
 });
 
 }else{
 
-hex=createHex(lat,lon,radius,color,{});
+hex=createHex(lat,lon,radius,color,{
+opacity:0.85,
+stroke:"#222",
+weight:1
+});
 
 }
 
-var popup;
+var displayDose=row["Gamma Dose Rate (nSv/h)"];
+
+if(displayDose!=="Out of service" && displayDose!==""){
+displayDose=parseFloat(displayDose).toFixed(2);
+}
+
+var popupContent;
 
 if(dose==="Out of service"){
 
-popup="<b>"+row["NAMA UNIT"]+"</b><br>Status: Out of Service<br>"+row["LAST UPDATE (WIB)"];
+popupContent=
+"<b>"+row["NAMA UNIT"]+"</b><br>"+
+"<b>Status:</b> Out of Service<br>"+
+"Last Update: "+row["LAST UPDATE (WIB)"];
 
 }else{
 
-popup="<b>"+row["NAMA UNIT"]+"</b><br>"+dose+" nSv/h<br>"+row["LAST UPDATE (WIB)";
+popupContent=
+"<b>"+row["NAMA UNIT"]+"</b><br>"+
+"Dose Rate: "+displayDose+" nSv/h<br>"+
+"Last Update: "+row["LAST UPDATE (WIB)"];
 
 }
 
-hex.bindPopup(popup);
+hex.bindPopup(popupContent,{
+maxWidth:280,
+minWidth:180
+});
 
-hex.addTo(stationLayer);
+hex.addTo(polygonLayer);
 
-if(map.getZoom()>6){
+// ================= LABEL =================
 
-var label=L.marker([lat+0.15,lon],{
-
+var label=L.marker(
+[lat+0.15,lon],
+{
 icon:L.divIcon({
-html:'<div class="unit-label">'+row["NAMA UNIT"]+'</div>'
+className:'',
+html:'<div class="unit-label">'+row["NAMA UNIT"]+'</div>',
+iconSize:null
 })
-
 });
 
 label.addTo(labelLayer);
-
-}
-
-});
-
-}
-
-function loadCSV(){
-
-fetch("output.csv?"+Date.now())
-.then(r=>r.text())
-.then(loadStations);
-
-}
-
-function loadWind(){
-
-fetch("wind.csv?"+Date.now())
-
-.then(r=>r.text())
-
-.then(text=>{
-
-windLayer.clearLayers();
-
-var data=Papa.parse(text,{header:true}).data;
-
-data.forEach(w=>{
-
-var lat=parseFloat(w.lat);
-var lon=parseFloat(w.lon);
-
-var speed=parseFloat(w.speed);
-var dir=parseFloat(w.dir);
-
-var length=speed*0.02;
-
-var lat2=lat+(length*Math.cos((dir-90)*Math.PI/180));
-var lon2=lon+(length*Math.sin((dir-90)*Math.PI/180));
-
-var arrow=L.polyline([[lat,lon],[lat2,lon2]],{color:"cyan",weight:2});
-
-arrow.addTo(windLayer);
 
 });
 
@@ -297,34 +320,13 @@ arrow.addTo(windLayer);
 }
 
 loadCSV();
-loadWind();
-
 setInterval(loadCSV,30000);
-setInterval(loadWind,60000);
+
+// reload polygon saat zoom berubah
 
 map.on("zoomend",loadCSV);
 
-var slider=document.getElementById("slider");
-
-slider.oninput=function(){
-
-var t=this.value;
-
-fetch("historical.csv")
-
-.then(r=>r.text())
-
-.then(text=>{
-
-var data=Papa.parse(text,{header:true}).data;
-
-var filtered=data.filter(d=>d.time_index==t);
-
-loadStations(Papa.unparse(filtered));
-
-});
-
-};
+// ================= LEGEND =================
 
 var legend=L.control({position:"bottomleft"});
 
@@ -336,18 +338,20 @@ div.innerHTML=`
 
 <b>IAEA Operational Intervention Levels</b><br><br>
 
-<div style="width:240px;height:14px;
+<div style="width:260px;height:14px;
 background:linear-gradient(to right,#2b83ba,#ffe600,#ff9b00,#ff2b2b);
-border:1px solid #999"></div>
+margin-bottom:6px;border:1px solid #999;"></div>
 
-<div style="display:flex;justify-content:space-between;width:240px">
+<div style="display:flex;justify-content:space-between;width:260px;font-size:11px;">
 <span>0</span>
-<span>1000</span>
-<span>100000</span>
-<span>1000000</span>
+<span>1,000</span>
+<span>100,000</span>
+<span>1,000,000</span>
 </div>
 
+<div style="font-size:11px;margin-top:4px;">
 Gamma Dose Rate (nSv/h)
+</div>
 
 `;
 
