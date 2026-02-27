@@ -454,6 +454,17 @@ var endTime=labels[labels.length-1];
 document.getElementById("selectedTime").innerHTML=
 "Selected Time : "+startTime+" – "+endTime;
 
+// hitung statistik
+var avg = values.reduce((a,b)=>a+b,0)/values.length;
+var min = Math.min(...values);
+var max = Math.max(...values);
+
+// margin supaya grafik tidak terlalu rapat
+var ymin = min - (max-min)*0.2;
+var ymax = max + (max-min)*0.2;
+
+if(ymin<0) ymin=0;
+
 if(tsChart) tsChart.destroy();
 
 tsChart=new Chart(document.getElementById("tsChart"),{
@@ -467,7 +478,8 @@ data:values,
 borderColor:'#2b83ba',
 backgroundColor:'rgba(43,131,186,0.15)',
 tension:0.25,
-pointRadius:2
+pointRadius:2,
+fill:true
 }]
 },
 
@@ -475,15 +487,18 @@ options:{
 responsive:true,
 plugins:{legend:{display:false}},
 scales:{
-y:{title:{display:true,text:"nSv/h"}}
+y:{
+min:ymin,
+max:ymax,
+title:{
+display:true,
+text:"nSv/h"
+}
+}
 }
 }
 
 });
-
-var avg = values.reduce((a,b)=>a+b,0)/values.length;
-var min = Math.min(...values);
-var max = Math.max(...values);
 
 document.getElementById("tsStats").innerHTML=
 "Average: "+avg.toFixed(2)+" nSv/h | "+
@@ -535,4 +550,5 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
