@@ -46,7 +46,7 @@ width:100%;
 }
 
 .unit-label{
-background:rgba(255,255,255,0.75);
+background:rgba(255,255,255,0.85);
 border-radius:6px;
 padding:3px 6px;
 font-size:11px;
@@ -64,34 +64,16 @@ font-size:12px;
 box-shadow:0 2px 6px rgba(0,0,0,0.3);
 }
 
-/* ================= POPUP STYLE ================= */
+/* POPUP */
 
 .leaflet-popup-content{
 font-size:14px;
-line-height:1.4;
 }
-
-.leaflet-popup-content-wrapper{
-border-radius:10px;
-}
-
-/* ================= MOBILE POPUP ================= */
 
 @media (max-width:768px){
 
 .leaflet-popup-content{
 font-size:18px;
-line-height:1.6;
-}
-
-.leaflet-popup-content-wrapper{
-padding:14px;
-border-radius:12px;
-}
-
-.leaflet-popup-tip{
-width:16px;
-height:16px;
 }
 
 }
@@ -113,7 +95,7 @@ height:16px;
 
 <script>
 
-// ================= BASEMAP =================
+// BASEMAP
 
 var osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 
@@ -129,7 +111,7 @@ var googleSat=L.tileLayer(
 {maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}
 );
 
-// ================= MAP =================
+// MAP
 
 var map=L.map('map',{
 center:[-2,118],
@@ -137,12 +119,12 @@ zoom:5,
 layers:[osm]
 });
 
-// ================= LAYERS =================
+// LAYERS
 
 var polygonLayer=L.layerGroup().addTo(map);
 var labelLayer=L.layerGroup().addTo(map);
 
-// ================= LAYER CONTROL =================
+// LAYER CONTROL
 
 L.control.layers(
 {
@@ -157,24 +139,25 @@ L.control.layers(
 }
 ).addTo(map);
 
-// ================= DYNAMIC RADIUS =================
+// DYNAMIC RADIUS (lebih kecil saat zoom)
 
 function getRadius(){
 
 var z=map.getZoom();
 
-if(z<=5) return 35000;
-if(z<=6) return 28000;
-if(z<=7) return 20000;
-if(z<=8) return 14000;
-if(z<=9) return 10000;
-if(z<=10) return 7000;
+if(z<=5) return 25000;
+if(z<=6) return 20000;
+if(z<=7) return 15000;
+if(z<=8) return 9000;
+if(z<=9) return 6000;
+if(z<=10) return 3500;
+if(z<=11) return 2000;
 
-return 4000;
+return 1200;
 
 }
 
-// ================= HEXAGON FUNCTION =================
+// HEXAGON
 
 function createHex(lat,lon,radius,color,options={}){
 
@@ -203,7 +186,7 @@ fillOpacity:options.opacity || 0.85
 
 }
 
-// ================= COLOR SCALE =================
+// COLOR SCALE
 
 function getColor(d){
 
@@ -218,7 +201,7 @@ return "#ff2b2b";
 
 }
 
-// ================= LOAD CSV =================
+// LOAD CSV
 
 function loadCSV(){
 
@@ -261,9 +244,7 @@ weight:2
 }else{
 
 hex=createHex(lat,lon,radius,color,{
-opacity:0.85,
-stroke:"#222",
-weight:1
+opacity:0.85
 });
 
 }
@@ -299,10 +280,13 @@ minWidth:180
 
 hex.addTo(polygonLayer);
 
-// ================= LABEL =================
+// LABEL DI KANAN ATAS POLYGON
+
+var labelOffsetLat = lat + (radius/111111)*0.9;
+var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
 
 var label=L.marker(
-[lat+0.15,lon],
+[labelOffsetLat,labelOffsetLon],
 {
 icon:L.divIcon({
 className:'',
@@ -322,11 +306,9 @@ label.addTo(labelLayer);
 loadCSV();
 setInterval(loadCSV,30000);
 
-// reload polygon saat zoom berubah
-
 map.on("zoomend",loadCSV);
 
-// ================= LEGEND =================
+// LEGEND
 
 var legend=L.control({position:"bottomleft"});
 
