@@ -144,40 +144,22 @@ font-size:14px;
 
 <div id="map"></div>
 
-<!-- TIME SERIES MODAL -->
-
 <div id="tsModal">
-
 <div id="tsBox">
 
 <div id="tsHeader">
-
 <div id="tsTitle">Time Series</div>
-
-<button onclick="closeTS()" style="
-background:#c00;
-color:white;
-border:none;
-padding:6px 12px;
-border-radius:6px;
-cursor:pointer">Close</button>
-
+<button onclick="closeTS()" style="background:#c00;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer">Close</button>
 </div>
 
 <div id="tsContent">
-
 <canvas id="tsChart" height="120"></canvas>
-
 <input type="range" id="timeSlider">
-
 <div id="selectedTime"></div>
-
 <div id="tsStats"></div>
-
 </div>
 
 </div>
-
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -187,26 +169,13 @@ cursor:pointer">Close</button>
 // BASEMAP
 
 var osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-
 var dark=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png');
-
-var googleHybrid=L.tileLayer(
-'https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}
-);
-
-var googleSat=L.tileLayer(
-'https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
-{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}
-);
+var googleHybrid=L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']});
+var googleSat=L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']});
 
 // MAP
 
-var map=L.map('map',{
-center:[-2,118],
-zoom:5,
-layers:[osm]
-});
+var map=L.map('map',{center:[-2,118],zoom:5,layers:[osm]});
 
 // LAYERS
 
@@ -231,9 +200,7 @@ L.control.layers(
 // RADIUS
 
 function getRadius(){
-
 var z=map.getZoom();
-
 if(z<=5) return 25000;
 if(z<=6) return 20000;
 if(z<=7) return 15000;
@@ -241,9 +208,7 @@ if(z<=8) return 9000;
 if(z<=9) return 6000;
 if(z<=10) return 3500;
 if(z<=11) return 2000;
-
 return 1200;
-
 }
 
 // HEXAGON
@@ -255,7 +220,6 @@ var coords=[];
 for(var i=0;i<6;i++){
 
 var angle=(Math.PI/180)*(60*i);
-
 var dx=radius*Math.cos(angle);
 var dy=radius*Math.sin(angle);
 
@@ -294,9 +258,7 @@ return "#ff2b2b";
 
 function loadCSV(){
 
-var url="output.csv?nocache="+Date.now();
-
-fetch(url)
+fetch("output.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
@@ -304,7 +266,6 @@ polygonLayer.clearLayers();
 labelLayer.clearLayers();
 
 var radius=getRadius();
-
 var data=Papa.parse(text,{header:true}).data;
 
 data.forEach(row=>{
@@ -313,26 +274,18 @@ if(!row["LATITUDE"]) return;
 
 var lat=parseFloat(row["LATITUDE"]);
 var lon=parseFloat(row["LONGITUDE"]);
-
 var dose=row["Gamma Dose Rate (nSv/h)"];
-
 var color=getColor(dose);
 
 var hex;
 
 if(dose==="Out of service"){
 
-hex=createHex(lat,lon,radius,color,{
-opacity:0.35,
-stroke:"#004a8f",
-weight:2
-});
+hex=createHex(lat,lon,radius,color,{opacity:0.35,stroke:"#004a8f",weight:2});
 
 }else{
 
-hex=createHex(lat,lon,radius,color,{
-opacity:0.85
-});
+hex=createHex(lat,lon,radius,color,{opacity:0.85});
 
 }
 
@@ -342,26 +295,21 @@ if(displayDose!=="Out of service" && displayDose!==""){
 displayDose=parseFloat(displayDose).toFixed(2);
 }
 
-var popupContent;
-
-popupContent=
+var popupContent=
 "<b>"+row["NAMA UNIT"]+"</b><br>"+
 "Dose Rate: "+displayDose+" nSv/h<br>"+
 "Last Update: "+row["LAST UPDATE (WIB)"]+"<br><br>"+
 "<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">View Time Series</a>";
 
 hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
-
 hex.addTo(polygonLayer);
 
-// LABEL OFFSET
+// LABEL
 
 var labelOffsetLat = lat + (radius/111111)*0.9;
 var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
 
-var label=L.marker(
-[labelOffsetLat,labelOffsetLon],
-{
+var label=L.marker([labelOffsetLat,labelOffsetLon],{
 icon:L.divIcon({
 className:'',
 html:'<div class="unit-label">'+row["NAMA UNIT"]+'</div>',
@@ -383,97 +331,6 @@ map.on("zoomend",loadCSV);
 
 // TIME SERIES
 
-var tsChart;
-var allLabels=[];
-var allValues=[];
-
-function openTS(station){
-
-document.getElementById("tsModal").style.display="block";
-document.getElementById("tsTitle").innerHTML="Time Series - "+station;
-
-// RESET GRAFIK LAMA
-if(tsChart){
-tsChart.destroy();
-tsChart=null;
-}
-
-// RESET CANVAS
-var ctx=document.getElementById("tsChart").getContext("2d");
-ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
-
-// RESET SLIDER
-var slider=document.getElementById("timeSlider");
-slider.value=0;
-slider.oninput=null;
-
-// RESET TEXT
-document.getElementById("selectedTime").innerHTML="";
-document.getElementById("tsStats").innerHTML="";
-
-fetch("timeseries.csv?nocache="+Date.now())
-.then(r=>r.text())
-.then(text=>{
-
-var data=Papa.parse(text,{header:true}).data;
-
-allLabels=[];
-allValues=[];
-
-data.forEach(r=>{
-
-if(r.station===station){
-
-allLabels.push(r.time);
-allValues.push(parseFloat(r.dose));
-
-}
-
-});
-
-if(allValues.length===0){
-
-document.getElementById("tsStats").innerHTML="No data available";
-
-if(tsChart) tsChart.destroy();
-
-tsChart=new Chart(document.getElementById("tsChart"),{
-type:'line',
-data:{labels:[],datasets:[{data:[]}]}
-});
-
-return;
-
-}
-
-var slider=document.getElementById("timeSlider");
-
-var step = 5;   // kira-kira 5 titik data
-
-slider.min = 0;
-slider.max = allValues.length - 1;
-slider.step = step;
-slider.value = allValues.length - 1;
-
-slider.oninput=function(){
-
-var index = parseInt(this.value);
-
-// pastikan index tidak melebihi data
-if(index >= allValues.length){
-index = allValues.length-1;
-}
-
-updateChart(index);
-
-};
-
-});
-
-}
-
-function updateChart(index){
-
 var tsChart=null;
 var allLabels=[];
 var allValues=[];
@@ -483,29 +340,16 @@ function openTS(station){
 document.getElementById("tsModal").style.display="block";
 document.getElementById("tsTitle").innerHTML="Time Series - "+station;
 
-// reset data
 allLabels=[];
 allValues=[];
 
-// reset grafik lama
 if(tsChart){
 tsChart.destroy();
 tsChart=null;
 }
 
-// reset canvas
-var canvas=document.getElementById("tsChart");
-var ctx=canvas.getContext("2d");
-ctx.clearRect(0,0,canvas.width,canvas.height);
-
-// reset text
 document.getElementById("selectedTime").innerHTML="";
 document.getElementById("tsStats").innerHTML="";
-
-// reset slider
-var slider=document.getElementById("timeSlider");
-slider.oninput=null;
-slider.value=0;
 
 fetch("timeseries.csv?nocache="+Date.now())
 .then(r=>r.text())
@@ -514,46 +358,30 @@ fetch("timeseries.csv?nocache="+Date.now())
 var data=Papa.parse(text,{header:true}).data;
 
 data.forEach(r=>{
-
 if(r.station===station){
-
 allLabels.push(r.time);
 allValues.push(parseFloat(r.dose));
-
 }
-
 });
 
 if(allValues.length===0){
-
 document.getElementById("tsStats").innerHTML="No data available";
 return;
-
 }
 
-// setup slider
+var slider=document.getElementById("timeSlider");
+
 slider.min=0;
 slider.max=allValues.length-1;
 slider.step=5;
 
-// paksa slider di posisi terakhir
 var lastIndex=allValues.length-1;
 slider.value=lastIndex;
 
-// gambar grafik langsung
 updateChart(lastIndex);
 
-// aktifkan slider
 slider.oninput=function(){
-
-var index=parseInt(this.value);
-
-if(index>=allValues.length){
-index=allValues.length-1;
-}
-
-updateChart(index);
-
+updateChart(parseInt(this.value));
 };
 
 });
@@ -571,23 +399,17 @@ var endTime=labels[labels.length-1];
 document.getElementById("selectedTime").innerHTML=
 "Selected Time : "+startTime+" – "+endTime;
 
-// statistik
 var avg=values.reduce((a,b)=>a+b,0)/values.length;
 var min=Math.min(...values);
 var max=Math.max(...values);
 
-// margin grafik
 var ymin=min-(max-min)*0.2;
 var ymax=max+(max-min)*0.2;
 
 if(ymin<0) ymin=0;
 
-// reset chart
-if(tsChart){
-tsChart.destroy();
-}
+if(tsChart) tsChart.destroy();
 
-// buat chart baru
 tsChart=new Chart(document.getElementById("tsChart"),{
 
 type:'line',
@@ -611,17 +433,13 @@ scales:{
 y:{
 min:ymin,
 max:ymax,
-title:{
-display:true,
-text:"nSv/h"
-}
+title:{display:true,text:"nSv/h"}
 }
 }
 }
 
 });
 
-// tampilkan statistik
 document.getElementById("tsStats").innerHTML=
 "<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
 "<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
@@ -672,9 +490,3 @@ legend.addTo(map);
 
 </body>
 </html>
-
-
-
-
-
-
