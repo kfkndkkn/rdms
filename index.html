@@ -429,14 +429,24 @@ return;
 
 var slider=document.getElementById("timeSlider");
 
-slider.min=0;
-slider.max=allValues.length-1;
-slider.value=allValues.length-1;
+var step = 5;   // kira-kira 5 titik data
 
-updateChart(slider.value);
+slider.min = 0;
+slider.max = allValues.length - 1;
+slider.step = step;
+slider.value = allValues.length - 1;
 
 slider.oninput=function(){
-updateChart(this.value);
+
+var index = parseInt(this.value);
+
+// pastikan index tidak melebihi data
+if(index >= allValues.length){
+index = allValues.length-1;
+}
+
+updateChart(index);
+
 };
 
 });
@@ -550,5 +560,6 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
