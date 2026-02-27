@@ -392,6 +392,25 @@ function openTS(station){
 document.getElementById("tsModal").style.display="block";
 document.getElementById("tsTitle").innerHTML="Time Series - "+station;
 
+// RESET GRAFIK LAMA
+if(tsChart){
+tsChart.destroy();
+tsChart=null;
+}
+
+// RESET CANVAS
+var ctx=document.getElementById("tsChart").getContext("2d");
+ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+
+// RESET SLIDER
+var slider=document.getElementById("timeSlider");
+slider.value=0;
+slider.oninput=null;
+
+// RESET TEXT
+document.getElementById("selectedTime").innerHTML="";
+document.getElementById("tsStats").innerHTML="";
+
 fetch("timeseries.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
@@ -560,6 +579,7 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
 
