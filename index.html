@@ -49,15 +49,12 @@ width:100%;
 }
 
 .unit-label{
-background:rgba(255,255,255,0.85);
+background:rgba(255,255,255,0.9);
 border-radius:6px;
 padding:3px 6px;
 font-size:11px;
 font-weight:bold;
-color:#111;
-border:1px solid rgba(0,0,0,0.25);
-box-shadow:0 1px 3px rgba(0,0,0,0.3);
-white-space:nowrap;
+border:1px solid rgba(0,0,0,0.3);
 }
 
 .legend{
@@ -65,6 +62,43 @@ background:white;
 padding:12px;
 font-size:12px;
 box-shadow:0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* TIME SERIES */
+
+#tsModal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.6);
+z-index:99999;
+}
+
+#tsBox{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:white;
+width:90%;
+max-width:900px;
+border-radius:10px;
+overflow:hidden;
+}
+
+#tsHeader{
+background:#0b1e3f;
+color:white;
+padding:12px;
+display:flex;
+justify-content:space-between;
+}
+
+#tsContent{
+padding:20px;
 }
 
 </style>
@@ -79,139 +113,51 @@ box-shadow:0 2px 6px rgba(0,0,0,0.3);
 
 <div id="map"></div>
 
+<div id="tsModal">
+<div id="tsBox">
+
+<div id="tsHeader">
+<div id="tsTitle">Time Series</div>
+<button onclick="closeTS()">Close</button>
+</div>
+
+<div id="tsContent">
+<canvas id="tsChart" height="120"></canvas>
+</div>
+
+</div>
+</div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
-/* ===========================
-BASEMAP
-=========================== */
+/* BASEMAP */
 
 var osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 
-var dark=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png');
-
-var googleHybrid=L.tileLayer(
-'https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}
-);
-
-var googleSat=L.tileLayer(
-'https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
-{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}
-);
-
 var esriGray=L.tileLayer(
-'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-{maxZoom:16}
+'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
 );
 
-var esriGrayLabel=L.tileLayer(
-'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
-{maxZoom:16}
-);
-
-/* ===========================
-MAP
-=========================== */
+/* MAP */
 
 var map=L.map('map',{
-
 zoomControl:true,
 zoomSnap:0.25,
 zoomDelta:0.25,
 wheelPxPerZoomLevel:120,
-
 layers:[osm]
-
 });
 
-map.attributionControl.addAttribution("© DKKN-BAPETEN 2026");
+map.fitBounds([[-11,94],[6,141]]);
 
-var indonesiaBounds=[
-[-11,94],
-[6,141]
-];
-
-map.fitBounds(indonesiaBounds);
-
-/* ===========================
-LAYERS
-=========================== */
+/* LAYERS */
 
 var polygonLayer=L.layerGroup().addTo(map);
 var labelLayer=L.layerGroup().addTo(map);
 
-/* ===========================
-LAYER CONTROL
-=========================== */
-
-L.control.layers(
-
-{
-"OpenStreetMap":osm,
-"Dark":dark,
-"Google Hybrid":googleHybrid,
-"Google Satellite":googleSat,
-"ESRI Light Gray":esriGray
-},
-
-{
-"ESRI Labels":esriGrayLabel,
-"Station Polygons":polygonLayer,
-"Station Labels":labelLayer
-}
-
-).addTo(map);
-
-/* ===========================
-HEXAGON RADIUS
-=========================== */
-
-function getRadius(){
-
-var zoom=map.getZoom();
-
-var base=40000;
-
-return Math.max(base / Math.pow(2, zoom-5), 80);
-
-}
-
-/* ===========================
-HEXAGON CREATE
-=========================== */
-
-function createHex(lat,lon,radius,color,options={}){
-
-var coords=[];
-
-for(var i=0;i<6;i++){
-
-var angle=(Math.PI/180)*(60*i);
-
-var dx=radius*Math.cos(angle);
-var dy=radius*Math.sin(angle);
-
-coords.push([
-lat+(dy/111111),
-lon+(dx/(111111*Math.cos(lat*Math.PI/180)))
-]);
-
-}
-
-return L.polygon(coords,{
-color:options.stroke || "#222",
-weight:options.weight || 1,
-fillColor:color,
-fillOpacity:options.opacity || 0.85
-});
-
-}
-
-/* ===========================
-COLOR SCALE
-=========================== */
+/* COLOR */
 
 function getColor(d){
 
@@ -222,15 +168,70 @@ d=parseFloat(d);
 if(d<1000) return "#2b83ba";
 if(d<100000) return "#ffe600";
 if(d<1000000) return "#ff9b00";
+
 return "#ff2b2b";
 
 }
 
-/* ===========================
-HEX CLUSTER
-=========================== */
+/* HEXAGON */
 
-function createHexCluster(data){
+function createHex(lat,lon,r){
+
+var pts=[];
+
+for(var i=0;i<6;i++){
+
+var angle=(Math.PI/180)*(60*i);
+
+var dx=r*Math.cos(angle);
+var dy=r*Math.sin(angle);
+
+pts.push([
+lat+(dy/111111),
+lon+(dx/(111111*Math.cos(lat*Math.PI/180)))
+]);
+
+}
+
+return pts;
+
+}
+
+/* HONEYCOMB GRID POSITION */
+
+function snapToHexGrid(lat,lon,size){
+
+var x=lon/(size*1.5);
+var y=lat/(size*Math.sqrt(3));
+
+var rx=Math.round(x);
+var ry=Math.round(y);
+
+var snappedLon=rx*(size*1.5);
+var snappedLat=ry*(size*Math.sqrt(3));
+
+return [snappedLat,snappedLon];
+
+}
+
+/* LOAD CSV */
+
+function loadCSV(){
+
+fetch("output.csv?"+Date.now())
+
+.then(r=>r.text())
+
+.then(text=>{
+
+polygonLayer.clearLayers();
+labelLayer.clearLayers();
+
+var data=Papa.parse(text,{header:true}).data;
+
+var zoom=map.getZoom();
+
+var hexSize=0.35;
 
 var grid={};
 
@@ -241,8 +242,9 @@ if(!row["LATITUDE"]) return;
 var lat=parseFloat(row["LATITUDE"]);
 var lon=parseFloat(row["LONGITUDE"]);
 
-var key=
-Math.round(lat*2)/2+"_"+Math.round(lon*2)/2;
+var snapped=snapToHexGrid(lat,lon,hexSize);
+
+var key=snapped[0]+"_"+snapped[1];
 
 if(!grid[key]) grid[key]=[];
 
@@ -250,176 +252,141 @@ grid[key].push(row);
 
 });
 
-var clusters=[];
+/* DRAW HEX */
 
 for(var key in grid){
 
 var group=grid[key];
 
-var lat=0;
-var lon=0;
+var lat=parseFloat(key.split("_")[0]);
+var lon=parseFloat(key.split("_")[1]);
 
-group.forEach(g=>{
-lat+=parseFloat(g["LATITUDE"]);
-lon+=parseFloat(g["LONGITUDE"]);
-});
+var dose=group[0]["Gamma Dose Rate (nSv/h)"];
 
-lat/=group.length;
-lon/=group.length;
-
-clusters.push({
-lat:lat,
-lon:lon,
-items:group
-});
-
+var hex=L.polygon(
+createHex(lat,lon,30000),
+{
+color:"#333",
+weight:1,
+fillColor:getColor(dose),
+fillOpacity:0.85
 }
+).addTo(polygonLayer);
 
-return clusters;
+/* POPUP */
 
-}
+if(group.length>1){
 
-/* ===========================
-LOAD CSV
-=========================== */
+var html="<b>"+group.length+" Stations</b><br>";
 
-function loadCSV(){
-
-fetch("output.csv?nocache="+Date.now())
-
-.then(r=>r.text())
-
-.then(text=>{
-
-polygonLayer.clearLayers();
-labelLayer.clearLayers();
-
-var radius=getRadius();
-
-var data=Papa.parse(text,{header:true}).data;
-
-var zoom=map.getZoom();
-
-/* ===========================
-CLUSTER MODE (ZOOM FAR)
-=========================== */
-
-if(zoom<6){
-
-var clusters=createHexCluster(data);
-
-clusters.forEach(c=>{
-
-var hex=createHex(c.lat,c.lon,radius*1.3,"#2b83ba");
-
-var popup="<b>"+c.items.length+" Stations</b><br><br>";
-
-c.items.forEach(r=>{
-popup+=r["NAMA UNIT"]+"<br>";
+group.forEach(s=>{
+html+=s["NAMA UNIT"]+"<br>";
 });
 
-hex.bindPopup(popup);
-
-hex.addTo(polygonLayer);
-
-});
-
-}
-
-/* ===========================
-NORMAL MODE (ZOOM CLOSE)
-=========================== */
-
-else{
-
-data.forEach(row=>{
-
-if(!row["LATITUDE"]) return;
-
-var lat=parseFloat(row["LATITUDE"]);
-var lon=parseFloat(row["LONGITUDE"]);
-
-var dose=row["Gamma Dose Rate (nSv/h)"];
-
-var color=getColor(dose);
-
-var hex;
-
-if(dose==="Out of service"){
-
-hex=createHex(lat,lon,radius,color,{
-opacity:0.35,
-stroke:"#004a8f",
-weight:2
-});
+hex.bindPopup(html);
 
 }else{
 
-hex=createHex(lat,lon,radius,color,{
-opacity:0.85
-});
+var s=group[0];
+
+var html=
+"<b>"+s["NAMA UNIT"]+"</b><br>"+
+"Dose Rate: "+s["Gamma Dose Rate (nSv/h)"]+" nSv/h<br>"+
+"Last Update: "+s["LAST UPDATE (WIB)"]+
+"<br><br><a href='#' onclick=\"openTS('"+s["NAMA UNIT"]+"')\">View Time Series</a>";
+
+hex.bindPopup(html);
 
 }
-
-var doseText="";
-
-if(dose==="Out of service"){
-
-doseText="Dose Rate: Out of service";
-
-}else{
-
-doseText="Dose Rate: "+parseFloat(dose).toFixed(2)+" nSv/h";
-
-}
-
-var popupContent=
-"<b>"+row["NAMA UNIT"]+"</b><br>"+
-doseText+"<br>"+
-"Last Update: "+row["LAST UPDATE (WIB)"];
-
-hex.bindPopup(popupContent);
-
-hex.addTo(polygonLayer);
 
 /* LABEL */
 
-var labelOffsetLat=lat+(radius/111111)*0.9;
-var labelOffsetLon=lon+(radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
+if(zoom>7){
 
-var label=L.marker([labelOffsetLat,labelOffsetLon],{
+var label=L.marker([lat,lon],{
 
 icon:L.divIcon({
-className:'',
-html:'<div class="unit-label">'+row["NAMA UNIT"]+'</div>',
-iconSize:null
+html:'<div class="unit-label">'+group[0]["NAMA UNIT"]+'</div>'
 })
 
 });
 
 label.addTo(labelLayer);
 
-});
+}
 
 }
 
 });
 
 }
-
-/* ===========================
-AUTO UPDATE
-=========================== */
 
 loadCSV();
-
 setInterval(loadCSV,30000);
 
 map.on("zoomend",loadCSV);
 
-/* ===========================
-LEGEND
-=========================== */
+/* TIME SERIES */
+
+var tsChart;
+
+function openTS(station){
+
+document.getElementById("tsModal").style.display="block";
+document.getElementById("tsTitle").innerHTML="Time Series - "+station;
+
+fetch("timeseries.csv?"+Date.now())
+
+.then(r=>r.text())
+
+.then(text=>{
+
+var data=Papa.parse(text,{header:true}).data;
+
+var labels=[];
+var values=[];
+
+data.forEach(r=>{
+if(r.station===station){
+labels.push(r.time);
+values.push(parseFloat(r.dose));
+}
+});
+
+if(tsChart) tsChart.destroy();
+
+tsChart=new Chart(document.getElementById("tsChart"),{
+
+type:'line',
+
+data:{
+labels:labels,
+datasets:[{
+data:values,
+borderColor:'#2b83ba',
+tension:0.3,
+fill:false
+}]
+},
+
+options:{
+plugins:{legend:{display:false}},
+scales:{
+y:{title:{display:true,text:"nSv/h"}}
+}
+}
+
+});
+
+});
+
+}
+
+function closeTS(){
+document.getElementById("tsModal").style.display="none";
+}
+
+/* LEGEND */
 
 var legend=L.control({position:"bottomleft"});
 
@@ -428,24 +395,18 @@ legend.onAdd=function(){
 var div=L.DomUtil.create("div","legend");
 
 div.innerHTML=`
+<b>Gamma Dose Rate</b><br><br>
 
-<b>IAEA Operational Intervention Levels</b><br><br>
-
-<div style="width:260px;height:14px;
+<div style="width:220px;height:14px;
 background:linear-gradient(to right,#2b83ba,#ffe600,#ff9b00,#ff2b2b);
-margin-bottom:6px;border:1px solid #999;"></div>
+border:1px solid #999;"></div>
 
-<div style="display:flex;justify-content:space-between;width:260px;font-size:11px;">
+<div style="display:flex;justify-content:space-between;font-size:11px">
 <span>0</span>
-<span>1,000</span>
-<span>100,000</span>
-<span>1,000,000</span>
+<span>1k</span>
+<span>100k</span>
+<span>1M</span>
 </div>
-
-<div style="font-size:11px;margin-top:4px;">
-Gamma Dose Rate (nSv/h)
-</div>
-
 `;
 
 return div;
