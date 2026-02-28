@@ -144,10 +144,11 @@ var esriGray=L.tileLayer(
 
 var map=L.map('map',{
 zoomControl:true,
-zoomSnap:0.25,
-zoomDelta:0.25,
-wheelPxPerZoomLevel:120,
-layers:[osm]
+layers:[osm],
+
+zoomSnap:0.25,          // zoom bisa 0.25 level
+zoomDelta:0.25,         // tombol + - juga 0.25
+wheelPxPerZoomLevel:120 // scroll mouse tidak terlalu sensitif
 });
 
 map.fitBounds([[-11,94],[6,141]]);
@@ -419,3 +420,4 @@ legend.addTo(map);
 
 </body>
 </html>
+
