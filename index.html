@@ -279,82 +279,6 @@ return "#ff2b2b";
 
 }
 
-function smartHexPositions(data){
-
-var zoom=map.getZoom();
-
-var groupDistance=0.02; // ~2 km
-var groups={};
-
-data.forEach(row=>{
-
-var lat=row._lat;
-var lon=row._lon;
-
-if(!lat) return;
-
-var key=Math.round(lat/groupDistance)+"_"+Math.round(lon/groupDistance);
-
-if(!groups[key]) groups[key]=[];
-
-groups[key].push(row);
-
-});
-
-Object.values(groups).forEach(group=>{
-
-var count=group.length;
-
-group.forEach((row,i)=>{
-
-var lat=row._lat;
-var lon=row._lon;
-
-var offsetScale=0;
-
-if(zoom<7){
-
-// semua jadi satu titik
-offsetScale=0;
-
-}else if(zoom<9){
-
-// mulai pisah sedikit
-offsetScale=0.003;
-
-}else if(zoom<11){
-
-// pisah lebih jelas
-offsetScale=0.006;
-
-}else{
-
-// posisi asli
-offsetScale=0;
-
-}
-
-if(zoom>=11){
-
-row._lat=lat;
-row._lon=lon;
-
-}else{
-
-var angle=(i/count)*Math.PI*2;
-
-row._lat=lat+(Math.sin(angle)*offsetScale);
-row._lon=lon+(Math.cos(angle)*offsetScale);
-
-}
-
-});
-
-});
-
-return data;
-
-}  
 // LOAD CSV
 
 function loadCSV(){
@@ -368,14 +292,13 @@ labelLayer.clearLayers();
 
 var radius=getRadius();
 var data=Papa.parse(text,{header:true}).data;
-data=smartHexPositions(data);
 
 data.forEach(row=>{
 
 if(!row["LATITUDE"]) return;
 
-var lat=row._lat;
-var lon=row._lon;
+var lat=parseFloat(row["LATITUDE"]);
+var lon=parseFloat(row["LONGITUDE"]);
 var dose=row["Gamma Dose Rate (nSv/h)"];
 var color=getColor(dose);
 
@@ -599,7 +522,6 @@ legend.addTo(map);
 
 </body>
 </html>
-
 
 
 
