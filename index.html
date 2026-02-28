@@ -190,7 +190,11 @@ maxZoom:16
 
 var map=L.map('map',{
 zoomControl:true,
-layers:[osm]
+layers:[osm],
+
+zoomSnap:0.25,          // zoom bisa 0.25 level
+zoomDelta:0.25,         // tombol + - juga 0.25
+wheelPxPerZoomLevel:120 // scroll mouse tidak terlalu sensitif
 });
 map.attributionControl.addAttribution("© DKKN-BAPETEN 2026");
 // batas wilayah Indonesia
@@ -522,6 +526,7 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
 
