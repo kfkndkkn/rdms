@@ -190,11 +190,7 @@ maxZoom:16
 
 var map=L.map('map',{
 zoomControl:true,
-layers:[osm],
-
-zoomSnap:0.25,          // zoom bisa 0.25 level
-zoomDelta:0.25,         // tombol + - juga 0.25
-wheelPxPerZoomLevel:120 // scroll mouse tidak terlalu sensitif
+layers:[osm]
 });
 map.attributionControl.addAttribution("© DKKN-BAPETEN 2026");
 // batas wilayah Indonesia
@@ -282,58 +278,7 @@ if(d<1000000) return "#ff9b00";
 return "#ff2b2b";
 
 }
-function spreadStations(data){
 
-var zoom=map.getZoom();
-
-if(zoom>=10) return data; // zoom besar tidak perlu spread
-
-var groups={};
-var threshold=0.02; // ~2km grouping
-
-data.forEach(row=>{
-
-var lat=parseFloat(row["LATITUDE"]);
-var lon=parseFloat(row["LONGITUDE"]);
-
-if(!lat) return;
-
-var key=Math.round(lat/threshold)+"_"+Math.round(lon/threshold);
-
-if(!groups[key]) groups[key]=[];
-groups[key].push(row);
-
-});
-
-Object.values(groups).forEach(group=>{
-
-if(group.length<=1) return;
-
-group.forEach((row,i)=>{
-
-var lat=parseFloat(row["LATITUDE"]);
-var lon=parseFloat(row["LONGITUDE"]);
-
-var offset=i*0.015; // jarak horizontal
-
-row._displayLat=lat;
-row._displayLon=lon+offset;
-
-});
-
-});
-
-data.forEach(r=>{
-if(!r._displayLat){
-r._displayLat=parseFloat(r["LATITUDE"]);
-r._displayLon=parseFloat(r["LONGITUDE"]);
-}
-});
-
-return data;
-
-}
-  
 // LOAD CSV
 
 function loadCSV(){
@@ -347,14 +292,13 @@ labelLayer.clearLayers();
 
 var radius=getRadius();
 var data=Papa.parse(text,{header:true}).data;
-data=spreadStations(data);
 
 data.forEach(row=>{
 
 if(!row["LATITUDE"]) return;
 
-var lat=row._displayLat;
-var lon=row._displayLon;
+var lat=parseFloat(row["LATITUDE"]);
+var lon=parseFloat(row["LONGITUDE"]);
 var dose=row["Gamma Dose Rate (nSv/h)"];
 var color=getColor(dose);
 
@@ -578,7 +522,6 @@ legend.addTo(map);
 
 </body>
 </html>
-
 
 
 
