@@ -67,6 +67,71 @@ font-size:12px;
 box-shadow:0 2px 6px rgba(0,0,0,0.3);
 }
 
+.leaflet-popup-content{
+font-size:14px;
+}
+
+@media (max-width:768px){
+.leaflet-popup-content{
+font-size:18px;
+}
+}
+
+/* TIME SERIES */
+
+#tsModal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.6);
+z-index:99999;
+}
+
+#tsBox{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:white;
+width:90%;
+max-width:900px;
+border-radius:10px;
+overflow:hidden;
+}
+
+#tsHeader{
+background:#0b1e3f;
+color:white;
+padding:12px 16px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+font-weight:bold;
+}
+
+#tsContent{
+padding:20px;
+}
+
+#timeSlider{
+width:100%;
+margin-top:10px;
+}
+
+#selectedTime{
+margin-top:6px;
+font-size:12px;
+color:#444;
+}
+
+#tsStats{
+margin-top:10px;
+font-size:14px;
+}
+
 </style>
 </head>
 
@@ -79,75 +144,76 @@ box-shadow:0 2px 6px rgba(0,0,0,0.3);
 
 <div id="map"></div>
 
+<div id="tsModal">
+<div id="tsBox">
+
+<div id="tsHeader">
+<div id="tsTitle">Time Series</div>
+<button onclick="closeTS()" style="background:#c00;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer">Close</button>
+</div>
+
+<div id="tsContent">
+<canvas id="tsChart" height="120"></canvas>
+<input type="range" id="timeSlider">
+<div id="selectedTime"></div>
+<div id="tsStats"></div>
+</div>
+
+</div>
+</div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
-/* ===========================
-BASEMAP
-=========================== */
+// BASEMAP
 
 var osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-
 var dark=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png');
-
-var googleHybrid=L.tileLayer(
-'https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}
-);
-
-var googleSat=L.tileLayer(
-'https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
-{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']}
-);
-
-var esriGray=L.tileLayer(
+var googleHybrid=L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']});
+var googleSat=L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']});
+  var esriGray=L.tileLayer(
 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-{maxZoom:16}
-);
+{
+maxZoom:16,
+attribution:'Esri'
+});
 
 var esriGrayLabel=L.tileLayer(
 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
-{maxZoom:16}
-);
+{
+maxZoom:16
+});
+  
 
-/* ===========================
-MAP
-=========================== */
+// MAP
 
 var map=L.map('map',{
-
 zoomControl:true,
-zoomSnap:0.25,
-zoomDelta:0.25,
-wheelPxPerZoomLevel:120,
+layers:[osm],
 
-layers:[osm]
-
+zoomSnap:0.25,          // zoom bisa 0.25 level
+zoomDelta:0.25,         // tombol + - juga 0.25
+wheelPxPerZoomLevel:120 // scroll mouse tidak terlalu sensitif
 });
-
 map.attributionControl.addAttribution("© DKKN-BAPETEN 2026");
-
-var indonesiaBounds=[
-[-11,94],
-[6,141]
+// batas wilayah Indonesia
+var indonesiaBounds = [
+[-11,94],   // SW (selatan barat)
+[6,141]     // NE (utara timur)
 ];
 
+// set view pertama kali
 map.fitBounds(indonesiaBounds);
 
-/* ===========================
-LAYERS
-=========================== */
+// LAYERS
 
 var polygonLayer=L.layerGroup().addTo(map);
 var labelLayer=L.layerGroup().addTo(map);
 
-/* ===========================
-LAYER CONTROL
-=========================== */
+// LAYER CONTROL
 
 L.control.layers(
-
 {
 "OpenStreetMap":osm,
 "Dark":dark,
@@ -155,18 +221,14 @@ L.control.layers(
 "Google Satellite":googleSat,
 "ESRI Light Gray":esriGray
 },
-
 {
 "ESRI Labels":esriGrayLabel,
 "Station Polygons":polygonLayer,
 "Station Labels":labelLayer
 }
-
 ).addTo(map);
 
-/* ===========================
-HEXAGON RADIUS
-=========================== */
+// RADIUS
 
 function getRadius(){
 
@@ -178,9 +240,7 @@ return Math.max(base / Math.pow(2, zoom-5), 80);
 
 }
 
-/* ===========================
-HEXAGON CREATE
-=========================== */
+// HEXAGON
 
 function createHex(lat,lon,radius,color,options={}){
 
@@ -189,7 +249,6 @@ var coords=[];
 for(var i=0;i<6;i++){
 
 var angle=(Math.PI/180)*(60*i);
-
 var dx=radius*Math.cos(angle);
 var dy=radius*Math.sin(angle);
 
@@ -209,9 +268,7 @@ fillOpacity:options.opacity || 0.85
 
 }
 
-/* ===========================
-COLOR SCALE
-=========================== */
+// COLOR
 
 function getColor(d){
 
@@ -226,111 +283,19 @@ return "#ff2b2b";
 
 }
 
-/* ===========================
-HEX CLUSTER
-=========================== */
-
-function createHexCluster(data){
-
-var grid={};
-
-data.forEach(row=>{
-
-if(!row["LATITUDE"]) return;
-
-var lat=parseFloat(row["LATITUDE"]);
-var lon=parseFloat(row["LONGITUDE"]);
-
-var key=
-Math.round(lat*2)/2+"_"+Math.round(lon*2)/2;
-
-if(!grid[key]) grid[key]=[];
-
-grid[key].push(row);
-
-});
-
-var clusters=[];
-
-for(var key in grid){
-
-var group=grid[key];
-
-var lat=0;
-var lon=0;
-
-group.forEach(g=>{
-lat+=parseFloat(g["LATITUDE"]);
-lon+=parseFloat(g["LONGITUDE"]);
-});
-
-lat/=group.length;
-lon/=group.length;
-
-clusters.push({
-lat:lat,
-lon:lon,
-items:group
-});
-
-}
-
-return clusters;
-
-}
-
-/* ===========================
-LOAD CSV
-=========================== */
+// LOAD CSV
 
 function loadCSV(){
 
 fetch("output.csv?nocache="+Date.now())
-
 .then(r=>r.text())
-
 .then(text=>{
 
 polygonLayer.clearLayers();
 labelLayer.clearLayers();
 
 var radius=getRadius();
-
 var data=Papa.parse(text,{header:true}).data;
-
-var zoom=map.getZoom();
-
-/* ===========================
-CLUSTER MODE (ZOOM FAR)
-=========================== */
-
-if(zoom<6){
-
-var clusters=createHexCluster(data);
-
-clusters.forEach(c=>{
-
-var hex=createHex(c.lat,c.lon,radius*1.3,"#2b83ba");
-
-var popup="<b>"+c.items.length+" Stations</b><br><br>";
-
-c.items.forEach(r=>{
-popup+=r["NAMA UNIT"]+"<br>";
-});
-
-hex.bindPopup(popup);
-
-hex.addTo(polygonLayer);
-
-});
-
-}
-
-/* ===========================
-NORMAL MODE (ZOOM CLOSE)
-=========================== */
-
-else{
 
 data.forEach(row=>{
 
@@ -338,88 +303,191 @@ if(!row["LATITUDE"]) return;
 
 var lat=parseFloat(row["LATITUDE"]);
 var lon=parseFloat(row["LONGITUDE"]);
-
 var dose=row["Gamma Dose Rate (nSv/h)"];
-
 var color=getColor(dose);
 
 var hex;
 
 if(dose==="Out of service"){
 
-hex=createHex(lat,lon,radius,color,{
-opacity:0.35,
-stroke:"#004a8f",
-weight:2
-});
+hex=createHex(lat,lon,radius,color,{opacity:0.35,stroke:"#004a8f",weight:2});
 
 }else{
 
-hex=createHex(lat,lon,radius,color,{
-opacity:0.85
-});
+hex=createHex(lat,lon,radius,color,{opacity:0.85});
 
 }
 
+var displayDose=row["Gamma Dose Rate (nSv/h)"];
 var doseText="";
 
-if(dose==="Out of service"){
+if(displayDose==="Out of service"){
 
 doseText="Dose Rate: Out of service";
 
-}else{
+}else if(displayDose!==""){
 
-doseText="Dose Rate: "+parseFloat(dose).toFixed(2)+" nSv/h";
+doseText="Dose Rate: "+parseFloat(displayDose).toFixed(2)+" nSv/h";
 
 }
 
 var popupContent=
 "<b>"+row["NAMA UNIT"]+"</b><br>"+
 doseText+"<br>"+
-"Last Update: "+row["LAST UPDATE (WIB)"];
+"Last Update: "+row["LAST UPDATE (WIB)"]+"<br><br>"+
+"<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">View Time Series</a>";
 
-hex.bindPopup(popupContent);
-
+hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
 hex.addTo(polygonLayer);
 
-/* LABEL */
+// LABEL
 
-var labelOffsetLat=lat+(radius/111111)*0.9;
-var labelOffsetLon=lon+(radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
+var labelOffsetLat = lat + (radius/111111)*0.9;
+var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
 
 var label=L.marker([labelOffsetLat,labelOffsetLon],{
-
 icon:L.divIcon({
 className:'',
 html:'<div class="unit-label">'+row["NAMA UNIT"]+'</div>',
 iconSize:null
 })
-
 });
 
 label.addTo(labelLayer);
 
 });
 
+});
+
 }
+
+loadCSV();
+setInterval(loadCSV,30000);
+map.on("zoomend",loadCSV);
+
+// TIME SERIES
+
+var tsChart=null;
+var allLabels=[];
+var allValues=[];
+
+function openTS(station){
+
+document.getElementById("tsModal").style.display="block";
+document.getElementById("tsTitle").innerHTML="Time Series - "+station;
+
+allLabels=[];
+allValues=[];
+
+if(tsChart){
+tsChart.destroy();
+tsChart=null;
+}
+
+document.getElementById("selectedTime").innerHTML="";
+document.getElementById("tsStats").innerHTML="";
+
+fetch("timeseries.csv?nocache="+Date.now())
+.then(r=>r.text())
+.then(text=>{
+
+var data=Papa.parse(text,{header:true}).data;
+
+data.forEach(r=>{
+if(r.station===station){
+allLabels.push(r.time);
+allValues.push(parseFloat(r.dose));
+}
+});
+
+if(allValues.length===0){
+document.getElementById("tsStats").innerHTML="No data available";
+return;
+}
+
+var slider=document.getElementById("timeSlider");
+
+slider.min=0;
+slider.max=allValues.length-1;
+slider.step=5;
+
+var lastIndex=allValues.length-1;
+slider.value=lastIndex;
+
+updateChart(lastIndex);
+
+slider.oninput=function(){
+updateChart(parseInt(this.value));
+};
 
 });
 
 }
 
-/* ===========================
-AUTO UPDATE
-=========================== */
+function updateChart(index){
 
-loadCSV();
+var labels=allLabels.slice(0,index+1);
+var values=allValues.slice(0,index+1);
 
-setInterval(loadCSV,30000);
+var startTime=labels[0];
+var endTime=labels[labels.length-1];
 
-map.on("zoomend",loadCSV);
+document.getElementById("selectedTime").innerHTML=
+"Selected Time : "+startTime+" – "+endTime;
 
-/* ===========================
-LEGEND
-=========================== */
+var avg=values.reduce((a,b)=>a+b,0)/values.length;
+var min=Math.min(...values);
+var max=Math.max(...values);
+
+var ymin=min-(max-min)*0.2;
+var ymax=max+(max-min)*0.2;
+
+if(ymin<0) ymin=0;
+
+if(tsChart) tsChart.destroy();
+
+tsChart=new Chart(document.getElementById("tsChart"),{
+
+type:'line',
+
+data:{
+labels:labels,
+datasets:[{
+data:values,
+borderColor:'#2b83ba',
+backgroundColor:'rgba(43,131,186,0.15)',
+tension:0.25,
+pointRadius:2,
+fill:true
+}]
+},
+
+options:{
+responsive:true,
+plugins:{legend:{display:false}},
+scales:{
+y:{
+min:ymin,
+max:ymax,
+title:{display:true,text:"nSv/h"}
+}
+}
+}
+
+});
+
+document.getElementById("tsStats").innerHTML=
+"<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
+"<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
+"<b>Max:</b> "+max.toFixed(2)+" nSv/h";
+
+}
+
+function closeTS(){
+document.getElementById("tsModal").style.display="none";
+}
+
+// LEGEND
 
 var legend=L.control({position:"bottomleft"});
 
@@ -458,3 +526,9 @@ legend.addTo(map);
 
 </body>
 </html>
+
+
+
+
+
+
