@@ -394,12 +394,19 @@ fetch("timeseries.csv?nocache="+Date.now())
 var data=Papa.parse(text,{header:true}).data;
 
 data.forEach(r=>{
-if(r.station===station){
-allLabels.push(r.time);
-allValues.push(parseFloat(r.dose));
-}
-});
 
+if(r.station===station){
+
+var v=parseFloat(r.dose);
+
+if(!isNaN(v)){   // hanya ambil angka valid
+allLabels.push(r.time);
+allValues.push(v);
+}
+
+}
+
+});
 if(allValues.length===0){
 document.getElementById("tsStats").innerHTML="No data available";
 return;
