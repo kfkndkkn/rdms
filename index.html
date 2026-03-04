@@ -272,9 +272,11 @@ fillOpacity:options.opacity || 0.85
 
 function getColor(d){
 
-if(d==="Out of service") return "#2b83ba";
+if(!d || d==="Out of service") return "#2b83ba";
 
 d=parseFloat(d);
+
+if(isNaN(d)) return "#2b83ba";
 
 if(d<1000) return "#2b83ba";
 if(d<100000) return "#ffe600";
@@ -533,3 +535,4 @@ legend.addTo(map);
 
 </body>
 </html>
+
