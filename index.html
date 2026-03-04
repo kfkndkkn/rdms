@@ -295,25 +295,15 @@ polygonLayer.clearLayers();
 labelLayer.clearLayers();
 
 var radius=getRadius();
-var parsed=Papa.parse(text,{header:true});
-var data=parsed.data;
+var data=Papa.parse(text,{header:true}).data;
 
-// update cache jika ada data baru
 data.forEach(row=>{
-if(row["NAMA UNIT"]){
-lastStationData[row["NAMA UNIT"]] = row;
-}
-});
-
-// gunakan data dari cache
-Object.values(lastStationData).forEach(row=>{
 
 if(!row["LATITUDE"]) return;
 
 var lat=parseFloat(row["LATITUDE"]);
 var lon=parseFloat(row["LONGITUDE"]);
 var dose=row["Gamma Dose Rate (nSv/h)"];
-
 var color=getColor(dose);
 
 var hex;
@@ -350,28 +340,6 @@ doseText+"<br>"+
 hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
 hex.addTo(polygonLayer);
 
-// LABEL
-
-var labelOffsetLat = lat + (radius/111111)*0.9;
-var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
-
-var label=L.marker([labelOffsetLat,labelOffsetLon],{
-icon:L.divIcon({
-className:'',
-html:'<div class="unit-label">'+row["NAMA UNIT"]+'</div>',
-iconSize:null
-})
-});
-
-label.addTo(labelLayer);
-
-});
-
-})
-.catch(err=>{
-console.log("CSV load failed, using cached data");
-});
-}
 // LABEL
 
 var labelOffsetLat = lat + (radius/111111)*0.9;
@@ -565,12 +533,3 @@ legend.addTo(map);
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
