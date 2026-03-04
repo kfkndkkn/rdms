@@ -416,11 +416,11 @@ return;
 
 var slider=document.getElementById("timeSlider");
 
-slider.min=0;
-slider.max=allValues.length-1;
-slider.step=5;
-
 var lastIndex=allValues.length-1;
+
+slider.min=0;
+slider.max=lastIndex;
+slider.step=1;
 slider.value=lastIndex;
 
 updateChart(lastIndex);
@@ -539,5 +539,6 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
