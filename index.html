@@ -285,6 +285,57 @@ return "#ff2b2b";
 
 }
 
+
+function clusterStations(data, radius){
+
+var clusters=[];
+
+data.forEach(row=>{
+
+if(!row["LATITUDE"]) return;
+
+var lat=parseFloat(row["LATITUDE"]);
+var lon=parseFloat(row["LONGITUDE"]);
+var dose=row["Gamma Dose Rate (nSv/h)"];
+
+var placed=false;
+
+clusters.forEach(c=>{
+
+var dLat=Math.abs(c.lat-lat);
+var dLon=Math.abs(c.lon-lon);
+
+if(dLat<radius/111111 && dLon<radius/111111){
+
+c.points.push({lat:lat,lon:lon,dose:dose});
+
+var v=parseFloat(dose);
+if(!isNaN(v) && v>c.maxDose) c.maxDose=v;
+
+placed=true;
+
+}
+
+});
+
+if(!placed){
+
+var v=parseFloat(dose);
+
+clusters.push({
+lat:lat,
+lon:lon,
+points:[{lat:lat,lon:lon,dose:dose}],
+maxDose:isNaN(v)?0:v
+});
+
+}
+
+});
+
+return clusters;
+
+}
 // LOAD CSV
 
 function loadCSV(){
@@ -299,26 +350,25 @@ labelLayer.clearLayers();
 var radius=getRadius();
 var data=Papa.parse(text,{header:true}).data;
 
-data.forEach(row=>{
+var clusters = clusterStations(data, radius);
 
-if(!row["LATITUDE"]) return;
+clusters.forEach(c=>{
 
-var lat=parseFloat(row["LATITUDE"]);
-var lon=parseFloat(row["LONGITUDE"]);
-var dose=row["Gamma Dose Rate (nSv/h)"];
-var color=getColor(dose);
+var color=getColor(c.maxDose);
 
-var hex;
+var hex=createHex(c.lat,c.lon,radius*1.4,color,{
+opacity:0.85
+});
 
-if(dose==="Out of service"){
+var popup="<b>Cluster</b><br>"+
+"Stations: "+c.points.length+"<br>"+
+"Max Dose: "+c.maxDose.toFixed(2)+" nSv/h";
 
-hex=createHex(lat,lon,radius,color,{opacity:0.35,stroke:"#004a8f",weight:2});
+hex.bindPopup(popup);
 
-}else{
+hex.addTo(polygonLayer);
 
-hex=createHex(lat,lon,radius,color,{opacity:0.85});
-
-}
+});
 
 var displayDose=row["Gamma Dose Rate (nSv/h)"];
 var doseText="";
@@ -539,6 +589,7 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
 
