@@ -435,11 +435,11 @@ updateChart(parseInt(this.value));
 
 function updateChart(index){
 
-var labels=allLabels.slice(0,index+1);
-var values=allValues.slice(0,index+1);
+var labels = allLabels;
+var values = allValues;
 
-var startTime=labels[0];
-var endTime=labels[labels.length-1];
+var startTime=allLabels[0];
+var endTime=allLabels[index];
 
 document.getElementById("selectedTime").innerHTML=
 "Selected Time : "+startTime+" – "+endTime;
@@ -475,6 +475,10 @@ options:{
 responsive:true,
 plugins:{legend:{display:false}},
 scales:{
+x:{
+min:0,
+max:index
+},
 y:{
 min:ymin,
 max:ymax,
@@ -535,4 +539,5 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
