@@ -297,14 +297,17 @@ polygonLayer.clearLayers();
 labelLayer.clearLayers();
 
 var radius=getRadius();
-var data=Papa.parse(text,{header:true}).data;
+var data=Papa.parse(text,{
+header:true,
+skipEmptyLines:true
+}).data;
 
 data.forEach(row=>{
 
-if(!row["LATITUDE"]) return;
-
 var lat=parseFloat(row["LATITUDE"]);
 var lon=parseFloat(row["LONGITUDE"]);
+
+if(isNaN(lat) || isNaN(lon)) return;
 var dose=row["Gamma Dose Rate (nSv/h)"];
 var color=getColor(dose);
 
@@ -539,6 +542,7 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
 
