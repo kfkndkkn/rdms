@@ -13,6 +13,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/supercluster@7.1.5/dist/supercluster.min.js"></script>
 
 <style>
 
@@ -297,10 +298,13 @@ polygonLayer.clearLayers();
 labelLayer.clearLayers();
 
 var radius=getRadius();
+
 var data=Papa.parse(text,{
 header:true,
 skipEmptyLines:true
 }).data;
+
+geoPoints=[];
 
 data.forEach(row=>{
 
@@ -308,21 +312,94 @@ var lat=parseFloat(row["LATITUDE"]);
 var lon=parseFloat(row["LONGITUDE"]);
 
 if(isNaN(lat) || isNaN(lon)) return;
-var dose=row["Gamma Dose Rate (nSv/h)"];
-var color=getColor(dose);
 
-var hex;
+geoPoints.push({
+type:"Feature",
+properties:{
+station:row["NAMA UNIT"],
+dose:row["Gamma Dose Rate (nSv/h)"],
+time:row["LAST UPDATE (WIB)"]
+},
+geometry:{
+type:"Point",
+coordinates:[lon,lat]
+}
+});
 
-if(dose==="Out of service"){
+});
 
-hex=createHex(lat,lon,radius,color,{opacity:0.35,stroke:"#004a8f",weight:2});
+clusterIndex=new Supercluster({
+radius:80,
+maxZoom:16
+});
 
-}else{
+clusterIndex.load(geoPoints);
 
-hex=createHex(lat,lon,radius,color,{opacity:0.85});
+drawClusters();
+
+});
 
 }
 
+function drawClusters(){
+
+polygonLayer.clearLayers();
+labelLayer.clearLayers();
+
+var bounds=map.getBounds();
+var zoom=map.getZoom();
+
+var clusters=clusterIndex.getClusters(
+[
+bounds.getWest(),
+bounds.getSouth(),
+bounds.getEast(),
+bounds.getNorth()
+],
+Math.round(zoom)
+);
+
+clusters.forEach(c=>{
+
+var lon=c.geometry.coordinates[0];
+var lat=c.geometry.coordinates[1];
+
+if(c.properties.cluster){
+
+var count=c.properties.point_count;
+
+var hex=createHex(lat,lon,getRadius()*1.3,"#666");
+
+hex.bindPopup("<b>"+count+" stations</b>");
+
+hex.addTo(polygonLayer);
+
+}else{
+
+var dose=c.properties.dose;
+var color=getColor(dose);
+
+var hex=createHex(lat,lon,getRadius(),color);
+
+var popup=
+"<b>"+c.properties.station+"</b><br>"+
+"Dose Rate: "+dose+" nSv/h<br>"+
+"Last Update: "+c.properties.time;
+
+hex.bindPopup(popup);
+
+hex.addTo(polygonLayer);
+
+}
+
+});
+
+}
+
+map.on("moveend zoomend",function(){
+if(clusterIndex) drawClusters();
+});
+  
 var displayDose=row["Gamma Dose Rate (nSv/h)"];
 var doseText="";
 
@@ -365,7 +442,8 @@ label.addTo(labelLayer);
 });
 
 }
-
+var clusterIndex = null;
+var geoPoints = [];
 loadCSV();
 setInterval(loadCSV,30000);
 map.on("zoomend",loadCSV);
@@ -544,6 +622,7 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
 
