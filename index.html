@@ -399,18 +399,18 @@ var hex;
 // OUT OF SERVICE
 if(dose==="Out of service"){
 
-hex=createHex(lat,lon,radius,"#9ecae1",{
-opacity:0.25,
-stroke:"#9ecae1",
+hex=createHex(lat,lon,radius,"#8fb9e3",{
+opacity:0.55,
+stroke:"#4a90c2",
 weight:1
 });
 
 // AGGREGATED GRID YANG MENGANDUNG OOS
 }else if(row.stations && row.stations.some(s=>s.dose==="Out of service")){
 
-hex=createHex(lat,lon,radius,"#9ecae1",{
-opacity:0.35,
-stroke:"#9ecae1",
+hex=createHex(lat,lon,radius,"#8fb9e3",{
+opacity:0.6,
+stroke:"#4a90c2",
 weight:1
 });
 
@@ -442,19 +442,18 @@ doseText=parseFloat(s.dose).toFixed(2)+" nSv/h";
 }
 
 listHTML+=
-"<div style='border-bottom:1px solid #ddd;padding:4px 0'>"+
+"<div style='border-bottom:1px solid #ddd;padding:6px 0'>"+
 "<b>"+s.name+"</b><br>"+
 "Dose: "+doseText+"<br>"+
-"Update: "+s.time+
+"Update: "+s.time+"<br>"+
+"<a href='#' onclick=\"openTS('"+s.name+"')\">View Time Series</a>"+
 "</div>";
 
 });
 
 listHTML+="</div>";
 
-popupContent=
-"<b>Stations in this grid ("+row.count+")</b><br><br>"+
-listHTML;
+popupContent=listHTML;
 
 }else{
 
@@ -672,6 +671,7 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
 
