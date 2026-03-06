@@ -380,21 +380,12 @@ var color;
 
 if(row.stations){
 
-var validValues=row.stations
-.map(s=>parseFloat(s.dose))
-.filter(v=>!isNaN(v));
+var hasOOS=row.stations.some(s=>s.dose==="Out of service");
 
-if(validValues.length>0){
-
-// ambil nilai maksimum supaya warna mengikuti yang paling tinggi
-var maxDose=Math.max(...validValues);
-color=getColor(maxDose);
-
+if(hasOOS){
+color="#2b83ba";
 }else{
-
-// jika semua OOS
-color="#8fb9e3";
-
+color=getColor(dose);
 }
 
 }else{
@@ -405,7 +396,31 @@ color=getColor(dose);
 
 var hex;
 
-// OUT OF SERVICE
+if(row.stations){
+
+// cek apakah semua OOS
+var valid=row.stations.some(s=>!isNaN(parseFloat(s.dose)));
+
+if(!valid){
+
+hex=createHex(lat,lon,radius,"#8fb9e3",{
+opacity:0.6,
+stroke:"#4a90c2",
+weight:1
+});
+
+}else{
+
+hex=createHex(lat,lon,radius,color,{
+opacity:0.85,
+stroke:"#222",
+weight:1
+});
+
+}
+
+}else{
+
 if(dose==="Out of service"){
 
 hex=createHex(lat,lon,radius,"#8fb9e3",{
@@ -413,6 +428,18 @@ opacity:0.55,
 stroke:"#4a90c2",
 weight:1
 });
+
+}else{
+
+hex=createHex(lat,lon,radius,color,{
+opacity:0.85,
+stroke:"#222",
+weight:1
+});
+
+}
+
+}
 
 // AGGREGATED GRID YANG MENGANDUNG OOS
 }else if(row.stations){
@@ -712,6 +739,7 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
 
