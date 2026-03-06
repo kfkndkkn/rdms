@@ -285,6 +285,75 @@ return "#ff2b2b";
 
 }
 
+// CLUSTERING
+function clusterStations(data){
+
+var zoom = map.getZoom();
+
+if(zoom > 7) return data; // zoom besar = tidak cluster
+
+var gridSize = 1.5; // derajat (atur sensitivity)
+
+var clusters = {};
+
+data.forEach(row=>{
+
+var lat=parseFloat(row["LATITUDE"]);
+var lon=parseFloat(row["LONGITUDE"]);
+
+if(isNaN(lat)||isNaN(lon)) return;
+
+var gx=Math.floor(lat/gridSize);
+var gy=Math.floor(lon/gridSize);
+
+var key=gx+"_"+gy;
+
+if(!clusters[key]){
+
+clusters[key]={
+lat:0,
+lon:0,
+count:0,
+stations:[],
+doseSum:0
+};
+
+}
+
+clusters[key].lat+=lat;
+clusters[key].lon+=lon;
+clusters[key].count++;
+
+var dose=parseFloat(row["Gamma Dose Rate (nSv/h)"]);
+
+if(!isNaN(dose)) clusters[key].doseSum+=dose;
+
+clusters[key].stations.push(row);
+
+});
+
+var result=[];
+
+Object.values(clusters).forEach(c=>{
+
+var lat=c.lat/c.count;
+var lon=c.lon/c.count;
+
+var avgDose=c.doseSum/c.count;
+
+result.push({
+LATITUDE:lat,
+LONGITUDE:lon,
+dose:avgDose,
+stations:c.stations,
+count:c.count
+});
+
+});
+
+return result;
+
+}  
 // LOAD CSV
 
 function loadCSV(){
@@ -297,10 +366,12 @@ polygonLayer.clearLayers();
 labelLayer.clearLayers();
 
 var radius=getRadius();
-var data=Papa.parse(text,{
+var raw=Papa.parse(text,{
 header:true,
 skipEmptyLines:true
 }).data;
+
+var data=clusterStations(raw);
 
 data.forEach(row=>{
 
@@ -336,14 +407,27 @@ doseText="Dose Rate: "+parseFloat(displayDose).toFixed(2)+" nSv/h";
 
 }
 
-var popupContent=
-"<b>"+row["NAMA UNIT"]+"</b><br>"+
-doseText+"<br>"+
-"Last Update: "+row["LAST UPDATE (WIB)"]+"<br><br>"+
-"<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">View Time Series</a>";
+var popupContent="";
 
-hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
-hex.addTo(polygonLayer);
+if(row.count>1){
+
+popupContent="<b>"+row.count+" Stations</b><br><br>";
+
+row.stations.forEach(s=>{
+
+popupContent+=
+s["NAMA UNIT"]+" : "+
+parseFloat(s["Gamma Dose Rate (nSv/h)"]).toFixed(2)+" nSv/h<br>";
+
+});
+
+}else{
+
+popupContent=
+"<b>"+row.stations[0]["NAMA UNIT"]+"</b><br>"+
+"Dose Rate: "+parseFloat(row.dose).toFixed(2)+" nSv/h";
+
+};
 
 // LABEL
 
@@ -544,6 +628,7 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
 
