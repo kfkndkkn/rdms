@@ -399,12 +399,10 @@ var hex;
 // ===== AGGREGATED GRID =====
 if(row.stations){
 
-// cek apakah ada data dose valid
 var valid=row.stations.some(s=>!isNaN(parseFloat(s.dose)));
 
 if(!valid){
 
-// semua Out of service
 hex=createHex(lat,lon,radius,"#8fb9e3",{
 opacity:0.6,
 stroke:"#4a90c2",
@@ -413,7 +411,6 @@ weight:1
 
 }else{
 
-// ada data valid → pakai warna dose
 hex=createHex(lat,lon,radius,color,{
 opacity:0.85,
 stroke:"#222",
@@ -422,7 +419,6 @@ weight:1
 
 }
 
-// ===== SINGLE STATION =====
 }else{
 
 if(dose==="Out of service"){
@@ -691,6 +687,7 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
 
