@@ -394,8 +394,26 @@ color=getColor(dose);
 
 }
 
-var hex=createHex(lat,lon,radius,color,{opacity:0.85});
+var hex;
 
+if(dose==="Out of service"){
+
+hex=createHex(lat,lon,radius,"#6aaed6",{
+opacity:0.25,
+stroke:"#4a90c2",
+weight:1
+});
+
+}else{
+
+hex=createHex(lat,lon,radius,color,{
+opacity:0.85,
+stroke:"#222",
+weight:1
+});
+
+}
+  
 var popupContent;
 
 if(row.count){
@@ -643,4 +661,5 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
