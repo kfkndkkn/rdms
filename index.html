@@ -438,34 +438,36 @@ updateChart(parseInt(this.value));
 
 function updateChart(index){
 
-var labels = allLabels;
-var values = allValues;
+var labels = allLabels.slice(0,index+1);
+var values = allValues.slice(0,index+1);
 
-var startTime=allLabels[0];
-var endTime=allLabels[index];
+var startTime = labels[0];
+var endTime = labels[labels.length-1];
 
-document.getElementById("selectedTime").innerHTML=
+document.getElementById("selectedTime").innerHTML =
 "Selected Time : "+startTime+" – "+endTime;
 
-var avg=values.reduce((a,b)=>a+b,0)/values.length;
-var min=Math.min(...values);
-var max=Math.max(...values);
+// hitung statistik hanya sampai slider
+var sum = values.reduce((a,b)=>a+b,0);
+var avg = sum / values.length;
+var min = Math.min(...values);
+var max = Math.max(...values);
 
-var ymin=min-(max-min)*0.2;
-var ymax=max+(max-min)*0.2;
+var ymin = min-(max-min)*0.2;
+var ymax = max+(max-min)*0.2;
 
 if(ymin<0) ymin=0;
 
 if(tsChart) tsChart.destroy();
 
-tsChart=new Chart(document.getElementById("tsChart"),{
+tsChart = new Chart(document.getElementById("tsChart"),{
 
 type:'line',
 
 data:{
-labels:labels,
+labels: allLabels,
 datasets:[{
-data:values,
+data: allValues,
 borderColor:'#2b83ba',
 backgroundColor:'rgba(43,131,186,0.15)',
 tension:0.25,
@@ -492,7 +494,7 @@ title:{display:true,text:"nSv/h"}
 
 });
 
-document.getElementById("tsStats").innerHTML=
+document.getElementById("tsStats").innerHTML =
 "<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
 "<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
 "<b>Max:</b> "+max.toFixed(2)+" nSv/h";
@@ -542,6 +544,7 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
 
