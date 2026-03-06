@@ -285,56 +285,6 @@ return "#ff2b2b";
 
 }
 
-function clusterStations(data){
-
-var zoom = map.getZoom();
-var threshold;
-
-if(zoom < 5) threshold = 2;
-else if(zoom < 6) threshold = 1;
-else threshold = 0;
-
-if(threshold === 0){
-return data.map(d => [d]);
-}
-
-var clusters = [];
-
-data.forEach(row => {
-
-var lat = parseFloat(row["LATITUDE"]);
-var lon = parseFloat(row["LONGITUDE"]);
-
-if(isNaN(lat) || isNaN(lon)) return;
-
-var added = false;
-
-clusters.forEach(c => {
-
-var dlat = lat - c[0].lat;
-var dlon = lon - c[0].lon;
-
-if(Math.sqrt(dlat*dlat + dlon*dlon) < threshold){
-
-c.push({data:row,lat:lat,lon:lon});
-added = true;
-
-}
-
-});
-
-if(!added){
-
-clusters.push([{data:row,lat:lat,lon:lon}]);
-
-}
-
-});
-
-return clusters;
-
-}
-  
 // LOAD CSV
 
 function loadCSV(){
@@ -352,55 +302,24 @@ header:true,
 skipEmptyLines:true
 }).data;
 
-var clusters = clusterStations(data);
+data.forEach(row=>{
 
-clusters.forEach(group=>{
+var lat=parseFloat(row["LATITUDE"]);
+var lon=parseFloat(row["LONGITUDE"]);
 
-var lat=0;
-var lon=0;
-
-group.forEach(g=>{
-lat+=g.lat;
-lon+=g.lon;
-});
-
-lat/=group.length;
-lon/=group.length;
-
-var row = group[0].data;
+if(isNaN(lat) || isNaN(lon)) return;
 var dose=row["Gamma Dose Rate (nSv/h)"];
 var color=getColor(dose);
 
-var hex=createHex(lat,lon,radius,color);
+var hex;
 
-var popup="";
+if(dose==="Out of service"){
 
-if(group.length===1){
-
-popup=
-"<b>"+row["NAMA UNIT"]+"</b><br>"+
-"Dose Rate: "+row["Gamma Dose Rate (nSv/h)"]+" nSv/h<br>"+
-"Last Update: "+row["LAST UPDATE (WIB)"]+"<br><br>"+
-"<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">View Time Series</a>";
+hex=createHex(lat,lon,radius,color,{opacity:0.35,stroke:"#004a8f",weight:2});
 
 }else{
 
-popup="<b>"+group.length+" Stations</b><br><br>";
-
-group.forEach(g=>{
-popup+=g.data["NAMA UNIT"]+"<br>";
-});
-
-popup+="<br><i>Zoom in for detail</i>";
-
-hex.on("click",function(){
-map.setView([lat,lon], map.getZoom()+2);
-});
-
-}
-
-hex.bindPopup(popup);
-hex.addTo(polygonLayer);
+hex=createHex(lat,lon,radius,color,{opacity:0.85});
 
 }
 
@@ -625,9 +544,6 @@ legend.addTo(map);
 
 </body>
 </html>
-
-
-
 
 
 
