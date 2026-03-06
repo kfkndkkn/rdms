@@ -285,6 +285,14 @@ return "#ff2b2b";
 
 }
 
+function getGridKey(lat,lon,size){
+
+var x=Math.floor(lon/size);
+var y=Math.floor(lat/size);
+
+return x+"_"+y;
+
+}  
 // LOAD CSV
 
 function loadCSV(){
@@ -297,10 +305,69 @@ polygonLayer.clearLayers();
 labelLayer.clearLayers();
 
 var radius=getRadius();
+var zoom=map.getZoom();
+
 var data=Papa.parse(text,{
 header:true,
 skipEmptyLines:true
 }).data;
+
+// ===== ZOOM OUT CLUSTER MODE =====
+
+if(zoom < 6){
+
+var grid={};
+var size=2;
+
+data.forEach(row=>{
+
+var lat=parseFloat(row["LATITUDE"]);
+var lon=parseFloat(row["LONGITUDE"]);
+var dose=parseFloat(row["Gamma Dose Rate (nSv/h)"]);
+
+if(isNaN(lat)||isNaN(lon)||isNaN(dose)) return;
+
+var key=getGridKey(lat,lon,size);
+
+if(!grid[key]){
+grid[key]={lat:lat,lon:lon,sum:0,count:0};
+}
+
+grid[key].sum+=dose;
+grid[key].count++;
+
+});
+
+Object.values(grid).forEach(g=>{
+
+var avg=g.sum/g.count;
+
+var color=getColor(avg);
+
+var hex=createHex(
+g.lat,
+g.lon,
+radius*2,
+color,
+{opacity:0.8}
+);
+
+hex.bindPopup(
+"<b>"+g.count+" Stations</b><br>"+
+"Average Dose: "+avg.toFixed(2)+" nSv/h"
+);
+
+hex.addTo(polygonLayer);
+
+});
+
+return;
+
+}
+
+
+// ⬇️ BAGIAN ASLI ANDA TETAP DI SINI
+data.forEach(row=>{  
 
 data.forEach(row=>{
 
@@ -544,6 +611,7 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
 
