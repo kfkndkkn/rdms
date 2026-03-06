@@ -290,9 +290,9 @@ function clusterStations(data){
 
 var zoom = map.getZoom();
 
-if(zoom > 7) return data; // zoom besar = tidak cluster
+if(zoom > 6) return data; // zoom besar = tidak cluster
 
-var gridSize = 1.5; // derajat (atur sensitivity)
+var gridSize = 0.8; // derajat (atur sensitivity)
 
 var clusters = {};
 
@@ -379,10 +379,17 @@ var lat=parseFloat(row["LATITUDE"]);
 var lon=parseFloat(row["LONGITUDE"]);
 
 if(isNaN(lat) || isNaN(lon)) return;
-var dose=row["Gamma Dose Rate (nSv/h)"];
+var dose;
+
+if(row.count && row.count>1){
+    dose=row.dose;   // cluster
+}else{
+    dose=row["Gamma Dose Rate (nSv/h)"]; // station normal
+}
+
 var color=getColor(dose);
 
-var hex;
+var hex=createHex(lat,lon,radius,color);
 
 if(dose==="Out of service"){
 
@@ -628,6 +635,7 @@ legend.addTo(map);
 
 </body>
 </html>
+
 
 
 
