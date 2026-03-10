@@ -417,6 +417,9 @@ CTBT Jayapura,2026-03-09 19:00,10.2
 CTBT Jayapura,2026-03-09 20:00,10.7
 CTBT Jayapura,2026-03-09 21:00,10.5
 CTBT Jayapura,2026-03-09 22:00,10.0
+CTBT Jayapura,2026-03-09 23:00,10.2
+CTBT Jayapura,2026-03-10 00:00,10.6
+CTBT Jayapura,2026-03-10 01:00,10.7
 CTBT Lembang,2026-02-20 13:00,39.74
 CTBT Lembang,2026-02-20 14:00,37.71
 CTBT Lembang,2026-02-20 15:00,39.5
@@ -835,6 +838,9 @@ CTBT Lembang,2026-03-09 19:00,38.12
 CTBT Lembang,2026-03-09 20:00,38.1
 CTBT Lembang,2026-03-09 21:00,37.88
 CTBT Lembang,2026-03-09 22:00,33.91
+CTBT Lembang,2026-03-09 23:00,36.97
+CTBT Lembang,2026-03-10 00:00,38.6
+CTBT Lembang,2026-03-10 01:00,38.48
 Istana Kepresidenan Bali,2026-02-20 13:00,15.7
 Istana Kepresidenan Bali,2026-02-20 14:00,15.8
 Istana Kepresidenan Bali,2026-02-20 15:00,15.8
@@ -1253,6 +1259,9 @@ Istana Kepresidenan Bali,2026-03-09 19:00,15.4
 Istana Kepresidenan Bali,2026-03-09 20:00,15.5
 Istana Kepresidenan Bali,2026-03-09 21:00,15.3
 Istana Kepresidenan Bali,2026-03-09 22:00,15.3
+Istana Kepresidenan Bali,2026-03-09 23:00,15.5
+Istana Kepresidenan Bali,2026-03-10 00:00,15.9
+Istana Kepresidenan Bali,2026-03-10 01:00,15.8
 Istana Kepresidenan Bogor,2026-02-21 12:00,38.9
 Istana Kepresidenan Bogor,2026-02-21 19:00,38.9
 Istana Kepresidenan Bogor,2026-02-22 12:00,40.3
@@ -1786,6 +1795,9 @@ Istana Kepresidenan Yogyakarta,2026-03-09 19:00,49.3
 Istana Kepresidenan Yogyakarta,2026-03-09 20:00,49.1
 Istana Kepresidenan Yogyakarta,2026-03-09 21:00,49.1
 Istana Kepresidenan Yogyakarta,2026-03-09 22:00,49.3
+Istana Kepresidenan Yogyakarta,2026-03-09 23:00,49.5
+Istana Kepresidenan Yogyakarta,2026-03-10 00:00,49.4
+Istana Kepresidenan Yogyakarta,2026-03-10 01:00,49.1
 KNS-1,2026-02-20 13:00,29.0
 KNS-1,2026-02-20 14:00,29.5
 KNS-1,2026-02-20 15:00,30.7
@@ -2511,6 +2523,9 @@ KNS-4,2026-03-09 19:00,38.0
 KNS-4,2026-03-09 20:00,37.7
 KNS-4,2026-03-09 21:00,38.3
 KNS-4,2026-03-09 22:00,38.4
+KNS-4,2026-03-09 23:00,38.6
+KNS-4,2026-03-10 00:00,39.0
+KNS-4,2026-03-10 01:00,38.9
 St.Geof.Kls.III Banjarnegara,2026-02-20 13:00,22.12
 St.Geof.Kls.III Banjarnegara,2026-02-20 14:00,21.91
 St.Geof.Kls.III Banjarnegara,2026-02-20 15:00,23.14
@@ -2929,6 +2944,9 @@ St.Geof.Kls.III Banjarnegara,2026-03-09 19:00,31.55
 St.Geof.Kls.III Banjarnegara,2026-03-09 20:00,28.36
 St.Geof.Kls.III Banjarnegara,2026-03-09 21:00,27.39
 St.Geof.Kls.III Banjarnegara,2026-03-09 22:00,25.21
+St.Geof.Kls.III Banjarnegara,2026-03-09 23:00,23.05
+St.Geof.Kls.III Banjarnegara,2026-03-10 00:00,23.14
+St.Geof.Kls.III Banjarnegara,2026-03-10 01:00,21.71
 St.Mteo.Kls I Pekanbaru,2026-02-20 13:00,27.7
 St.Mteo.Kls I Pekanbaru,2026-02-20 14:00,27.8
 St.Mteo.Kls I Pekanbaru,2026-02-20 15:00,28.0
@@ -3347,6 +3365,9 @@ St.Mteo.Kls I Pekanbaru,2026-03-09 19:00,28.3
 St.Mteo.Kls I Pekanbaru,2026-03-09 20:00,28.4
 St.Mteo.Kls I Pekanbaru,2026-03-09 21:00,28.6
 St.Mteo.Kls I Pekanbaru,2026-03-09 22:00,28.6
+St.Mteo.Kls I Pekanbaru,2026-03-09 23:00,28.4
+St.Mteo.Kls I Pekanbaru,2026-03-10 00:00,28.4
+St.Mteo.Kls I Pekanbaru,2026-03-10 01:00,29.1
 St.Mteo.Kls.I Gorontalo,2026-02-20 13:00,32.1
 St.Mteo.Kls.I Gorontalo,2026-02-20 14:00,31.7
 St.Mteo.Kls.I Gorontalo,2026-02-20 15:00,32.1
@@ -3765,6 +3786,9 @@ St.Mteo.Kls.I Gorontalo,2026-03-09 19:00,28.7
 St.Mteo.Kls.I Gorontalo,2026-03-09 20:00,28.4
 St.Mteo.Kls.I Gorontalo,2026-03-09 21:00,28.7
 St.Mteo.Kls.I Gorontalo,2026-03-09 22:00,28.8
+St.Mteo.Kls.I Gorontalo,2026-03-09 23:00,28.4
+St.Mteo.Kls.I Gorontalo,2026-03-10 00:00,28.8
+St.Mteo.Kls.I Gorontalo,2026-03-10 01:00,29.2
 St.Mteo.Kls.III Bengkulu,2026-02-20 13:00,38.8
 St.Mteo.Kls.III Bengkulu,2026-02-20 14:00,38.0
 St.Mteo.Kls.III Bengkulu,2026-02-20 15:00,38.6
@@ -4183,6 +4207,9 @@ St.Mteo.Kls.III Bengkulu,2026-03-09 19:00,38.2
 St.Mteo.Kls.III Bengkulu,2026-03-09 20:00,38.1
 St.Mteo.Kls.III Bengkulu,2026-03-09 21:00,38.6
 St.Mteo.Kls.III Bengkulu,2026-03-09 22:00,38.2
+St.Mteo.Kls.III Bengkulu,2026-03-09 23:00,38.7
+St.Mteo.Kls.III Bengkulu,2026-03-10 00:00,39.1
+St.Mteo.Kls.III Bengkulu,2026-03-10 01:00,39.4
 St.Mteo.Kls.III Cilacap,2026-02-20 13:00,19.9
 St.Mteo.Kls.III Cilacap,2026-02-20 14:00,20.4
 St.Mteo.Kls.III Cilacap,2026-02-20 15:00,21.7
@@ -4597,6 +4624,9 @@ St.Mteo.Kls.III Cilacap,2026-03-09 19:00,20.8
 St.Mteo.Kls.III Cilacap,2026-03-09 20:00,20.5
 St.Mteo.Kls.III Cilacap,2026-03-09 21:00,20.5
 St.Mteo.Kls.III Cilacap,2026-03-09 22:00,20.3
+St.Mteo.Kls.III Cilacap,2026-03-09 23:00,20.5
+St.Mteo.Kls.III Cilacap,2026-03-10 00:00,20.6
+St.Mteo.Kls.III Cilacap,2026-03-10 01:00,20.3
 St.Mteo.Kls.III Sintang,2026-02-20 13:00,23.8
 St.Mteo.Kls.III Sintang,2026-02-20 14:00,24.1
 St.Mteo.Kls.III Sintang,2026-02-20 15:00,23.4
@@ -5012,6 +5042,9 @@ St.Mteo.Kls.III Sintang,2026-03-09 19:00,24.8
 St.Mteo.Kls.III Sintang,2026-03-09 20:00,24.2
 St.Mteo.Kls.III Sintang,2026-03-09 21:00,24.5
 St.Mteo.Kls.III Sintang,2026-03-09 22:00,24.8
+St.Mteo.Kls.III Sintang,2026-03-09 23:00,24.3
+St.Mteo.Kls.III Sintang,2026-03-10 00:00,24.5
+St.Mteo.Kls.III Sintang,2026-03-10 01:00,25.1
 St.Mteo.Kls.III Tana Toraja,2026-02-20 13:00,58.2
 St.Mteo.Kls.III Tana Toraja,2026-02-20 14:00,58.2
 St.Mteo.Kls.III Tana Toraja,2026-02-20 15:00,57.2
@@ -5430,6 +5463,9 @@ St.Mteo.Kls.III Tana Toraja,2026-03-09 19:00,58.7
 St.Mteo.Kls.III Tana Toraja,2026-03-09 20:00,58.2
 St.Mteo.Kls.III Tana Toraja,2026-03-09 21:00,58.3
 St.Mteo.Kls.III Tana Toraja,2026-03-09 22:00,58.8
+St.Mteo.Kls.III Tana Toraja,2026-03-09 23:00,58.9
+St.Mteo.Kls.III Tana Toraja,2026-03-10 00:00,58.2
+St.Mteo.Kls.III Tana Toraja,2026-03-10 01:00,58.6
 St.Mteo.Kls.III Tanjung Pinang,2026-02-20 13:00,61.5
 St.Mteo.Kls.III Tanjung Pinang,2026-02-20 14:00,61.3
 St.Mteo.Kls.III Tanjung Pinang,2026-02-20 15:00,61.5
@@ -5848,6 +5884,9 @@ St.Mteo.Kls.III Tanjung Pinang,2026-03-09 19:00,62.9
 St.Mteo.Kls.III Tanjung Pinang,2026-03-09 20:00,63.0
 St.Mteo.Kls.III Tanjung Pinang,2026-03-09 21:00,63.4
 St.Mteo.Kls.III Tanjung Pinang,2026-03-09 22:00,62.8
+St.Mteo.Kls.III Tanjung Pinang,2026-03-09 23:00,63.8
+St.Mteo.Kls.III Tanjung Pinang,2026-03-10 00:00,63.8
+St.Mteo.Kls.III Tanjung Pinang,2026-03-10 01:00,62.9
 St.Mteo.Kls.III Tapanuli Tengah,2026-02-20 13:00,24.9
 St.Mteo.Kls.III Tapanuli Tengah,2026-02-20 14:00,25.3
 St.Mteo.Kls.III Tapanuli Tengah,2026-02-20 15:00,25.6
@@ -6266,6 +6305,9 @@ St.Mteo.Kls.III Tapanuli Tengah,2026-03-09 19:00,29.4
 St.Mteo.Kls.III Tapanuli Tengah,2026-03-09 20:00,26.2
 St.Mteo.Kls.III Tapanuli Tengah,2026-03-09 21:00,24.7
 St.Mteo.Kls.III Tapanuli Tengah,2026-03-09 22:00,25.2
+St.Mteo.Kls.III Tapanuli Tengah,2026-03-09 23:00,25.6
+St.Mteo.Kls.III Tapanuli Tengah,2026-03-10 00:00,25.0
+St.Mteo.Kls.III Tapanuli Tengah,2026-03-10 01:00,25.1
 BRIN KSE Achmad Baiquni Yogyakarta,03/03/2026 01:00,46.61
 BRIN KSE Achmad Baiquni Yogyakarta,03/03/2026 02:00,46.52
 BRIN KSE Achmad Baiquni Yogyakarta,03/03/2026 03:00,46.76
