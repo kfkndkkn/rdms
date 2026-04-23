@@ -19,12 +19,13 @@ stationProfile[row.station_name.trim().toLowerCase()] = row;
 
 console.log("PROFILE LOADED");
 
-// 🔥 PANGGIL DI SINI (bukan di luar)
-loadProfile();
+// ✅ jalankan map setelah profile siap
+loadCSV();
+setInterval(loadCSV,30000);
 
 });
 
-}
+} // ✅ INI YANG KAMU KURANGIN
 
 </script>
 
@@ -578,8 +579,7 @@ label.addTo(labelLayer);
 }
 
 loadProfile();
-loadCSV();
-setInterval(loadCSV,30000);
+
 map.on("zoomend",loadCSV);
 
 // TIME SERIES
