@@ -1,3 +1,29 @@
+<script>
+
+// ===== PROFILE DATA =====
+var stationProfile = {};
+
+function loadProfile(){
+fetch("https://raw.githubusercontent.com/kfkndkkn/rdms/main/profile.csv?nocache="+Date.now())
+.then(r=>r.text())
+.then(text=>{
+var data=Papa.parse(text,{header:true}).data;
+
+data.forEach(row=>{
+if(row.station_name){
+stationProfile[row.station_name.trim().toLowerCase()] = row;
+}
+});
+});
+}
+
+function copyCoord(txt){
+navigator.clipboard.writeText(txt);
+alert("Copied: "+txt);
+}
+
+</script>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -153,6 +179,7 @@ font-size:14px;
 </div>
 
 <div id="tsContent">
+<div id="tsStationInfo" style="margin-bottom:15px;"></div>
 <canvas id="tsChart" height="120"></canvas>
 <input type="range" id="timeSlider">
 <div id="selectedTime"></div>
@@ -443,6 +470,36 @@ weight:1
   
 var popupContent;
 
+// ===== PROFILE MATCH =====
+var key = row["NAMA UNIT"].trim().toLowerCase();
+var p = stationProfile[key];
+
+var extraHTML = "";
+
+if(p){
+
+var statusColor = p.status === "online" ? "green" : "black";
+
+extraHTML = `
+<img src="${p.image_url}" 
+style="width:100%;height:140px;object-fit:cover;border-radius:6px;margin-bottom:6px;">
+
+<div style="font-size:12px">
+<b>Address:</b> ${p.address}<br>
+<b>Province:</b> ${p.province}<br>
+
+<b>Coordinate:</b><br>
+${p.latitude}, ${p.longitude}
+<button onclick="copyCoord('${p.latitude},${p.longitude}')" style="font-size:10px;margin-left:5px">Copy</button><br>
+
+<b>Status:</b> 
+<span style="color:${statusColor};font-weight:bold">
+${p.status}
+</span>
+</div><br>
+`;
+}  
+
 if(row.count){
 
 var listHTML="<div style='max-height:180px;overflow-y:auto'>";
@@ -483,7 +540,7 @@ doseText="Dose Rate: "+parseFloat(displayDose).toFixed(2)+" nSv/h";
 }
 
 popupContent=
-"<b>"+row["NAMA UNIT"]+"</b><br>"+
+"<b>"+row["NAMA UNIT"]+"</b><br><br>"+extraHTML+
 doseText+"<br>"+
 "Last Update: "+row["LAST UPDATE (WIB)"]+"<br><br>"+
 "<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">View Time Series</a>";
@@ -516,6 +573,7 @@ label.addTo(labelLayer);
 
 }
 
+loadProfile();
 loadCSV();
 setInterval(loadCSV,30000);
 map.on("zoomend",loadCSV);
@@ -530,6 +588,35 @@ function openTS(station){
 
 document.getElementById("tsModal").style.display="block";
 document.getElementById("tsTitle").innerHTML="Time Series - "+station;
+// ===== PROFILE DI MODAL =====
+var key = station.trim().toLowerCase();
+var p = stationProfile[key];
+
+if(p){
+
+var statusColor = p.status === "online" ? "green" : "black";
+
+document.getElementById("tsStationInfo").innerHTML = `
+<img src="${p.image_url}" 
+style="width:100%;max-height:200px;object-fit:cover;border-radius:6px;margin-bottom:10px;">
+
+<div style="font-size:13px">
+<b>${station}</b><br>
+${p.address}<br>
+${p.province}<br>
+
+${p.latitude}, ${p.longitude}<br>
+
+<b>Status:</b> 
+<span style="color:${statusColor};font-weight:bold">
+${p.status}
+</span>
+</div>
+`;
+
+}else{
+document.getElementById("tsStationInfo").innerHTML="";
+}
 
 allLabels=[];
 allValues=[];
