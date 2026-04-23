@@ -4,9 +4,11 @@
 var stationProfile = {};
 
 function loadProfile(){
+
 fetch("https://raw.githubusercontent.com/kfkndkkn/rdms/main/profile.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
+
 var data=Papa.parse(text,{header:true}).data;
 
 data.forEach(row=>{
@@ -14,12 +16,14 @@ if(row.station_name){
 stationProfile[row.station_name.trim().toLowerCase()] = row;
 }
 });
-});
-}
 
-function copyCoord(txt){
-navigator.clipboard.writeText(txt);
-alert("Copied: "+txt);
+console.log("PROFILE LOADED");
+
+// 🔥 PANGGIL DI SINI (bukan di luar)
+loadProfile();
+
+});
+
 }
 
 </script>
