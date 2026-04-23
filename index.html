@@ -3,52 +3,172 @@
 <head>
 <meta charset="utf-8">
 
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
 <title>Indonesia Radiation Data Monitoring System</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-html,body{margin:0;padding:0;font-family:Arial;}
 
-#header{
-position:absolute;top:0;left:0;width:100%;height:70px;
-background:#0b1e3f;color:white;display:flex;align-items:center;padding:0 20px;z-index:9999;
+html,body{
+margin:0;
+padding:0;
+font-family:Arial;
 }
 
-#map{position:absolute;top:70px;bottom:0;width:100%;}
+#header{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:70px;
+background:#0b1e3f;
+display:flex;
+align-items:center;
+padding:0 25px;
+color:white;
+z-index:9999;
+}
+
+#header img{
+height:42px;
+margin-right:15px;
+}
+
+#map{
+position:absolute;
+top:70px;
+bottom:0;
+width:100%;
+}
 
 .unit-label{
-background:white;padding:3px 6px;border-radius:5px;font-size:11px;
+background:rgba(255,255,255,0.85);
+border-radius:6px;
+padding:3px 6px;
+font-size:11px;
+font-weight:bold;
+color:#111;
+border:1px solid rgba(0,0,0,0.25);
+box-shadow:0 1px 3px rgba(0,0,0,0.3);
+white-space:nowrap;
 }
 
 .legend{
-background:white;padding:10px;font-size:12px;
+background:white;
+padding:12px;
+font-size:12px;
 box-shadow:0 2px 6px rgba(0,0,0,0.3);
 }
+
+.leaflet-popup-content{
+font-size:14px;
+}
+
+#tsModal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.6);
+z-index:99999;
+}
+
+#tsBox{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:white;
+width:90%;
+max-width:900px;
+border-radius:10px;
+overflow:hidden;
+}
+
+#tsHeader{
+background:#0b1e3f;
+color:white;
+padding:12px 16px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+font-weight:bold;
+}
+
+#tsContent{
+padding:20px;
+}
+
+#timeSlider{
+width:100%;
+margin-top:10px;
+}
+
+#selectedTime{
+margin-top:6px;
+font-size:12px;
+color:#444;
+}
+
+#tsStats{
+margin-top:10px;
+font-size:14px;
+}
+
 </style>
 </head>
 
 <body>
 
 <div id="header">
+<img src="logo/logo-bapeten.png">
 <h2>Indonesia Radiation Data Monitoring System</h2>
 </div>
 
 <div id="map"></div>
+
+<div id="tsModal">
+<div id="tsBox">
+
+<div id="tsHeader">
+<div id="tsTitle">Time Series</div>
+<button onclick="closeTS()" style="background:#c00;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer">Close</button>
+</div>
+
+<div id="tsContent">
+<div id="tsStationInfo" style="margin-bottom:15px;"></div>
+<canvas id="tsChart" height="120"></canvas>
+<input type="range" id="timeSlider">
+<div id="selectedTime"></div>
+<div id="tsStats"></div>
+</div>
+
+</div>
+</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
 // ================= PROFILE =================
-var stationProfile={};
+
+var stationProfile = {};
 
 function loadProfile(){
-fetch("https://raw.githubusercontent.com/kfkndkkn/rdms/main/profile.csv")
+
+fetch("https://raw.githubusercontent.com/kfkndkkn/rdms/main/profile.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
+
 var data=Papa.parse(text,{header:true}).data;
 
 data.forEach(row=>{
@@ -57,31 +177,65 @@ stationProfile[row.station_name.trim().toLowerCase()] = row;
 }
 });
 
-console.log("PROFILE READY");
+console.log("PROFILE LOADED");
+
+// start system AFTER profile ready
 loadCSV();
 setInterval(loadCSV,30000);
 
+})
+.catch(err=>{
+console.log("PROFILE ERROR",err);
+loadCSV();
+setInterval(loadCSV,30000);
 });
+
+}
+
+function copyCoord(c){
+navigator.clipboard.writeText(c);
+alert("Copied: "+c);
 }
 
 // ================= MAP =================
-var map=L.map('map').setView([-2,118],5);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+var osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+
+var map=L.map('map',{
+zoomControl:true,
+layers:[osm],
+zoomSnap:0.25,
+zoomDelta:0.25
+});
+
+map.fitBounds([[-11,94],[6,141]]);
 
 var polygonLayer=L.layerGroup().addTo(map);
+var labelLayer=L.layerGroup();
 
-// ================= HEXAGON =================
-function createHex(lat,lon,r,color){
+// ================= HEX =================
+
+function getRadius(){
+var zoom=map.getZoom();
+var base=40000;
+return Math.max(base/Math.pow(2,zoom-5),80);
+}
+
+function createHex(lat,lon,radius,color){
 
 var coords=[];
 
 for(var i=0;i<6;i++){
+
 var angle=(Math.PI/180)*(60*i);
+var dx=radius*Math.cos(angle);
+var dy=radius*Math.sin(angle);
+
 coords.push([
-lat+(r*Math.sin(angle)/111111),
-lon+(r*Math.cos(angle)/(111111*Math.cos(lat*Math.PI/180)))
+lat+(dy/111111),
+lon+(dx/(111111*Math.cos(lat*Math.PI/180)))
 ]);
+
 }
 
 return L.polygon(coords,{
@@ -90,53 +244,28 @@ weight:1,
 fillColor:color,
 fillOpacity:0.85
 });
+
 }
 
 // ================= COLOR =================
+
 function getColor(d){
+
+if(!d || d==="Out of service") return "#2b83ba";
+
 d=parseFloat(d);
+
 if(isNaN(d)) return "#2b83ba";
+
 if(d<1000) return "#2b83ba";
 if(d<100000) return "#ffe600";
 if(d<1000000) return "#ff9b00";
 return "#ff2b2b";
-}
-
-// ================= AGGREGATE =================
-function aggregate(data){
-
-var grid={};
-
-data.forEach(r=>{
-var lat=parseFloat(r["LATITUDE"]);
-var lon=parseFloat(r["LONGITUDE"]);
-var dose=parseFloat(r["Gamma Dose Rate (nSv/h)"]);
-
-if(isNaN(lat)||isNaN(lon)) return;
-
-var key=Math.floor(lat)+"_"+Math.floor(lon);
-
-if(!grid[key]){
-grid[key]={lat:0,lon:0,sum:0,count:0,rows:[]};
-}
-
-grid[key].lat+=lat;
-grid[key].lon+=lon;
-grid[key].sum+=dose||0;
-grid[key].count++;
-grid[key].rows.push(r);
-});
-
-return Object.values(grid).map(g=>({
-lat:g.lat/g.count,
-lon:g.lon/g.count,
-dose:g.sum/g.count,
-rows:g.rows
-}));
 
 }
 
 // ================= LOAD CSV =================
+
 function loadCSV(){
 
 fetch("output.csv?nocache="+Date.now())
@@ -144,77 +273,91 @@ fetch("output.csv?nocache="+Date.now())
 .then(text=>{
 
 polygonLayer.clearLayers();
+labelLayer.clearLayers();
 
-var raw=Papa.parse(text,{header:true}).data;
+var rawData=Papa.parse(text,{header:true}).data;
 
-var data = map.getZoom()<6 ? aggregate(raw) : raw;
+rawData.forEach(row=>{
 
-data.forEach(row=>{
-
-var lat=row.lat || parseFloat(row["LATITUDE"]);
-var lon=row.lon || parseFloat(row["LONGITUDE"]);
-var dose=row.dose || row["Gamma Dose Rate (nSv/h)"];
+var lat=parseFloat(row["LATITUDE"]);
+var lon=parseFloat(row["LONGITUDE"]);
+var dose=row["Gamma Dose Rate (nSv/h)"];
 
 if(isNaN(lat)||isNaN(lon)) return;
 
 var color=getColor(dose);
 
-var hex=createHex(lat,lon,40000,color);
+var hex=createHex(lat,lon,getRadius(),color);
 
 // ===== PROFILE =====
-var key = row["NAMA UNIT"] ? row["NAMA UNIT"].trim().toLowerCase() : "";
-var p = stationProfile[key];
+var key=row["NAMA UNIT"] ? row["NAMA UNIT"].trim().toLowerCase() : "";
+var p=stationProfile[key];
 
 var extra="";
 
 if(p){
 
 var img="";
+
 if(p.image_url && p.image_url.startsWith("http")){
-img=`<img src="${p.image_url}" style="width:100%;height:120px;object-fit:cover" onerror="this.style.display='none'">`;
+img=`<img src="${p.image_url}" style="width:100%;height:140px;object-fit:cover;margin-bottom:6px;" onerror="this.style.display='none'">`;
 }
 
 extra=`
 ${img}
-${p.address||""}<br>
-${p.province||""}<br>
-Status: ${p.status||""}<br><br>
+<b>${p.address||"-"}</b><br>
+${p.province||"-"}<br>
+${p.latitude}, ${p.longitude}<br>
+<button onclick="copyCoord('${p.latitude},${p.longitude}')">Copy</button><br>
+Status: ${p.status}
+<br><br>
 `;
 }
 
-// ===== POPUP =====
-var popup="<b>"+(row["NAMA UNIT"]||"Cluster")+"</b><br><br>"+
+hex.bindPopup(
+"<b>"+row["NAMA UNIT"]+"</b><br><br>"+
 extra+
-"Dose: "+dose+" nSv/h";
+"Dose: "+dose+"<br>"+
+"Update: "+row["LAST UPDATE (WIB)"]+"<br>"+
+"<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">Time Series</a>"
+);
 
-hex.bindPopup(popup).addTo(polygonLayer);
+hex.addTo(polygonLayer);
 
 });
 
 });
+
 }
 
-// ================= LEGEND =================
-var legend=L.control({position:"bottomleft"});
+// ================= TIME SERIES =================
 
-legend.onAdd=function(){
+function openTS(station){
 
-var div=L.DomUtil.create("div","legend");
+document.getElementById("tsModal").style.display="block";
+document.getElementById("tsTitle").innerHTML=station;
 
-div.innerHTML=`
-<b>Dose Level</b><br>
-<div style="background:#2b83ba;width:20px;height:10px;display:inline-block"></div> Low<br>
-<div style="background:#ffe600;width:20px;height:10px;display:inline-block"></div> Medium<br>
-<div style="background:#ff9b00;width:20px;height:10px;display:inline-block"></div> High<br>
-<div style="background:#ff2b2b;width:20px;height:10px;display:inline-block"></div> Extreme
-`;
+// PROFILE MODAL
+var key=station.toLowerCase();
+var p=stationProfile[key];
 
-return div;
-};
+if(p){
 
-legend.addTo(map);
+document.getElementById("tsStationInfo").innerHTML=
+"<b>"+station+"</b><br>"+p.address;
 
-// ================= START =================
+}else{
+document.getElementById("tsStationInfo").innerHTML="";
+}
+
+}
+
+function closeTS(){
+document.getElementById("tsModal").style.display="none";
+}
+
+// ================= INIT =================
+
 window.onload=function(){
 loadProfile();
 };
