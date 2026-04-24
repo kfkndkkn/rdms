@@ -625,14 +625,17 @@ var img = document.getElementById("tsImage");
 var url = profileData?.["IMAGE_URL"];
 
 if(url){
-url = url.trim();   // WAJIB
+url = url.trim();
 img.src = url;
-}
+
 img.onerror = function(){
 this.src = "https://via.placeholder.com/250x150?text=Image+Error";
 };
+
 }else{
+
 img.src = "https://via.placeholder.com/250x150?text=No+Image";
+
 }
 
 // STATUS
