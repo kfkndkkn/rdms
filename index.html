@@ -153,14 +153,28 @@ font-size:14px;
 <button onclick="closeTS()" style="background:#c00;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer">Close</button>
 </div>
 
-<div id="tsContent">
+<div id="tsContent" style="display:flex;gap:20px">
+
+<!-- LEFT -->
+<div style="width:260px">
+
+<img id="tsImage" src="" 
+style="width:100%;border-radius:8px;margin-bottom:10px">
+
+<div id="tsMeta" style="font-size:13px;line-height:1.5"></div>
+
+</div>
+
+<!-- RIGHT -->
+<div style="flex:1">
+
 <canvas id="tsChart" height="120"></canvas>
 <input type="range" id="timeSlider">
 <div id="selectedTime"></div>
 <div id="tsStats"></div>
-</div>
 
 </div>
+
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -182,7 +196,10 @@ window.profileIndex = {};
 // dll
 
 loadProfile();
+
+setTimeout(()=>{
 loadCSV();
+},300);
 function loadProfile(){
 
 fetch("profile.csv?nocache="+Date.now())
@@ -629,7 +646,7 @@ var data=Papa.parse(text,{header:true}).data;
 
 data.forEach(r=>{
 
-if(r.station===station){
+if(normalizeName(r.station) === normalizeName(station)){
 
 var v=parseFloat(r.dose);
 
