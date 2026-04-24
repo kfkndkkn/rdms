@@ -184,13 +184,29 @@ flex-direction:column;
 }
 
 /* CHART FLEX FULL */
-#tsChart{
-height:260px !important;   /* 🔥 sweet spot */
-max-height:260px;
-}
 
 #tsContent{
-align-items:flex-start; /* 🔥 jangan stretch penuh */
+display:flex;
+gap:20px;
+align-items:stretch; /* 🔥 wajib */
+min-height:420px;
+}
+
+#tsContent > div:first-child{
+width:260px;
+display:flex;
+flex-direction:column;
+}
+
+#tsContent > div:last-child{
+flex:1;
+display:flex;
+flex-direction:column;
+}
+
+#tsChart{
+width:100% !important;
+height:100% !important;
 }
   
 </style>
@@ -226,10 +242,8 @@ style="width:100%;border-radius:8px;margin-bottom:10px">
 </div>
 
 <!-- RIGHT -->
-<div style="flex:1;display:flex;flex-direction:column">
-
-<div style="flex:1;position:relative;display:flex;flex-direction:column">
-  <canvas id="tsChart" style="flex:1;"></canvas>
+<div style="flex:1;position:relative">
+  <canvas id="tsChart"></canvas>
 </div>
 <input type="range" id="timeSlider">
 <div id="selectedTime"></div>
