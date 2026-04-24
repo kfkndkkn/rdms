@@ -225,7 +225,7 @@ console.log("PROFILE CSV:", data);
 window.profileIndex = {};
 
 data.forEach(r=>{
-var key = normalizeName(r["NAMA UNIT"]);
+var key = normalizeName(r["station"]);
 window.profileIndex[key] = r;
 });
 
