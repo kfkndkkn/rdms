@@ -90,7 +90,36 @@ height:100%;
 background:rgba(0,0,0,0.6);
 z-index:99999;
 }
+/* ===== PATCH AGAR PROPORSIONAL TANPA UBAH LAYOUT ===== */
 
+#tsBox{
+max-height:80vh;
+overflow:hidden;
+}
+
+#tsContent{
+max-height:calc(80vh - 60px);
+overflow:hidden;
+}
+
+#tsContent > div:first-child{
+overflow-y:auto;
+}
+
+#tsImage{
+height:160px;
+object-fit:cover;
+}
+
+#tsChart{
+height:220px !important;
+max-height:220px;
+}
+
+#tsContent > div:last-child{
+min-width:0;
+}
+  
 #tsBox{
 position:absolute;
 top:50%;
@@ -132,47 +161,6 @@ color:#444;
 margin-top:10px;
 font-size:14px;
 }
-
-/* LAYOUT TS MODAL */
-#tsContent{
-display:flex;
-gap:20px;
-align-items:stretch;
-}
-
-/* LEFT PANEL */
-#tsContent > div:first-child{
-width:260px;
-display:flex;
-flex-direction:column;
-}
-
-/* IMAGE */
-#tsImage{
-width:100%;
-height:180px;
-object-fit:cover;   /* 🔥 ini penting biar proporsional */
-border-radius:10px;
-}
-
-/* META TEXT */
-#tsMeta{
-font-size:13px;
-line-height:1.6;
-margin-top:10px;
-}
-
-/* RIGHT PANEL (CHART) */
-#tsContent > div:last-child{
-flex:1;
-display:flex;
-flex-direction:column;
-}
-
-/* CHART HEIGHT */
-#tsChart{
-height:260px !important;
-}
 /* STATUS KHUSUS TS MODAL */
 #tsModal .status-online{
 color:#00b050;
@@ -204,7 +192,7 @@ font-weight:bold;
 <button onclick="closeTS()" style="background:#c00;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer">Close</button>
 </div>
 
-<div id="tsContent" style="display:flex;gap:20px">
+<div id="tsContent">
 
 <!-- LEFT -->
 <div style="width:260px">
@@ -791,6 +779,7 @@ fill:true
 
 options:{
 responsive:true,
+maintainAspectRatio:false, // ← TAMBAH DI SINI
 plugins:{legend:{display:false}},
 scales:{
 x:{min:0,max:index},
