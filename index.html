@@ -604,6 +604,12 @@ var key = normalizeName(station);
 
 var stationData = window.stationIndex[key];
 var profileData = window.profileIndex[key];
+
+// 🔥 TAMBAHKAN DEBUG DI SINI
+console.log("STATION:", station);
+console.log("KEY:", key);
+console.log("PROFILE INDEX:", window.profileIndex);
+console.log("PROFILE DATA:", profileData);
   
 document.getElementById("tsModal").style.display="block";
 document.getElementById("tsTitle").innerHTML="Time Series - "+station;
