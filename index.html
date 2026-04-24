@@ -143,7 +143,8 @@ color:#000;
 font-weight:bold;
 }
 #tsContent{
-height:420px; /* 🔥 ini bikin kiri-kanan pasti sama */
+min-height:420px;
+align-items:stretch;
 }
 
 #tsChart{
@@ -151,6 +152,15 @@ width:100% !important;
 height:100% !important;
 }
 
+
+#tsContent > div:last-child{
+display:flex;
+flex-direction:column;
+}
+
+#tsContent > div:first-child{
+overflow-y:auto;
+}
 /* ===== SAMAKAN TINGGI KIRI & KANAN ===== */
 
 #tsContent{
@@ -218,8 +228,8 @@ style="width:100%;border-radius:8px;margin-bottom:10px">
 <!-- RIGHT -->
 <div style="flex:1;display:flex;flex-direction:column">
 
-<div style="flex:1;position:relative">
-  <canvas id="tsChart"></canvas>
+<div style="flex:1;position:relative;display:flex;flex-direction:column">
+  <canvas id="tsChart" style="flex:1;"></canvas>
 </div>
 <input type="range" id="timeSlider">
 <div id="selectedTime"></div>
