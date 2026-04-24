@@ -11,7 +11,7 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>#tsChart{
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -184,13 +184,44 @@ flex-direction:column;
 }
 
 /* CHART FLEX FULL */
-#tsChart{
-height:260px !important;   /* 🔥 sweet spot */
-max-height:260px;
+#tsContent{
+display:flex;
+gap:20px;
+align-items:stretch;
+min-height:420px;
 }
 
-#tsContent{
-align-items:flex-start; /* 🔥 jangan stretch penuh */
+/* LEFT */
+#tsContent > div:first-child{
+width:260px;
+display:flex;
+flex-direction:column;
+}
+
+/* RIGHT */
+#tsContent > div:last-child{
+flex:1;
+display:flex;
+flex-direction:column;
+}
+
+/* CHART AREA */
+#tsContent > div:last-child > div:first-child{
+flex:3;   /* 🔥 chart ambil porsi besar */
+position:relative;
+}
+
+/* SLIDER + INFO */
+#timeSlider,
+#selectedTime,
+#tsStats{
+flex-shrink:0;
+}
+
+/* CANVAS FULL */
+#tsChart{
+width:100% !important;
+height:100% !important;
 }
   
 </style>
@@ -228,12 +259,13 @@ style="width:100%;border-radius:8px;margin-bottom:10px">
 <!-- RIGHT -->
 <div style="flex:1;display:flex;flex-direction:column">
 
-<div style="flex:1;position:relative;display:flex;flex-direction:column">
-  <canvas id="tsChart" style="flex:1;"></canvas>
-</div>
-<input type="range" id="timeSlider">
-<div id="selectedTime"></div>
-<div id="tsStats"></div>
+  <div style="flex:3;position:relative">
+    <canvas id="tsChart"></canvas>
+  </div>
+
+  <input type="range" id="timeSlider">
+  <div id="selectedTime"></div>
+  <div id="tsStats"></div>
 
 </div>
 
