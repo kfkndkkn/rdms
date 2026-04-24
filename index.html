@@ -90,36 +90,7 @@ height:100%;
 background:rgba(0,0,0,0.6);
 z-index:99999;
 }
-/* ===== PATCH AGAR PROPORSIONAL TANPA UBAH LAYOUT ===== */
 
-#tsBox{
-max-height:80vh;
-overflow:hidden;
-}
-
-#tsContent{
-max-height:calc(80vh - 60px);
-overflow:hidden;
-}
-
-#tsContent > div:first-child{
-overflow-y:auto;
-}
-
-#tsImage{
-height:160px;
-object-fit:cover;
-}
-
-#tsChart{
-height:220px !important;
-max-height:220px;
-}
-
-#tsContent > div:last-child{
-min-width:0;
-}
-  
 #tsBox{
 position:absolute;
 top:50%;
@@ -171,44 +142,7 @@ font-weight:bold;
 color:#000;
 font-weight:bold;
 }
-/* ===== CARD STYLE MODAL ===== */
-
-#tsBox{
-box-shadow:0 10px 30px rgba(0,0,0,0.35);
-border-radius:14px;
-}
-
-#tsHeader{
-box-shadow:0 2px 6px rgba(0,0,0,0.2);
-}
-
-#tsContent > div:first-child{
-background:#f7f9fc;
-padding:10px;
-border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,0.1);
-}
-
-#tsImage{
-box-shadow:0 4px 10px rgba(0,0,0,0.25);
-}
-
-#tsContent > div:last-child{
-background:white;
-border-radius:10px;
-padding:10px;
-}
-
-#tsChart{
-background:#ffffff;
-border-radius:8px;
-}
-
-#tsStats{
-margin-top:12px;
-padding-top:8px;
-border-top:1px solid #ddd;
-}  
+  
 </style>
 </head>
 
@@ -229,7 +163,7 @@ border-top:1px solid #ddd;
 <button onclick="closeTS()" style="background:#c00;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer">Close</button>
 </div>
 
-<div id="tsContent">
+<div id="tsContent" style="display:flex;gap:20px">
 
 <!-- LEFT -->
 <div style="width:260px">
@@ -816,7 +750,6 @@ fill:true
 
 options:{
 responsive:true,
-maintainAspectRatio:false, // ← TAMBAH DI SINI
 plugins:{legend:{display:false}},
 scales:{
 x:{min:0,max:index},
