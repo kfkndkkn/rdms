@@ -132,6 +132,47 @@ color:#444;
 margin-top:10px;
 font-size:14px;
 }
+
+/* LAYOUT TS MODAL */
+#tsContent{
+display:flex;
+gap:20px;
+align-items:stretch;
+}
+
+/* LEFT PANEL */
+#tsContent > div:first-child{
+width:260px;
+display:flex;
+flex-direction:column;
+}
+
+/* IMAGE */
+#tsImage{
+width:100%;
+height:180px;
+object-fit:cover;   /* 🔥 ini penting biar proporsional */
+border-radius:10px;
+}
+
+/* META TEXT */
+#tsMeta{
+font-size:13px;
+line-height:1.6;
+margin-top:10px;
+}
+
+/* RIGHT PANEL (CHART) */
+#tsContent > div:last-child{
+flex:1;
+display:flex;
+flex-direction:column;
+}
+
+/* CHART HEIGHT */
+#tsChart{
+height:260px !important;
+}
 /* STATUS KHUSUS TS MODAL */
 #tsModal .status-online{
 color:#00b050;
