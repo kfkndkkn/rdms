@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -168,6 +169,44 @@ font-size:14px;
 
 // BASEMAP
 
+function normalizeName(name){
+return (name || "").toString().trim().toLowerCase().replace(/\s+/g," ");
+}
+
+window.stationIndex = {};
+window.profileIndex = {};
+
+// function loadProfile()
+// function loadCSV()
+// function openTS()
+// dll
+
+loadProfile();
+loadCSV();
+function loadProfile(){
+
+fetch("profile.csv?nocache="+Date.now())
+.then(r=>r.text())
+.then(text=>{
+
+var data = Papa.parse(text,{
+header:true,
+skipEmptyLines:true
+}).data;
+
+window.profileIndex = {};
+
+data.forEach(r=>{
+var key = normalizeName(r["NAMA UNIT"]);
+window.profileIndex[key] = r;
+});
+
+console.log("Profile ready");
+
+});
+
+}
+  
 var osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 var dark=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png');
 var googleHybrid=L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']});
@@ -355,7 +394,13 @@ var rawData=Papa.parse(text,{
 header:true,
 skipEmptyLines:true
 }).data;
+window.stationIndex = {};
 
+rawData.forEach(r=>{
+var key = normalizeName(r["NAMA UNIT"]);
+window.stationIndex[key] = r;
+});
+  
 var zoom=map.getZoom();
 
 var data;
@@ -516,6 +561,7 @@ label.addTo(labelLayer);
 
 }
 
+loadProfile();
 loadCSV();
 setInterval(loadCSV,30000);
 map.on("zoomend",loadCSV);
@@ -527,7 +573,11 @@ var allLabels=[];
 var allValues=[];
 
 function openTS(station){
+var key = normalizeName(station);
 
+var stationData = window.stationIndex[key];
+var profileData = window.profileIndex[key];
+  
 document.getElementById("tsModal").style.display="block";
 document.getElementById("tsTitle").innerHTML="Time Series - "+station;
 
@@ -542,6 +592,35 @@ tsChart=null;
 document.getElementById("selectedTime").innerHTML="";
 document.getElementById("tsStats").innerHTML="";
 
+// IMAGE
+var img = document.getElementById("tsImage");
+
+var url = profileData?.["IMAGE_URL"];
+
+if(url){
+url = url.trim();
+img.src = url;
+img.onerror = function(){
+this.src = "https://via.placeholder.com/250x150?text=Image+Error";
+};
+}else{
+img.src = "https://via.placeholder.com/250x150?text=No+Image";
+}
+
+// STATUS
+var statusText = stationData?.["Gamma Dose Rate (nSv/h)"] === "Out of service"
+? "<span class='status-oos'>Out of Service</span>"
+: "<span class='status-online'>Online</span>";
+
+// META
+document.getElementById("tsMeta").innerHTML =
+"<b>"+station+"</b><br><br>"+
+"Address: "+(profileData?.["ADDRESS"] || "-")+"<br>"+
+"Province: "+(profileData?.["PROVINCE"] || "-")+"<br>"+
+"Lat: "+(profileData?.["LATITUDE"] || "-")+"<br>"+
+"Lon: "+(profileData?.["LONGITUDE"] || "-")+"<br>"+
+"Status: "+statusText;
+  
 fetch("timeseries.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
