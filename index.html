@@ -654,13 +654,13 @@ var statusText = stationData?.["Gamma Dose Rate (nSv/h)"] === "Out of service"
 document.getElementById("tsMeta").innerHTML =
 "<b>"+station+"</b><br><br>"+
 
-"Address: "+(profileData?.["Address"] || "-")+"<br>"+
+"Address: "+(profileData?.["Address"] || profileData?.["ADDRESS"] || "-")+"<br>"+
 
-"Province: "+(profileData?.["Province"] || "-")+"<br>"+
+"Province: "+(profileData?.["Province"] || profileData?.["PROVINCE"] || "-")+"<br>"+
 
-"Lat: "+(profileData?.["Latitude"] || "-")+"<br>"+
+"Lat: "+(profileData?.["Latitude"] || profileData?.["LATITUDE"] || "-")+"<br>"+
 
-"Lon: "+(profileData?.["Longitude"] || "-")+"<br>"+
+"Lon: "+(profileData?.["Longitude"] || profileData?.["LONGITUDE"] || "-")+"<br>"+
 
 "Status: "+statusText;
   
