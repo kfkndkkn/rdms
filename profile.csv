@@ -1,0 +1,40 @@
+﻿station,IMAGE_URL,Address,Province,Latitude,Longitude
+KNY-1,https://iili.io/FMzWYFt.jpg,"Tambak Bayan, Caturtunggal, Kec. Depok, Kabupaten Sleman",DI Yogyakarta,-7.77811,110.4128
+KNB-1,https://iili.io/FMzWzAJ.jpg,"Jl. Tamansari No.71, Lb. Siliwangi, Kecamatan Coblong, Kota Bandung",Jawa Barat,-6.8878,107.6062
+KNS-3,https://iili.io/FMzWRMN.jpg,"Jl. Kw. Puspiptek No.12, Muncul, Kec. Setu, Kota Tangerang Selatan",Banten,-6.35313,106.6636
+Puspiptek-1,https://iili.io/FMzWwl9.jpg,,Banten,-6.34581,106.6608
+Puspiptek-2,https://iili.io/FMzWNSe.jpg,,Banten,-6.35414,106.6718
+Istana Negara Merdeka (Setneg),https://iili.io/FMzWvNj.jpg,,DKI Jakarta,-6.16889,106.8228
+CTBT NTT,https://iili.io/FMzWGt4.jpg,"Jl. Sonbai km.01 Bonen, Baumata Kupang",NTT,-10.1989,123.6701
+CTBT Lembang,https://iili.io/FMzWcSn.jpg,"Jl. Peneropongan Bintang No.45, Lembang",Jawa Barat,-6.82636,107.6178
+CTBT Kappang,https://iili.io/FMzWBF1.jpg,"Stasiun seismik CTBT Kappang (KAPI),Labuaja, Kec. Cenrana, Kabupaten Maros",Sulawesi Selatan,-5.01419,119.7511
+CTBT Sorong,https://iili.io/FMzWriB.jpg,"Jl. Danau Siwiki, No.1, Kampung Baru, KP 167, Sorong",Papua Barat,-0.8625,131.2589
+CTBT Jayapura,https://iili.io/FMzWKMB.jpg,"Jalan Drs. Krisna Sunarya No.26, Angkasapura, Kec. Jayapura Utara, Kota Jayapura",Papua,-2.51444,140.7038
+St.Geof.Kls.I Ambon,https://iili.io/FMzVy8u.jpg,"Jl. A. I. S. Nasution No. 8, Kec. Sirimau, Kota Ambon",Maluku,-3.68717,128.1942
+St.Mteo.Kls.III Tanjung Pinang,https://iili.io/FMzWQRa.jpg,"Jl. Adi Sucipto Km 12,5 Bandara Kijang, Tanjung Pinang",Tanjungpinang,0.922694,104.5283
+St.Geof.Kls.I Padang Panjang,https://iili.io/FMzWVol.jpg,"Jl Meteorologi, Silaing Bawah, Padang Panjang",Sumatra Barat,-0.46612,100.3804
+St.Mteo.Kls.I Pangkal Pinang,https://iili.io/FMzWWV2.jpg,Jl. Bandara Depati Amir Pangkalpinang,Kepulauan Bangka Belitung,-2.16156,106.137
+St.Geof.Kls.I Tuntungan,https://iili.io/FMzXHlt.jpg,"Jalan Geofisika No.1, Tuntungan I, Kec. Pancur Batu, Kabupaten Deli Serdang",Sumatra Utara,3.50025,98.56528
+Istana Kepresidenan Yogyakarta,https://iili.io/FGXliDF.jpg,"Jalan Ahmad Yani, Ngupasan, Kec. Gondomanan, Kota Yogyakarta",DI Yogyakarta,-7.80031,110.3631
+St.Klim. Manokwari,https://iili.io/FMzW1AG.jpg,"Anday, Distrik Manokwari, Kabupaten Manokwari",Papua Barat,-0.92813,134.0259
+Istana Kepresidenan Bali,https://iili.io/FMzW9yb.jpg,"Jl. Dr. Ir. Soekarno, Manukaya, Kec. Tampaksiring, Kabupaten Gianyar",Bali,-8.41308,115.3139
+Istana Kepresidenan Bogor,https://iili.io/FMzVmF9.jpg,"Jl. Ir. H. Juanda, RT.04/RW.01, Paledang, Kecamatan Bogor Tengah, Kota Bogor",Jawa Barat,-6.59792,106.7958
+Istana Kepresidenan Cipanas,https://iili.io/FMzW2ZQ.jpg,"Jl. Raya Cipanas No.105, Cipanas, Kec. Cipanas, Kabupaten Cianjur",Jawa Barat,-6.73208,107.0399
+Istana Negara Merdeka (Wantimpres),https://iili.io/FMzWUoQ.jpg,"Jl. Veteran III No.2, RT.2/RW.3, Gambir, Kecamatan Gambir, Kota Jakarta Pusat",DKI Jakarta,-6.16911,106.825
+St.Mteo.Kls.III Putussibau,https://iili.io/FMzWkAb.jpg,"Bandar Udara Pangsuma, Jalan Adisucipto, Kedamin Hulu, Kec. Putussibau Sel., Kabupaten Kapuas Hulu",Kalimantan Barat,0.838667,112.9349
+St.Mteo.Kls.I Gorontalo,https://iili.io/FMzWFnV.jpg,"Stasiun Meteorologi Kelas I Komplek Bandar Udara Djalaluddin, Tolotio, Kec. Tibawa, Kabupaten Gorontalo",Sulawesi Utara,0.638444,122.8524
+St.Klim.Kls.II Mempawah,https://iili.io/FMzWENf.jpg,"Jalan Raya Sei Nipah KM. 20.5, Jungkat, Sei Nipah, Kec. Jongkat, Kab. Mempawah",Kalimantan Barat,0.075778,109.1909
+St.Mteo.Kls.III Tarakan,https://iili.io/FMzWpiN.jpg,"Jl. Kamboja No.RT.43, Karang Anyar, Kec. Tarakan Bar., Kota Tarakan",Kalimantan Utara,3.313434,117.5815
+KNS-2,https://iili.io/FMzWTtR.jpg,"Jl. Kw. Puspiptek No.30, Muncul, Kec. Setu, Kota Tangerang Selatan",Banten,-6.35278,106.662
+KNS-4,https://iili.io/FMzW5PI.jpg,"Jl. Kw. Puspiptek No.50, Muncul, Kec. Setu, Kota Tangerang Selatan",Banten,-6.35053,106.6617
+KNS-1,https://iili.io/FMzWIwv.jpg,"Jl. Kw. Puspiptek No.30, Muncul, Kec. Setu, Kota Tangerang Selatan",Banten,-6.35178,106.664
+St.Mteo.Kls.III Kerinci,https://iili.io/FMzWn8g.jpg,"Bandara Depati Parbo, Desa Angkasa Pura, Sebukar, Kec. Sitinjau Laut, Kabupaten Kerinci",Jambi,-2.09119,101.462
+St.Mteo.Kls.III Tapanuli Tengah,https://iili.io/FMzWtDv.jpg,"Gn. Marijo, Kec. Pinangsori, Kabupaten Tapanuli Tengah",Sumatra Utara,1.553194,98.89733
+St.Klim.Kls.II Malang,https://iili.io/FMzW09s.jpg,"Jl. Zentana No. 33, RT 55/ RW 08 Desa Ngijo Kecamatan Karangploso Kabupaten Malang",Jawa Timur,-7.90142,112.5979
+St.Mteo.Kls.III Tana Toraja,https://iili.io/FMzW6KP.jpg,"Jalan Bandara, Simbuang, Kec. Mengkendek, Kabupaten Tana Toraja",Sulawesi Selatan,-3.04508,119.8187
+St.Mteo.Kls.III Sintang,https://iili.io/FMzWgVV.jpg,"Manter, Kec. Sungai Tebelian, Kabupaten Sintang",Kalimantan Barat,-0.04303,111.4594
+St.Mteo.Kls.III Bengkulu,https://iili.io/FMzVpae.jpg,"Jl. Depati Payung Negara, Komplek Bandar Udara Fatmawati Soekarno, Kel. Pekan Sabtu, Kec. Selebar, Kota Bengkulu",Bengkulu,-3.85822,102.3366
+St.Mteo.Kls.III Cilacap,https://iili.io/FMzWJuj.jpg,"Jl. Gatot Subroto No.20, Tambaksari, Sidanegara, Kec. Cilacap Tengah, Kabupaten Cilacap",Jawa Tengah,-7.71875,109.015
+St.Mteo.Kls I Pekanbaru,https://iili.io/FMzWXPS.jpg,"Bandar Udara Sultan Syarif Kasim II, Pekanbaru, Maharatu, Marpoyan Damai, Pekanbaru",Riau,0.459222,101.4473
+St.Geof.Kls.III Banjarnegara,,"Jl. Raya Purbayasa, Purbayasa, Kec. Purbayasa, Kabupaten Banjarnegara",Jawa Tengah,-7.33322,109.7098
+St.Meteo.Kls.I Supadio Pontianak,https://iili.io/FMTsiGV.jpg,"Jl. Adi Sucipto Km 17 Bandara Supadio Pontianak, Kec. Sungai Raya, Kab. Kubu Raya",Kalimantan Barat,-0.14185,109.4026
