@@ -132,7 +132,17 @@ color:#444;
 margin-top:10px;
 font-size:14px;
 }
+/* STATUS KHUSUS TS MODAL */
+#tsModal .status-online{
+color:#00b050;
+font-weight:bold;
+}
 
+#tsModal .status-oos{
+color:#000;
+font-weight:bold;
+}
+  
 </style>
 </head>
 
@@ -615,8 +625,9 @@ var img = document.getElementById("tsImage");
 var url = profileData?.["IMAGE_URL"];
 
 if(url){
-url = url.trim();
+url = url.trim();   // WAJIB
 img.src = url;
+}
 img.onerror = function(){
 this.src = "https://via.placeholder.com/250x150?text=Image+Error";
 };
@@ -632,10 +643,15 @@ var statusText = stationData?.["Gamma Dose Rate (nSv/h)"] === "Out of service"
 // META
 document.getElementById("tsMeta").innerHTML =
 "<b>"+station+"</b><br><br>"+
-"Address: "+(profileData?.["ADDRESS"] || "-")+"<br>"+
-"Province: "+(profileData?.["PROVINCE"] || "-")+"<br>"+
-"Lat: "+(profileData?.["LATITUDE"] || "-")+"<br>"+
-"Lon: "+(profileData?.["LONGITUDE"] || "-")+"<br>"+
+
+"Address: "+(profileData?.["Address"] || "-")+"<br>"+
+
+"Province: "+(profileData?.["Province"] || "-")+"<br>"+
+
+"Lat: "+(profileData?.["Latitude"] || "-")+"<br>"+
+
+"Lon: "+(profileData?.["Longitude"] || "-")+"<br>"+
+
 "Status: "+statusText;
   
 fetch("timeseries.csv?nocache="+Date.now())
