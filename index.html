@@ -206,7 +206,7 @@ window.profileIndex = {};
 // dll
 
 loadProfile();
-console.log("PROFILE CSV:", data);
+
 setTimeout(()=>{
 loadCSV();
 },300);
@@ -220,6 +220,7 @@ var data = Papa.parse(text,{
 header:true,
 skipEmptyLines:true
 }).data;
+console.log("PROFILE CSV:", data);
 
 window.profileIndex = {};
 
