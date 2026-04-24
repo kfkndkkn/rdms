@@ -142,8 +142,6 @@ font-weight:bold;
 color:#000;
 font-weight:bold;
 }
-
-
 #tsContent{
 min-height:420px;
 align-items:stretch;
@@ -153,15 +151,7 @@ align-items:stretch;
 width:100% !important;
 height:100% !important;
 }
-#tsTable tr:nth-child(even){
-background:#f7f7f7;
-}
 
-#tsTable th{
-position:sticky;
-top:0;
-z-index:1;
-}
 
 #tsContent > div:last-child{
 display:flex;
@@ -277,24 +267,10 @@ style="width:98%;border-radius:8px;margin-bottom:10px;border:1px solid rgba(0,0,
 
 <!-- RIGHT -->
 <div style="flex:1;display:flex;flex-direction:column">
-<div style="display:flex;justify-content:flex-end;margin-bottom:6px;gap:6px">
-  <button onclick="setView('chart')" id="btnChart">Chart</button>
-  <button onclick="setView('table')" id="btnTable">Table</button>
-<div id="chartContainer" style="flex:1;position:relative;display:flex;flex-direction:column">
-  <canvas id="tsChart" style="flex:1;"></canvas>
-</div>
 
-<div id="tableContainer" style="flex:1;display:none;overflow:auto">
-  <table id="tsTable" style="width:100%;border-collapse:collapse;font-size:12px">
-    <thead>
-      <tr style="background:#eee">
-        <th style="padding:6px;border:1px solid #ccc">Time</th>
-        <th style="padding:6px;border:1px solid #ccc">Dose (nSv/h)</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
+  <div style="flex:3;position:relative">
+    <canvas id="tsChart"></canvas>
+  </div>
 
   <input type="range" id="timeSlider">
   <div id="selectedTime"></div>
@@ -831,21 +807,6 @@ function updateChart(index){
 var labels=allLabels.slice(0,index+1);
 var values=allValues.slice(0,index+1);
 
-// 🔥 TAMBAHKAN DI SINI
-var tableBody = document.querySelector("#tsTable tbody");
-tableBody.innerHTML = "";
-
-for(let i=0;i<=index;i++){
-  let tr = document.createElement("tr");
-
-  tr.innerHTML = `
-    <td style="padding:4px;border:1px solid #ddd">${allLabels[i]}</td>
-    <td style="padding:4px;border:1px solid #ddd">${allValues[i].toFixed(2)}</td>
-  `;
-
-  tableBody.appendChild(tr);
-}
-  
 var startTime=labels[0];
 var endTime=labels[labels.length-1];
 
@@ -922,10 +883,7 @@ document.getElementById("tsStats").innerHTML=
 function closeTS(){
 document.getElementById("tsModal").style.display="none";
 }
-function setView(mode){
-  document.getElementById("chartContainer").style.display = (mode==="chart") ? "flex" : "none";
-  document.getElementById("tableContainer").style.display = (mode==="table") ? "block" : "none";
-}
+
 // LEGEND
 
 var legend=L.control({position:"bottomleft"});
@@ -965,7 +923,6 @@ legend.addTo(map);
 
 </body>
 </html>
-
 
 
 
