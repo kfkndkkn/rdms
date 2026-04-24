@@ -167,9 +167,12 @@ flex-direction:column;
 
 /* CHART FLEX FULL */
 #tsChart{
-flex:1 !important;     /* 🔥 ikut tinggi parent */
-height:auto !important;
-max-height:none;
+height:260px !important;   /* 🔥 sweet spot */
+max-height:260px;
+}
+
+#tsContent{
+align-items:flex-start; /* 🔥 jangan stretch penuh */
 }
   
 </style>
@@ -779,11 +782,31 @@ fill:true
 
 options:{
 responsive:true,
-maintainAspectRatio:false, // 🔥 WAJIB
-plugins:{legend:{display:false}},
+maintainAspectRatio:false, // 🔥 wajib
+
+plugins:{
+legend:{display:false}
+},
+
 scales:{
-x:{min:0,max:index},
-y:{min:ymin,max:ymax,title:{display:true,text:"nSv/h"}}
+x:{
+min:0,
+max:index,
+ticks:{
+maxRotation:0,
+minRotation:0,
+autoSkip:true,
+maxTicksLimit:8
+},
+grid:{display:false} // 🔥 tambahan dari step 4
+},
+
+y:{
+min:ymin,
+max:ymax,
+title:{display:true,text:"nSv/h"},
+grid:{color:"rgba(0,0,0,0.08)"} // 🔥 tambahan dari step 4
+}
 }
 }
 
