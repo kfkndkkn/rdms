@@ -232,7 +232,45 @@ flex-shrink:0;
 width:100% !important;
 height:100% !important;
 }
-  
+/* 🔥 GLOBAL PANEL */
+#globalPanel{
+position:absolute;
+top:80px;
+right:20px;
+width:300px;
+background:rgba(255,255,255,0.85);
+border-radius:12px;
+box-shadow:0 6px 16px rgba(0,0,0,0.25);
+z-index:9999;
+overflow:hidden;
+backdrop-filter:blur(8px);
+}
+
+#gpHeader{
+background:#0b1e3f;
+color:white;
+padding:8px 10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+font-size:13px;
+}
+
+#gpHeader button{
+background:none;
+border:none;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+#gpContent{
+padding:10px;
+}
+
+#globalChart{
+height:160px !important;
+}  
 </style>
 </head>
 
@@ -244,7 +282,18 @@ height:100% !important;
 </div>
 
 <div id="map"></div>
+<!-- 🔥 GLOBAL DASHBOARD PANEL -->
+<div id="globalPanel">
+  <div id="gpHeader">
+    National Summary
+    <button onclick="togglePanel()">–</button>
+  </div>
 
+  <div id="gpContent">
+    <div id="globalStats"></div>
+    <canvas id="globalChart"></canvas>
+  </div>
+</div>
 <div id="tsModal">
 <div id="tsBox">
 
@@ -515,6 +564,64 @@ var rawData=Papa.parse(text,{
 header:true,
 skipEmptyLines:true
 }).data;
+
+// 🔥 GLOBAL STATISTICS
+var values = rawData
+  .map(r => parseFloat(r["Gamma Dose Rate (nSv/h)"]))
+  .filter(v => !isNaN(v));
+
+if(values.length){
+
+var min = Math.min(...values);
+var max = Math.max(...values);
+var avg = values.reduce((a,b)=>a+b,0)/values.length;
+
+document.getElementById("globalStats").innerHTML =
+  "<b>Min:</b> "+min.toFixed(2)+" nSv/h<br>"+
+  "<b>Max:</b> "+max.toFixed(2)+" nSv/h<br>"+
+  "<b>Avg:</b> "+avg.toFixed(2)+" nSv/h";
+}
+
+// 🔥 BAR CHART
+if(window.globalChart){
+  window.globalChart.destroy();
+}
+
+var sorted = rawData
+  .map(r=>({
+    name:r["NAMA UNIT"],
+    val:parseFloat(r["Gamma Dose Rate (nSv/h)"]) || 0
+  }))
+  .sort((a,b)=>b.val-a.val)
+  .slice(0,5);
+
+var labels = sorted.map(r=>r.name);
+var vals = sorted.map(r=>r.val);
+var vals = rawData.map(r=>parseFloat(r["Gamma Dose Rate (nSv/h)"]) || 0);
+
+window.globalChart = new Chart(document.getElementById("globalChart"),{
+  type:'bar',
+  data:{
+    labels:labels,
+    datasets:[{
+      data:vals,
+      backgroundColor:'#2b83ba'
+    }]
+  },
+  options:{
+    responsive:true,
+    maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{
+        ticks:{display:false}
+      },
+      y:{
+        ticks:{font:{size:10}}
+      }
+    }
+  }
+});
 window.stationIndex = {};
 
 rawData.forEach(r=>{
@@ -881,6 +988,16 @@ document.getElementById("tsStats").innerHTML=
 }
 
 function closeTS(){
+function togglePanel(){
+var el = document.getElementById("gpContent");
+
+if(el.style.display==="none"){
+  el.style.display="block";
+}else{
+  el.style.display="none";
+}
+}
+  
 document.getElementById("tsModal").style.display="none";
 }
 
