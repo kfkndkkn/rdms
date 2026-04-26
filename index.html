@@ -1121,9 +1121,7 @@ right:0
 },
 
 plugins:{
-legend:{display:false}
-
-},
+legend:{display:false},
 tooltip:{
 callbacks:{
 title:function(items){
@@ -1131,6 +1129,8 @@ return items[0].label; // 🔥 tampil full label saat hover
 }
 }
 }
+},
+
 scales:{
 x:{
 type:'category',
