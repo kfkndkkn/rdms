@@ -1245,17 +1245,17 @@ map.invalidateSize();
 }
 // LEGEND
 var legendVisible = true;
-var legend=L.control({position:"bottomleft"});
+var legend = L.control({position:"bottomleft"});
 
+legend.onAdd = function(){
 
-var div=L.DomUtil.create("div","legend");
+var div = L.DomUtil.create("div","legend");
 
-div.innerHTML=`
+div.innerHTML = `
 
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
   <b>IAEA Operational Intervention Levels</b>
 
-  <!-- 🔥 ICON INFO -->
   <div id="infoIcon" style="
     cursor:pointer;
     background:#0b1e3f;
@@ -1271,7 +1271,6 @@ div.innerHTML=`
   ">i</div>
 </div>
 
-<!-- 🔥 TOOLTIP -->
 <div id="legendTooltip" style="
   display:none;
   position:absolute;
@@ -1310,7 +1309,6 @@ OILs evakuasi
 
 </div>
 
-<!-- 🔥 COLOR BAR -->
 <div style="width:260px;height:14px;
 background:linear-gradient(to right,#2b83ba,#ffe600,#ff9b00,#ff2b2b);
 margin-bottom:6px;border:1px solid #999;"></div>
@@ -1330,16 +1328,17 @@ Gamma Dose Rate (nSv/h)
 
 setTimeout(()=>{
 
-var icon = document.getElementById("infoIcon");
-var tooltip = document.getElementById("legendTooltip");
+var icon = div.querySelector("#infoIcon");
+var tooltip = div.querySelector("#legendTooltip");
 
+if(icon && tooltip){
 icon.onmouseenter = ()=> tooltip.style.display="block";
 icon.onmouseleave = ()=> tooltip.style.display="none";
+}
 
-},100);
+},50);
 
 return div;
-
 };
 
 legend.addTo(map);
