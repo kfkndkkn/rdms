@@ -284,8 +284,7 @@ opacity:0.9;
 }
 
 #avgBarChart{
-height:auto !important;
-max-height:180px; /* 🔥 fleksibel */
+max-height:220px; /* 🔥 lebih lega */
 }
 </style>
 </head>
@@ -904,7 +903,7 @@ legend:{display:false}
 },
 
 layout:{
-padding:{left:50,right:10}
+padding:{left:70,right:10}
 },
 
 scales:{
@@ -915,12 +914,12 @@ title:{display:true,text:"nSv/h"}
 y:{
 
 afterFit: function(scale){
-scale.width = 120; // 🔥 ruang label fix
+scale.width = 180; // 🔥 kasih napas
 },
 
 ticks:{
 autoSkip:false,
-font:{size:10},
+font:{size:9},
 padding:6,
 align:'end',
 
@@ -929,20 +928,13 @@ callback:function(value){
 var label = this.getLabelForValue(value);
 if(!label) return "";
 
-var maxLen = 12;
-
-// pendek → normal
-if(label.length <= maxLen){
-return label;
-}
-
-// split jadi multi-line STRING (pakai \n)
+// 🔥 potong jadi 2–3 baris
 var words = label.split(" ");
 var lines = [];
 var line = "";
 
 words.forEach(w=>{
-if((line + w).length > maxLen){
+if((line + w).length > 14){
 lines.push(line.trim());
 line = w + " ";
 }else{
@@ -952,7 +944,7 @@ line += w + " ";
 
 lines.push(line.trim());
 
-// 🔥 JOIN pakai newline (INI KUNCI)
+// 🔥 maksimal 3 baris
 return lines.slice(0,3).join("\n");
 }
 },
