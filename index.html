@@ -874,11 +874,8 @@ window.avgChart.destroy();
 }
 
 // 🔥 CREATE NEW
+// 🔥 CREATE NEW
 window.avgChart = new Chart(document.getElementById("avgBarChart"),{
-
-}); // 🔥 tutup .then
-}    // 🔥 tutup function
-  
 type:'bar',
 data:{
 labels:labels,
@@ -911,7 +908,9 @@ return value.length > 18
 }
 });
 
-}
+}); // 🔥 tutup fetch (.then)
+
+} // 🔥 tutup function
   
 // TIME SERIES
 
