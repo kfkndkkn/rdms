@@ -236,13 +236,14 @@ height:100% !important;
 #sidePanel{
 position:absolute;
 top:80px;
-right:10px;
+left:10px; /* 🔥 GANTI dari right ke left */
 width:260px;
 background:#1f5fa8;
 padding:12px;
 color:white;
 z-index:9999;
 border-radius:6px;
+transition:transform 0.3s ease; /* optional biar smooth */
 }
 
 .panel-box{
@@ -285,7 +286,21 @@ opacity:0.9;
 </div>
 
 <div id="map"></div>
-
+<button id="togglePanelBtn" onclick="togglePanel()"
+style="
+position:absolute;
+top:90px;
+left:10px;
+z-index:10000;
+background:#0b1e3f;
+color:white;
+border:none;
+padding:8px 12px;
+border-radius:6px;
+cursor:pointer;
+">
+☰ Panel
+</button>
 <div id="sidePanel">
 
 <div class="panel-box">
@@ -414,6 +429,7 @@ var esriGrayLabel=L.tileLayer(
 // MAP
 
 var map=L.map('map',{
+map.zoomControl.setPosition('topright');
 zoomControl:true,
 layers:[osm],
 zoomSnap:0.25,
@@ -1052,7 +1068,22 @@ document.getElementById("tsStats").innerHTML=
 function closeTS(){
 document.getElementById("tsModal").style.display="none";
 }
+var panelVisible = true;
 
+function togglePanel(){
+var panel = document.getElementById("sidePanel");
+var btn = document.getElementById("togglePanelBtn");
+
+if(panelVisible){
+panel.style.transform = "translateX(-280px)";
+btn.style.left = "10px";
+panelVisible = false;
+}else{
+panel.style.transform = "translateX(0)";
+btn.style.left = "280px";
+panelVisible = true;
+}
+}
 // LEGEND
 
 var legend=L.control({position:"bottomleft"});
