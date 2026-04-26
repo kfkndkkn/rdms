@@ -857,18 +857,35 @@ legend:{display:false}
 
 scales:{
 x:{
+type:'category',
+
 min:0,
 max:index,
 
 ticks:{
-autoSkip:false, // 🔥 WAJIB
+autoSkip:false,
 maxRotation:0,
 minRotation:0,
 
 callback:function(value, i){
-if(i === 0 || i === index){
-return allLabels[i]; // 🔥 tampilkan awal & akhir
+
+const mid = Math.floor(index/2);
+
+// 🔥 tampilkan:
+// - awal
+// - tengah
+// - akhir
+// - interval tiap 6 data (~1 jam)
+
+if(
+i === 0 ||
+i === mid ||
+i === index ||
+i % 6 === 0
+){
+return allLabels[i];
 }
+
 return "";
 }
 },
