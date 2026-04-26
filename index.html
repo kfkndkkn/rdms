@@ -909,7 +909,7 @@ legend:{display:false}
 },
 
 layout:{
-padding:{left:20,right:10}
+padding:{left:80,right:10}
 },
 
 scales:{
@@ -919,29 +919,23 @@ title:{display:true,text:"nSv/h"}
 },
 y:{
 ticks:{
+padding:5,
 autoSkip:false,
-font:{size:11},
+font:{size:10},
 
 callback:function(value){
 
 let label = this.getLabelForValue(value);
 
-let words = label.split(" ");
-let lines = [];
-let current = "";
-
-words.forEach(w=>{
-if((current + w).length > 12){
-lines.push(current);
-current = w;
-}else{
-current += (current ? " " : "") + w;
+// 🔥 max 2 baris saja biar tidak berantakan
+if(label.length > 18){
+return [
+label.slice(0,18),
+label.slice(18)
+];
 }
-});
 
-if(current) lines.push(current);
-
-return lines;
+return label;
 }
 },
 grid:{display:false}
