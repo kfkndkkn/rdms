@@ -236,14 +236,14 @@ height:100% !important;
 #sidePanel{
 position:absolute;
 top:80px;
-left:10px; /* 🔥 GANTI dari right ke left */
-width:260px;
+left:10px;
+width:300px; /* 🔥 dibesarkan */
 background:#1f5fa8;
-padding:12px;
+padding:14px;
 color:white;
 z-index:9999;
-border-radius:6px;
-transition:left 0.3s ease; /* optional biar smooth */
+border-radius:10px;
+transition:top 0.3s ease; /* 🔥 ubah animasi */
 }
 
 .panel-box{
@@ -275,6 +275,10 @@ font-weight:bold;
 font-size:12px;
 opacity:0.9;
 }
+
+#avgBarChart{
+height:220px !important;
+}
 </style>
 </head>
 
@@ -295,18 +299,15 @@ z-index:10000;
 background:#0b1e3f;
 color:white;
 border:none;
-padding:8px 12px;
-border-radius:6px;
+padding:10px 14px;
+border-radius:8px;
 cursor:pointer;
+font-weight:bold;
 ">
-☰ Panel
+☰ Statistic Summary
 </button>
 <div id="sidePanel">
 
-<div class="panel-box">
-<input type="date" id="startDate">
-<input type="date" id="endDate">
-</div>
 
 <div class="panel-box highlight">
 <div class="title">Maximum Dose Rate (nSv/h)</div>
@@ -321,7 +322,7 @@ cursor:pointer;
 </div>
 
 <div class="panel-box">
-<div class="title">Average Dose Rate (nSv/h)</div>
+<div class="title">Average Dose Rate in Last 7 Days (nSv/h)</div>
 <canvas id="avgBarChart"></canvas>
 </div>
 
@@ -808,25 +809,72 @@ document.getElementById("minStation").innerHTML =
 minRow["NAMA UNIT"];
 
 // 🔥 BAR CHART (TOP 10)
-drawAvgChart(valid);
+drawAvgChart();
 
 });
 
 }
-function drawAvgChart(data){
+function drawAvgChart(){
 
-// ambil top 10 tertinggi
-data.sort((a,b)=>
-parseFloat(b["Gamma Dose Rate (nSv/h)"]) -
-parseFloat(a["Gamma Dose Rate (nSv/h)"])
-);
+fetch("timeseries.csv?nocache="+Date.now())
+.then(r=>r.text())
+.then(text=>{
 
-var top = data.slice(0,10);
+var data = Papa.parse(text,{header:true}).data;
 
-var labels = top.map(r=>r["NAMA UNIT"]);
-var values = top.map(r=>parseFloat(r["Gamma Dose Rate (nSv/h)"]));
+// 🔥 FILTER 7 HARI TERAKHIR
+const now = new Date();
+const sevenDaysAgo = new Date();
+sevenDaysAgo.setDate(now.getDate() - 7);
 
-new Chart(document.getElementById("avgBarChart"),{
+var grouped = {};
+
+// 🔥 GROUP BY STATION
+data.forEach(r=>{
+
+var t = new Date(r.time);
+var v = parseFloat(r.dose);
+
+if(t >= sevenDaysAgo && t <= now && !isNaN(v)){
+
+var name = r.station;
+
+if(!grouped[name]){
+grouped[name] = [];
+}
+
+grouped[name].push(v);
+}
+});
+
+// 🔥 HITUNG AVERAGE
+var result = [];
+
+Object.keys(grouped).forEach(station=>{
+var arr = grouped[station];
+var avg = arr.reduce((a,b)=>a+b,0) / arr.length;
+
+result.push({
+name: station,
+avg: avg
+});
+});
+
+// 🔥 SORT & TOP 5
+result.sort((a,b)=>b.avg - a.avg);
+var top = result.slice(0,5);
+
+// 🔥 PREPARE CHART
+var labels = top.map(r=>r.name);
+var values = top.map(r=>r.avg);
+
+// 🔥 DESTROY CHART LAMA
+if(window.avgChart){
+window.avgChart.destroy();
+}
+
+// 🔥 CREATE NEW
+window.avgChart = new Chart(document.getElementById("avgBarChart"),{
 type:'bar',
 data:{
 labels:labels,
@@ -836,14 +884,14 @@ backgroundColor:'#2b83ba'
 }]
 },
 options:{
-indexAxis:'y', // 🔥 horizontal bar
 plugins:{legend:{display:false}},
 scales:{
-x:{beginAtZero:true}
+y:{beginAtZero:true}
 }
 }
 });
 
+});
 }
 // TIME SERIES
 
@@ -1072,19 +1120,15 @@ var panelVisible = true;
 
 function togglePanel(){
 var panel = document.getElementById("sidePanel");
-var btn = document.getElementById("togglePanelBtn");
 
 if(panelVisible){
-panel.style.left = "-280px";   // 🔥 keluar beneran
-btn.style.left = "10px";
+panel.style.top = "-500px";  // 🔥 naik ke atas
 panelVisible = false;
 }else{
-panel.style.left = "10px";
-btn.style.left = "280px";
+panel.style.top = "80px";
 panelVisible = true;
 }
 
-// 🔥 refresh leaflet
 setTimeout(()=>{
 map.invalidateSize();
 },300);
