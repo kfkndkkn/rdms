@@ -904,7 +904,7 @@ legend:{display:false}
 },
 
 layout:{
-padding:{left:40,right:10}
+padding:{left:60,right:10}
 },
 
 scales:{
@@ -916,18 +916,24 @@ y:{
 offset:true,
 ticks:{
 autoSkip:false,
-font:{size:6},
+font:{size:9},
 padding:4,
 
 callback:function(value){
 
 let label = this.getLabelForValue(value);
 
-// 🔥 potong saja, jangan wrap aneh
-if(label.length > 22){
-return label.substring(0,22) + "...";
+// 🔥 SPLIT JADI 2 BARIS (PASTI KE-WRAP)
+let words = label.split(" ");
+
+if(words.length >= 2){
+return [
+words.slice(0, Math.ceil(words.length/2)).join(" "),
+words.slice(Math.ceil(words.length/2)).join(" ")
+];
 }
 
+// kalau cuma 1 kata
 return label;
 }
 },
