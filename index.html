@@ -862,6 +862,8 @@ type:'category',
 min:0,
 max:index,
 
+offset:false, // 🔥 INI KUNCI
+
 ticks:{
 autoSkip:false,
 maxRotation:0,
@@ -871,11 +873,7 @@ callback:function(value, i){
 
 const mid = Math.floor(index / 2);
 
-if(
-i === 0 ||        // awal
-i === mid ||      // tengah
-i === index       // akhir
-){
+if(i === 0 || i === mid || i === index){
 return allLabels[i];
 }
 
@@ -885,7 +883,6 @@ return "";
 
 grid:{display:false}
 },
-
 y:{
 min:ymin,
 max:ymax,
