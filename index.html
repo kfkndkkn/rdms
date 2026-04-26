@@ -1202,22 +1202,42 @@ document.getElementById("tsModal").style.display="none";
 var panelVisible = false; // 🔥 default hidden
 
 function togglePanel(){
+
 var panel = document.getElementById("sidePanel");
 
 if(panelVisible){
-panel.style.transform = "translateX(-110%)";; // 🔥 hilang total
+
+// 🔴 HIDE PANEL
+panel.style.transform = "translateX(-110%)";
 panelVisible = false;
+
+// 🟢 SHOW LEGEND
+if(!legendVisible){
+legend.addTo(map);
+legendVisible = true;
+}
+
 }else{
+
+// 🟢 SHOW PANEL
 panel.style.transform = "translateX(0)";
 panelVisible = true;
+
+// 🔴 HIDE LEGEND
+if(legendVisible){
+map.removeControl(legend);
+legendVisible = false;
+}
+
 }
 
 setTimeout(()=>{
 map.invalidateSize();
 },300);
+
 }
 // LEGEND
-
+var legendVisible = true;
 var legend=L.control({position:"bottomleft"});
 
 legend.onAdd=function(){
