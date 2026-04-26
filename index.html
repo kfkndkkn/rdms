@@ -233,14 +233,14 @@ width:100% !important;
 height:100% !important;
 }
 
-#sidePanel{
+##sidePanel{
 position:absolute;
 top:140px;
 left:10px;
 width:260px;
 
-max-height:calc(100vh - 260px); /* 🔥 KUNCI: sisakan ruang legend */
-overflow-y:auto;               /* 🔥 kalau kepanjangan, scroll */
+max-height:calc(100vh - 260px);
+overflow-y:auto;
 
 background:#1f5fa8;
 padding:14px;
@@ -248,7 +248,8 @@ color:white;
 z-index:9999;
 border-radius:10px;
 
-transform:translateY(0);
+/* 🔥 ANIMASI HORIZONTAL */
+transform:translateX(0);
 transition:transform 0.3s ease;
 }
   
