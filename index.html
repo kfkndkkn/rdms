@@ -233,7 +233,7 @@ width:100% !important;
 height:100% !important;
 }
 
-##sidePanel{
+#sidePanel{
 position:absolute;
 top:140px;
 left:10px;
@@ -1165,10 +1165,10 @@ function togglePanel(){
 var panel = document.getElementById("sidePanel");
 
 if(panelVisible){
-panel.style.transform = "translateY(-120%)"; // 🔥 hilang total
+panel.style.transform = "translateX(-110%)";; // 🔥 hilang total
 panelVisible = false;
 }else{
-panel.style.transform = "translateY(0)";
+panel.style.transform = "translateX(0)";
 panelVisible = true;
 }
 
