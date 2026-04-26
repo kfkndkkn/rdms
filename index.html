@@ -235,15 +235,16 @@ height:100% !important;
 
 #sidePanel{
 position:absolute;
-top:140px; /* 🔥 TURUNKAN dari 80px */
+top:140px;
 left:10px;
-width:300px;
+width:260px; /* 🔥 samakan legend */
 background:#1f5fa8;
 padding:14px;
 color:white;
 z-index:9999;
 border-radius:10px;
-transition:top 0.3s ease;
+transform:translateY(0); /* 🔥 ganti top animasi */
+transition:transform 0.3s ease;
 }
 
 .panel-box{
@@ -814,6 +815,7 @@ drawAvgChart();
 });
 
 }
+window.lastChartData = "";
 function drawAvgChart(){
 
 fetch("timeseries.csv?nocache="+Date.now())
@@ -822,14 +824,13 @@ fetch("timeseries.csv?nocache="+Date.now())
 
 var data = Papa.parse(text,{header:true}).data;
 
-// 🔥 FILTER 7 HARI TERAKHIR
+// FILTER 7 HARI
 const now = new Date();
 const sevenDaysAgo = new Date();
 sevenDaysAgo.setDate(now.getDate() - 7);
 
 var grouped = {};
 
-// 🔥 GROUP BY STATION
 data.forEach(r=>{
 
 var t = new Date(r.time);
@@ -847,70 +848,87 @@ grouped[name].push(v);
 }
 });
 
-// 🔥 HITUNG AVERAGE
+// HITUNG AVG
 var result = [];
 
 Object.keys(grouped).forEach(station=>{
 var arr = grouped[station];
 var avg = arr.reduce((a,b)=>a+b,0) / arr.length;
 
-result.push({
-name: station,
-avg: avg
-});
+result.push({name:station, avg:avg});
 });
 
-// 🔥 SORT & TOP 5
+// SORT TOP 5
 result.sort((a,b)=>b.avg - a.avg);
 var top = result.slice(0,5);
 
-// 🔥 PREPARE CHART
+// LABEL FULL (NO CUT)
 var labels = top.map(r=>r.name);
 var values = top.map(r=>r.avg);
 
-// 🔥 DESTROY CHART LAMA
+// DESTROY ONLY IF EXIST
 if(window.avgChart){
 window.avgChart.destroy();
 }
+var currentData = JSON.stringify(values);
 
-// 🔥 CREATE NEW
-// 🔥 CREATE NEW
+if(window.lastChartData === currentData){
+return; // 🔥 tidak redraw
+}
+
+window.lastChartData = currentData;
+// CREATE
 window.avgChart = new Chart(document.getElementById("avgBarChart"),{
 type:'bar',
 data:{
 labels:labels,
 datasets:[{
 data:values,
-backgroundColor:'#2b83ba'
+backgroundColor:'#2b83ba',
+barThickness:18 // 🔥 proporsional
 }]
 },
 options:{
+responsive:true,
+maintainAspectRatio:false,
 indexAxis:'y',
+
 plugins:{
 legend:{display:false}
 },
+
+layout:{
+padding:{
+left:10,
+right:10
+}
+},
+
 scales:{
 x:{
 beginAtZero:true,
-title:{display:true,text:"nSv/h"}
+grid:{color:"rgba(0,0,0,0.05)"},
+title:{
+display:true,
+text:"nSv/h"
+}
 },
 y:{
 ticks:{
-autoSkip:false,
-callback:function(value){
-return value.length > 18 
-? value.substring(0,18) + "..." 
-: value;
+autoSkip:false, // 🔥 wajib
+font:{
+size:11
 }
-}
+},
+grid:{display:false}
 }
 }
 }
 });
 
-}); // 🔥 tutup fetch (.then)
+});
 
-} // 🔥 tutup function
+}
   
 // TIME SERIES
 
@@ -1141,10 +1159,10 @@ function togglePanel(){
 var panel = document.getElementById("sidePanel");
 
 if(panelVisible){
-panel.style.top = "-500px";
+panel.style.transform = "translateY(-120%)"; // 🔥 hilang total
 panelVisible = false;
 }else{
-panel.style.top = "140px"; // 🔥 samakan dengan CSS
+panel.style.transform = "translateY(0)";
 panelVisible = true;
 }
 
