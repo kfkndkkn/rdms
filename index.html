@@ -239,7 +239,7 @@ top:140px;
 left:10px;
 width:260px;
 
-max-height:calc(100vh - 260px);
+max-height:calc(100vh - 320px);
 overflow-y:auto;
 
 background:#1f5fa8;
@@ -247,7 +247,7 @@ padding:14px;
 color:white;
 z-index:9999;
 border-radius:10px;
-
+overflow-y:auto;
 /* 🔥 ANIMASI HORIZONTAL */
 transform:translateX(0);
 transition:transform 0.3s ease;
@@ -286,6 +286,12 @@ opacity:0.9;
 #avgBarChart{
 height:auto !important;
 max-height:180px; /* 🔥 fleksibel */
+}
+
+@media (max-height: 800px){
+#sidePanel{
+max-height:calc(100vh - 360px); /* 🔥 lebih pendek lagi */
+}
 }
 </style>
 </head>
