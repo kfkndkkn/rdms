@@ -917,18 +917,22 @@ ticks:{
 autoSkip:false,
 font:{size:11},
 
-callback:function(value){
+callback:function(value, index){
 
-// 🔥 MAX PANJANG PER BARIS
+var label = this.getLabelForValue(value);
+
+// 🔥 SAFETY
+if(!label) return "";
+
+// 🔥 MAX PANJANG
 var maxLen = 12;
 
-// 🔥 JIKA PENDEK → NORMAL
-if(value.length <= maxLen){
-return value;
+if(label.length <= maxLen){
+return label;
 }
 
-// 🔥 SPLIT JADI MULTILINE
-var words = value.split(" ");
+// 🔥 SPLIT MULTILINE
+var words = label.split(" ");
 var lines = [];
 var line = "";
 
@@ -943,7 +947,6 @@ line += w + " ";
 
 lines.push(line.trim());
 
-// 🔥 BATASI MAX 3 BARIS
 return lines.slice(0,3);
 }
 },
