@@ -869,19 +869,16 @@ minRotation:0,
 
 callback:function(value, i){
 
-const mid = Math.floor(index/2);
+// 🔥 tentukan jumlah label yang ingin tampil
+const targetTicks = 6; // bisa ubah (5–10 ideal)
 
-// 🔥 tampilkan:
-// - awal
-// - tengah
-// - akhir
-// - interval tiap 6 data (~1 jam)
+// 🔥 hitung step otomatis
+const step = Math.floor(index / targetTicks);
 
 if(
-i === 0 ||
-i === mid ||
-i === index ||
-i % 6 === 0
+i === 0 ||                 // awal
+i === index ||             // akhir
+(i % step === 0)           // tengah tersebar
 ){
 return allLabels[i];
 }
