@@ -239,7 +239,7 @@ top:140px;
 left:10px;
 width:260px;
 
-max-height:calc(100vh - 260px);
+max-height:calc(100vh - 220px);
 overflow-y:auto;
 
 background:#1f5fa8;
@@ -284,8 +284,8 @@ opacity:0.9;
 }
 
 #avgBarChart{
-height:auto !important;
-max-height:180px; /* 🔥 fleksibel */
+height:220px !important;  /* 🔥 sweet spot */
+max-height:220px;
 }
 </style>
 </head>
@@ -869,6 +869,11 @@ result.sort((a,b)=>b.avg - a.avg);
 var top = result.slice(0,5);
 
 var labels = top.map(r=>r.name);
+var dynamicHeight = labels.length * 35; // 1 bar ≈ 35px
+
+dynamicHeight = Math.min(dynamicHeight, 220); // 🔥 batasi biar gak nabrak legend
+
+document.getElementById("avgBarChart").style.height = dynamicHeight + "px";
 var values = top.map(r=>r.avg);
 
 // 🔥 CEK DATA SAMA → JANGAN UPDATE
