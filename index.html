@@ -890,7 +890,7 @@ labels:labels,
 datasets:[{
 data:values,
 backgroundColor:'#2b83ba',
-barThickness:14
+barThickness:10
 }]
 },
 options:{
@@ -904,7 +904,7 @@ legend:{display:false}
 },
 
 layout:{
-padding:{left:20,right:10}
+padding:{left:50,right:10}
 },
 
 scales:{
@@ -913,25 +913,28 @@ beginAtZero:true,
 title:{display:true,text:"nSv/h"}
 },
 y:{
+
+afterFit: function(scale){
+scale.width = 120; // 🔥 ruang label fix
+},
+
 ticks:{
 autoSkip:false,
-font:{size:11},
+font:{size:10},
+padding:6,
+align:'end',
 
 callback:function(value, index){
 
 var label = this.getLabelForValue(value);
-
-// 🔥 SAFETY
 if(!label) return "";
 
-// 🔥 MAX PANJANG
 var maxLen = 12;
 
 if(label.length <= maxLen){
 return label;
 }
 
-// 🔥 SPLIT MULTILINE
 var words = label.split(" ");
 var lines = [];
 var line = "";
