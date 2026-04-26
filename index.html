@@ -909,7 +909,7 @@ legend:{display:false}
 },
 
 layout:{
-padding:{left:80,right:10}
+padding:{left:100,right:10}
 },
 
 scales:{
@@ -919,23 +919,34 @@ title:{display:true,text:"nSv/h"}
 },
 y:{
 ticks:{
+offset:true,
 padding:5,
 autoSkip:false,
-font:{size:10},
+font:{size:9},
 
 callback:function(value){
 
 let label = this.getLabelForValue(value);
 
-// 🔥 max 2 baris saja biar tidak berantakan
-if(label.length > 18){
-return [
-label.slice(0,18),
-label.slice(18)
-];
-}
+// 🔥 potong berdasarkan KATA, bukan huruf
+let words = label.split(" ");
+let lines = [];
+let line = "";
 
-return label;
+words.forEach(w=>{
+if((line + " " + w).length > 18){
+lines.push(line);
+line = w;
+}else{
+line += (line ? " " : "") + w;
+}
+});
+
+// push sisa
+if(line) lines.push(line);
+
+// 🔥 maksimal 2 baris aja biar clean
+return lines.slice(0,2);
 }
 },
 grid:{display:false}
