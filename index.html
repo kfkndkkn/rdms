@@ -865,8 +865,10 @@ scales:{
 x:{
 type:'category',
 
-offset:false,       // 🔥 wajib
-bounds:'data',      // 🔥 kunci anti gap
+min:0,
+max:index,
+
+offset:false, // 🔥 INI KUNCI
 
 ticks:{
 autoSkip:false,
@@ -875,14 +877,10 @@ minRotation:0,
 
 callback:function(value, i){
 
-const mid = Math.floor(labels.length / 2);
+const mid = Math.floor(index / 2);
 
-if(
-i === 0 ||
-i === mid ||
-i === labels.length - 1
-){
-return labels[i];
+if(i === 0 || i === mid || i === index){
+return allLabels[i];
 }
 
 return "";
