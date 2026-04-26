@@ -869,22 +869,12 @@ minRotation:0,
 
 callback:function(value, i){
 
-// 🔥 maksimal jarak antar label (misal tiap 2 jam = 12 data)
-const maxStep = 12;
-
-// 🔥 hitung step adaptif
-const dynamicStep = Math.max(
-Math.floor(index / 8), // target sekitar 8 label
-1
-);
-
-// 🔥 pilih step paling kecil biar tidak jarang
-const step = Math.min(dynamicStep, maxStep);
+const mid = Math.floor(index / 2);
 
 if(
-i === 0 || 
-i === index || 
-(i % step === 0)
+i === 0 ||        // awal
+i === mid ||      // tengah
+i === index       // akhir
 ){
 return allLabels[i];
 }
