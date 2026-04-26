@@ -284,7 +284,7 @@ opacity:0.9;
 }
 
 #avgBarChart{
-max-height:220px; /* 🔥 lebih lega */
+height:260px !important; /* 🔥 paksa tinggi */
 }
 </style>
 </head>
@@ -889,7 +889,7 @@ labels:labels,
 datasets:[{
 data:values,
 backgroundColor:'#2b83ba',
-barThickness:10
+minBarLength:8
 }]
 },
 options:{
@@ -903,7 +903,7 @@ legend:{display:false}
 },
 
 layout:{
-padding:{left:70,right:10}
+padding:{left:50,right:10}
 },
 
 scales:{
@@ -914,7 +914,7 @@ title:{display:true,text:"nSv/h"}
 y:{
 
 afterFit: function(scale){
-scale.width = 180; // 🔥 kasih napas
+scale.width = 140; // 🔥 kasih napas
 },
 
 ticks:{
