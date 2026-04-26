@@ -924,17 +924,19 @@ font:{size:10},
 padding:6,
 align:'end',
 
-callback:function(value, index){
+callback:function(value){
 
 var label = this.getLabelForValue(value);
 if(!label) return "";
 
 var maxLen = 12;
 
+// pendek → normal
 if(label.length <= maxLen){
 return label;
 }
 
+// split jadi multi-line STRING (pakai \n)
 var words = label.split(" ");
 var lines = [];
 var line = "";
@@ -950,7 +952,8 @@ line += w + " ";
 
 lines.push(line.trim());
 
-return lines.slice(0,3);
+// 🔥 JOIN pakai newline (INI KUNCI)
+return lines.slice(0,3).join("\n");
 }
 },
 
