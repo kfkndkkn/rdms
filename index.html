@@ -904,7 +904,7 @@ legend:{display:false}
 },
 
 layout:{
-padding:{left:20,right:10}
+padding:{left:90,right:10}
 },
 
 scales:{
@@ -913,9 +913,36 @@ beginAtZero:true,
 title:{display:true,text:"nSv/h"}
 },
 y:{
+offset:true,
 ticks:{
 autoSkip:false,
-font:{size:11}
+font:{size:10},
+padding:4,
+
+callback:function(value){
+
+let label = this.getLabelForValue(value);
+
+// 🔥 split per kata
+let words = label.split(" ");
+let lines = [];
+let line = "";
+
+// 🔥 bikin max 2 baris rapi
+words.forEach(w=>{
+if((line + " " + w).length > 16){
+lines.push(line);
+line = w;
+}else{
+line += (line ? " " : "") + w;
+}
+});
+
+if(line) lines.push(line);
+
+// 🔥 maksimal 2 baris saja
+return lines.slice(0,2);
+}
 },
 grid:{display:false}
 }
