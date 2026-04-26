@@ -284,7 +284,8 @@ opacity:0.9;
 }
 
 #avgBarChart{
-height:260px !important; /* 🔥 paksa tinggi */
+height:auto !important;
+max-height:180px; /* 🔥 fleksibel */
 }
 </style>
 </head>
@@ -889,7 +890,7 @@ labels:labels,
 datasets:[{
 data:values,
 backgroundColor:'#2b83ba',
-minBarLength:8
+barThickness:14
 }]
 },
 options:{
@@ -903,7 +904,7 @@ legend:{display:false}
 },
 
 layout:{
-padding:{left:50,right:10}
+padding:{left:20,right:10}
 },
 
 scales:{
@@ -912,43 +913,10 @@ beginAtZero:true,
 title:{display:true,text:"nSv/h"}
 },
 y:{
-
-afterFit: function(scale){
-scale.width = 140; // 🔥 kasih napas
-},
-
 ticks:{
 autoSkip:false,
-font:{size:9},
-padding:6,
-align:'end',
-
-callback:function(value){
-
-var label = this.getLabelForValue(value);
-if(!label) return "";
-
-// 🔥 potong jadi 2–3 baris
-var words = label.split(" ");
-var lines = [];
-var line = "";
-
-words.forEach(w=>{
-if((line + w).length > 14){
-lines.push(line.trim());
-line = w + " ";
-}else{
-line += w + " ";
-}
-});
-
-lines.push(line.trim());
-
-// 🔥 maksimal 3 baris
-return lines.slice(0,3).join("\n");
-}
+font:{size:11}
 },
-
 grid:{display:false}
 }
 }
