@@ -232,7 +232,48 @@ flex-shrink:0;
 width:100% !important;
 height:100% !important;
 }
-  
+
+#sidePanel{
+position:absolute;
+top:80px;
+right:10px;
+width:260px;
+background:#1f5fa8;
+padding:12px;
+color:white;
+z-index:9999;
+border-radius:6px;
+}
+
+.panel-box{
+background:#eaeaea;
+color:#222;
+padding:10px;
+margin-bottom:12px;
+border-radius:6px;
+text-align:center;
+}
+
+.panel-box.highlight{
+background:#2b6cb0;
+color:white;
+}
+
+.title{
+font-size:13px;
+font-weight:bold;
+margin-bottom:5px;
+}
+
+.big{
+font-size:28px;
+font-weight:bold;
+}
+
+.sub{
+font-size:12px;
+opacity:0.9;
+}
 </style>
 </head>
 
@@ -244,6 +285,32 @@ height:100% !important;
 </div>
 
 <div id="map"></div>
+
+<div id="sidePanel">
+
+<div class="panel-box">
+<input type="date" id="startDate">
+<input type="date" id="endDate">
+</div>
+
+<div class="panel-box highlight">
+<div class="title">Maximum Dose Rate (nSv/h)</div>
+<div id="maxValue" class="big">-</div>
+<div id="maxStation" class="sub">-</div>
+</div>
+
+<div class="panel-box highlight">
+<div class="title">Minimum Dose Rate (nSv/h)</div>
+<div id="minValue" class="big">-</div>
+<div id="minStation" class="sub">-</div>
+</div>
+
+<div class="panel-box">
+<div class="title">Average Dose Rate (nSv/h)</div>
+<canvas id="avgBarChart"></canvas>
+</div>
+
+</div>
 
 <div id="tsModal">
 <div id="tsBox">
@@ -302,6 +369,8 @@ loadProfile();
 
 setTimeout(()=>{
 loadCSV();
+updateSidePanel();
+setInterval(updateSidePanel,30000);
 },300);
 function loadProfile(){
 
@@ -687,6 +756,79 @@ loadCSV();
 setInterval(loadCSV,30000);
 map.on("zoomend",loadCSV);
 
+  function updateSidePanel(){
+
+fetch("output.csv?nocache="+Date.now())
+.then(r=>r.text())
+.then(text=>{
+
+var data = Papa.parse(text,{header:true}).data;
+
+var valid = data.filter(r=>!isNaN(parseFloat(r["Gamma Dose Rate (nSv/h)"])));
+
+if(valid.length===0) return;
+
+// 🔥 MAX
+var maxRow = valid.reduce((a,b)=>{
+return parseFloat(a["Gamma Dose Rate (nSv/h)"]) > parseFloat(b["Gamma Dose Rate (nSv/h)"]) ? a : b;
+});
+
+// 🔥 MIN
+var minRow = valid.reduce((a,b)=>{
+return parseFloat(a["Gamma Dose Rate (nSv/h)"]) < parseFloat(b["Gamma Dose Rate (nSv/h)"]) ? a : b;
+});
+
+// SET UI
+document.getElementById("maxValue").innerHTML =
+parseFloat(maxRow["Gamma Dose Rate (nSv/h)"]).toFixed(2);
+
+document.getElementById("maxStation").innerHTML =
+maxRow["NAMA UNIT"];
+
+document.getElementById("minValue").innerHTML =
+parseFloat(minRow["Gamma Dose Rate (nSv/h)"]).toFixed(2);
+
+document.getElementById("minStation").innerHTML =
+minRow["NAMA UNIT"];
+
+// 🔥 BAR CHART (TOP 10)
+drawAvgChart(valid);
+
+});
+
+}
+function drawAvgChart(data){
+
+// ambil top 10 tertinggi
+data.sort((a,b)=>
+parseFloat(b["Gamma Dose Rate (nSv/h)"]) -
+parseFloat(a["Gamma Dose Rate (nSv/h)"])
+);
+
+var top = data.slice(0,10);
+
+var labels = top.map(r=>r["NAMA UNIT"]);
+var values = top.map(r=>parseFloat(r["Gamma Dose Rate (nSv/h)"]));
+
+new Chart(document.getElementById("avgBarChart"),{
+type:'bar',
+data:{
+labels:labels,
+datasets:[{
+data:values,
+backgroundColor:'#2b83ba'
+}]
+},
+options:{
+indexAxis:'y', // 🔥 horizontal bar
+plugins:{legend:{display:false}},
+scales:{
+x:{beginAtZero:true}
+}
+}
+});
+
+}
 // TIME SERIES
 
 var tsChart=null;
