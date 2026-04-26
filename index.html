@@ -239,37 +239,32 @@ top:140px;
 left:10px;
 width:260px;
 
-max-height:calc(100vh - 220px); /* 🔥 lebih lega */
+max-height:calc(100vh - 260px);
 overflow-y:auto;
 
-background:linear-gradient(180deg,#0b1e3f,#1f5fa8); /* 🔥 profesional */
+background:#1f5fa8;
 padding:14px;
 color:white;
 z-index:9999;
-border-radius:12px;
+border-radius:10px;
 
-box-shadow:0 8px 24px rgba(0,0,0,0.35); /* 🔥 depth */
-
+/* 🔥 ANIMASI HORIZONTAL */
 transform:translateX(0);
 transition:transform 0.3s ease;
 }
   
 .panel-box{
-background:rgba(255,255,255,0.95);
+background:#eaeaea;
 color:#222;
-padding:10px;
-margin-bottom:12px;
-border-radius:8px;
+padding:8px;
+margin-bottom:10px;
+border-radius:6px;
 text-align:center;
-
-box-shadow:0 2px 8px rgba(0,0,0,0.15);
 }
 
 .panel-box.highlight{
-background:linear-gradient(135deg,#2b6cb0,#1f5fa8);
+background:#2b6cb0;
 color:white;
-
-box-shadow:0 4px 12px rgba(0,0,0,0.3);
 }
 
 .title{
@@ -289,7 +284,8 @@ opacity:0.9;
 }
 
 #avgBarChart{
-height:300px !important;   /* 🔥 lebih tinggi */
+height:auto !important;
+max-height:180px; /* 🔥 fleksibel */
 }
 </style>
 </head>
@@ -894,10 +890,7 @@ labels:labels,
 datasets:[{
 data:values,
 backgroundColor:'#2b83ba',
-barThickness:12,
-maxBarThickness:14,
-categoryPercentage:0.8,
-barPercentage:0.9
+barThickness:14
 }]
 },
 options:{
@@ -907,12 +900,7 @@ maintainAspectRatio:false,
 animation:false, // 🔥 NO FLICKER
 
 plugins:{
-legend:{display:false},
-tooltip:{
-backgroundColor:'#0b1e3f',
-titleColor:'#fff',
-bodyColor:'#fff'
-}
+legend:{display:false}
 },
 
 layout:{
@@ -927,38 +915,8 @@ title:{display:true,text:"nSv/h"}
 y:{
 ticks:{
 autoSkip:false,
-font:{size:11},
-
-callback:function(value){
-
-// 🔥 split panjang jadi multi-line
-var maxLen = 14;
-
-if(value.length > maxLen){
-
-var words = value.split(" ");
-var lines = [];
-var line = "";
-
-words.forEach(w=>{
-if((line + w).length > maxLen){
-lines.push(line);
-line = w + " ";
-}else{
-line += w + " ";
-}
-});
-
-lines.push(line);
-
-return lines; // 🔥 multi-line
-}
-
-return value;
-}
+font:{size:11}
 },
-grid:{display:false}
-}
 grid:{display:false}
 }
 }
