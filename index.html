@@ -234,8 +234,6 @@ height:100% !important;
 }
 
 #sidePanel{
-width:100% !important;
-height:400px !important;
 position:absolute;
 top:80px;
 right:10px;
@@ -290,18 +288,6 @@ opacity:0.9;
 
 <div id="sidePanel">
 
-<button onclick="togglePanel()" style="
-width:100%;
-margin-bottom:10px;
-background:#0b1e3f;
-color:white;
-border:none;
-padding:6px;
-border-radius:6px;
-cursor:pointer;">
-Hide Panel
-</button>
-
 <div class="panel-box">
 <input type="date" id="startDate">
 <input type="date" id="endDate">
@@ -321,9 +307,7 @@ Hide Panel
 
 <div class="panel-box">
 <div class="title">Average Dose Rate (nSv/h)</div>
-<canvas id="avgBarChart" height="400"></canvas>
-
-  
+<canvas id="avgBarChart"></canvas>
 </div>
 
 </div>
@@ -430,10 +414,7 @@ var esriGrayLabel=L.tileLayer(
 // MAP
 
 var map=L.map('map',{
-zoomControl:false, // 🔥 matikan default
-L.control.zoom({
-position:'topright' // 🔥 pindah ke kanan
-}).addTo(map);
+zoomControl:true,
 layers:[osm],
 zoomSnap:0.25,
 zoomDelta:0.25,
@@ -816,15 +797,6 @@ drawAvgChart(valid);
 });
 
 }
-function togglePanel(){
-var panel = document.getElementById("sidePanel");
-
-if(panel.style.display === "none"){
-panel.style.display = "block";
-}else{
-panel.style.display = "none";
-}
-}
 function drawAvgChart(data){
 
 // ambil top 10 tertinggi
@@ -1020,23 +992,7 @@ fill:true
 options:{
 responsive:true,
 maintainAspectRatio:false, // 🔥 wajib
-indexAxis:'y', // horizontal
 
-plugins:{
-legend:{display:false}
-},
-
-scales:{
-x:{
-beginAtZero:true
-},
-y:{
-ticks:{
-autoSkip:false, // 🔥 tampil semua station
-font:{size:10}  // 🔥 kecilin biar muat
-}
-}
-}
 layout:{
 padding:{
 right:0
