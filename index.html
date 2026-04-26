@@ -904,7 +904,7 @@ legend:{display:false}
 },
 
 layout:{
-padding:{left:90,right:10}
+padding:{left:40,right:10}
 },
 
 scales:{
@@ -916,32 +916,19 @@ y:{
 offset:true,
 ticks:{
 autoSkip:false,
-font:{size:10},
+font:{size:9},
 padding:4,
 
 callback:function(value){
 
 let label = this.getLabelForValue(value);
 
-// 🔥 split per kata
-let words = label.split(" ");
-let lines = [];
-let line = "";
-
-// 🔥 bikin max 2 baris rapi
-words.forEach(w=>{
-if((line + " " + w).length > 16){
-lines.push(line);
-line = w;
-}else{
-line += (line ? " " : "") + w;
+// 🔥 potong saja, jangan wrap aneh
+if(label.length > 22){
+return label.substring(0,22) + "...";
 }
-});
 
-if(line) lines.push(line);
-
-// 🔥 maksimal 2 baris saja
-return lines.slice(0,2);
+return label;
 }
 },
 grid:{display:false}
@@ -1135,8 +1122,15 @@ right:0
 
 plugins:{
 legend:{display:false}
-},
 
+},
+tooltip:{
+callbacks:{
+title:function(items){
+return items[0].label; // 🔥 tampil full label saat hover
+}
+}
+}
 scales:{
 x:{
 type:'category',
