@@ -11,7 +11,7 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>#tsChart{
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -243,7 +243,7 @@ padding:12px;
 color:white;
 z-index:9999;
 border-radius:6px;
-transition:transform 0.3s ease; /* optional biar smooth */
+transition:left 0.3s ease; /* optional biar smooth */
 }
 
 .panel-box{
@@ -429,14 +429,14 @@ var esriGrayLabel=L.tileLayer(
 // MAP
 
 var map=L.map('map',{
-map.zoomControl.setPosition('topright');
+
 zoomControl:true,
 layers:[osm],
 zoomSnap:0.25,
 zoomDelta:0.25,
 wheelPxPerZoomLevel:120
 });
-
+map.zoomControl.setPosition('topright');
 map.attributionControl.addAttribution("© DKKN-BAPETEN 2026");
 
 var indonesiaBounds=[[-11,94],[6,141]];
@@ -1075,14 +1075,19 @@ var panel = document.getElementById("sidePanel");
 var btn = document.getElementById("togglePanelBtn");
 
 if(panelVisible){
-panel.style.transform = "translateX(-280px)";
+panel.style.left = "-280px";   // 🔥 keluar beneran
 btn.style.left = "10px";
 panelVisible = false;
 }else{
-panel.style.transform = "translateX(0)";
+panel.style.left = "10px";
 btn.style.left = "280px";
 panelVisible = true;
 }
+
+// 🔥 refresh leaflet
+setTimeout(()=>{
+map.invalidateSize();
+},300);
 }
 // LEGEND
 
