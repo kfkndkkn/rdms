@@ -869,16 +869,22 @@ minRotation:0,
 
 callback:function(value, i){
 
-// 🔥 tentukan jumlah label yang ingin tampil
-const targetTicks = 6; // bisa ubah (5–10 ideal)
+// 🔥 maksimal jarak antar label (misal tiap 2 jam = 12 data)
+const maxStep = 12;
 
-// 🔥 hitung step otomatis
-const step = Math.floor(index / targetTicks);
+// 🔥 hitung step adaptif
+const dynamicStep = Math.max(
+Math.floor(index / 8), // target sekitar 8 label
+1
+);
+
+// 🔥 pilih step paling kecil biar tidak jarang
+const step = Math.min(dynamicStep, maxStep);
 
 if(
-i === 0 ||                 // awal
-i === index ||             // akhir
-(i % step === 0)           // tengah tersebar
+i === 0 || 
+i === index || 
+(i % step === 0)
 ){
 return allLabels[i];
 }
