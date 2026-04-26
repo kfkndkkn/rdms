@@ -235,15 +235,15 @@ height:100% !important;
 
 #sidePanel{
 position:absolute;
-top:80px;
+top:140px; /* 🔥 TURUNKAN dari 80px */
 left:10px;
-width:300px; /* 🔥 dibesarkan */
+width:300px;
 background:#1f5fa8;
 padding:14px;
 color:white;
 z-index:9999;
 border-radius:10px;
-transition:top 0.3s ease; /* 🔥 ubah animasi */
+transition:top 0.3s ease;
 }
 
 .panel-box{
@@ -277,7 +277,7 @@ opacity:0.9;
 }
 
 #avgBarChart{
-height:220px !important;
+height:260px !important; /* 🔥 tambah tinggi */
 }
 </style>
 </head>
@@ -884,14 +884,23 @@ backgroundColor:'#2b83ba'
 }]
 },
 options:{
-plugins:{legend:{display:false}},
+indexAxis:'y', // 🔥 INI KUNCI (horizontal)
+plugins:{
+legend:{display:false}
+},
 scales:{
-y:{beginAtZero:true}
+x:{
+beginAtZero:true,
+title:{display:true,text:"nSv/h"}
+},
+y:{
+ticks:{
+autoSkip:false,
+callback:function(value){
+return value.length > 18 
+? value.substring(0,18) + "..." 
+: value;
 }
-}
-});
-
-});
 }
 // TIME SERIES
 
@@ -1122,10 +1131,10 @@ function togglePanel(){
 var panel = document.getElementById("sidePanel");
 
 if(panelVisible){
-panel.style.top = "-500px";  // 🔥 naik ke atas
+panel.style.top = "-500px";
 panelVisible = false;
 }else{
-panel.style.top = "80px";
+panel.style.top = "140px"; // 🔥 samakan dengan CSS
 panelVisible = true;
 }
 
