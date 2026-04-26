@@ -910,22 +910,37 @@ padding:{left:10,right:10}
 scales:{
 x:{
 beginAtZero:true,
+max:75,   // 🔥 BATAS MAKSIMUM
 title:{display:true,text:"nSv/h"}
 },
 y:{
 offset:true,
 ticks:{
 autoSkip:false,
-font:{size:9},
+font:{size:10},
 padding:4,
 
 callback:function(value){
 
 let label = this.getLabelForValue(value);
 
-// 🔥 SPLIT JADI 2 BARIS (PASTI KE-WRAP)
+// 🔥 NORMALISASI (INI KUNCI)
+label = label
+.replace(/\./g, " ")   // titik jadi spasi
+.replace(/\s+/g, " ")  // rapikan spasi
+.trim();
+
 let words = label.split(" ");
 
+// 🔥 kalau cuma 1 kata panjang → paksa split
+if(words.length === 1 && label.length > 12){
+return [
+label.substring(0,12),
+label.substring(12)
+];
+}
+
+// 🔥 normal 2 baris
 if(words.length >= 2){
 return [
 words.slice(0, Math.ceil(words.length/2)).join(" "),
@@ -933,7 +948,6 @@ words.slice(Math.ceil(words.length/2)).join(" ")
 ];
 }
 
-// kalau cuma 1 kata
 return label;
 }
 },
