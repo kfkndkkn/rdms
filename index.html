@@ -875,6 +875,10 @@ window.avgChart.destroy();
 
 // 🔥 CREATE NEW
 window.avgChart = new Chart(document.getElementById("avgBarChart"),{
+
+}); // 🔥 tutup .then
+}    // 🔥 tutup function
+  
 type:'bar',
 data:{
 labels:labels,
@@ -884,7 +888,7 @@ backgroundColor:'#2b83ba'
 }]
 },
 options:{
-indexAxis:'y', // 🔥 INI KUNCI (horizontal)
+indexAxis:'y',
 plugins:{
 legend:{display:false}
 },
@@ -902,6 +906,13 @@ return value.length > 18
 : value;
 }
 }
+}
+}
+}
+});
+
+}
+  
 // TIME SERIES
 
 var tsChart=null;
