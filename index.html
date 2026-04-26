@@ -237,21 +237,26 @@ height:100% !important;
 position:absolute;
 top:140px;
 left:10px;
-width:260px; /* 🔥 samakan legend */
+width:260px;
+
+max-height:calc(100vh - 260px); /* 🔥 KUNCI: sisakan ruang legend */
+overflow-y:auto;               /* 🔥 kalau kepanjangan, scroll */
+
 background:#1f5fa8;
 padding:14px;
 color:white;
 z-index:9999;
 border-radius:10px;
-transform:translateY(0); /* 🔥 ganti top animasi */
+
+transform:translateY(0);
 transition:transform 0.3s ease;
 }
-
+  
 .panel-box{
 background:#eaeaea;
 color:#222;
-padding:10px;
-margin-bottom:12px;
+padding:8px;
+margin-bottom:10px;
 border-radius:6px;
 text-align:center;
 }
@@ -278,7 +283,8 @@ opacity:0.9;
 }
 
 #avgBarChart{
-height:260px !important; /* 🔥 tambah tinggi */
+height:auto !important;
+max-height:180px; /* 🔥 fleksibel */
 }
 </style>
 </head>
@@ -832,7 +838,6 @@ sevenDaysAgo.setDate(now.getDate() - 7);
 var grouped = {};
 
 data.forEach(r=>{
-
 var t = new Date(r.time);
 var v = parseFloat(r.dose);
 
@@ -855,29 +860,28 @@ Object.keys(grouped).forEach(station=>{
 var arr = grouped[station];
 var avg = arr.reduce((a,b)=>a+b,0) / arr.length;
 
-result.push({name:station, avg:avg});
+result.push({name:station,avg:avg});
 });
 
 // SORT TOP 5
 result.sort((a,b)=>b.avg - a.avg);
 var top = result.slice(0,5);
 
-// LABEL FULL (NO CUT)
 var labels = top.map(r=>r.name);
 var values = top.map(r=>r.avg);
 
-// DESTROY ONLY IF EXIST
-if(window.avgChart){
-window.avgChart.destroy();
-}
+// 🔥 CEK DATA SAMA → JANGAN UPDATE
 var currentData = JSON.stringify(values);
 
 if(window.lastChartData === currentData){
-return; // 🔥 tidak redraw
+return;
 }
-
 window.lastChartData = currentData;
-// CREATE
+
+
+// 🔥 KALAU BELUM ADA → CREATE
+if(!window.avgChart){
+
 window.avgChart = new Chart(document.getElementById("avgBarChart"),{
 type:'bar',
 data:{
@@ -885,40 +889,32 @@ labels:labels,
 datasets:[{
 data:values,
 backgroundColor:'#2b83ba',
-barThickness:18 // 🔥 proporsional
+barThickness:14
 }]
 },
 options:{
+indexAxis:'y',
 responsive:true,
 maintainAspectRatio:false,
-indexAxis:'y',
+animation:false, // 🔥 NO FLICKER
 
 plugins:{
 legend:{display:false}
 },
 
 layout:{
-padding:{
-left:10,
-right:10
-}
+padding:{left:20,right:10}
 },
 
 scales:{
 x:{
 beginAtZero:true,
-grid:{color:"rgba(0,0,0,0.05)"},
-title:{
-display:true,
-text:"nSv/h"
-}
+title:{display:true,text:"nSv/h"}
 },
 y:{
 ticks:{
-autoSkip:false, // 🔥 wajib
-font:{
-size:11
-}
+autoSkip:false,
+font:{size:11}
 },
 grid:{display:false}
 }
@@ -926,8 +922,17 @@ grid:{display:false}
 }
 });
 
-});
+}else{
 
+// 🔥 UPDATE TANPA DESTROY
+window.avgChart.data.labels = labels;
+window.avgChart.data.datasets[0].data = values;
+
+window.avgChart.update('none'); // 🔥 TANPA ANIMASI
+
+}
+
+});
 }
   
 // TIME SERIES
