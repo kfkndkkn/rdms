@@ -763,13 +763,19 @@ fetch("timeseries.csv?nocache="+Date.now())
 
 var data=Papa.parse(text,{header:true}).data;
 
+const now = new Date();
+const oneMonthAgo = new Date();
+oneMonthAgo.setMonth(now.getMonth() - 1);
+
 data.forEach(r=>{
 
 if(normalizeName(r.station) === normalizeName(station)){
 
-var v=parseFloat(r.dose);
+var t = new Date(r.time);
+var v = parseFloat(r.dose);
 
-if(!isNaN(v)){
+// 🔥 FILTER 1 BULAN TERAKHIR
+if(t >= oneMonthAgo && t <= now && !isNaN(v)){
 allLabels.push(r.time);
 allValues.push(v);
 }
@@ -853,13 +859,21 @@ scales:{
 x:{
 min:0,
 max:index,
+
 ticks:{
+autoSkip:false, // 🔥 WAJIB
 maxRotation:0,
 minRotation:0,
-autoSkip:true,
-maxTicksLimit:8
+
+callback:function(value, i){
+if(i === 0 || i === index){
+return allLabels[i]; // 🔥 tampilkan awal & akhir
+}
+return "";
+}
 },
-grid:{display:false} // 🔥 tambahan dari step 4
+
+grid:{display:false}
 },
 
 y:{
