@@ -869,9 +869,11 @@ if(!isTooClose(labelOffsetLat, labelOffsetLon, placedLabels, minDistance)){
     })
   });
 
-  label.addTo(labelLayer);
+label.addTo(labelLayer);
 
 }
+
+});
 
 var labelOffsetLat = lat + (radius/111111)*0.9;
 var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
