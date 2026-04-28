@@ -705,11 +705,7 @@ skipEmptyLines:true
 }).data;
 window.stationIndex = {};
 
-  data.sort((a,b)=>{
-  let da = window.latestTS[normalizeName(a["NAMA UNIT"])]?.dose || 0;
-  let db = window.latestTS[normalizeName(b["NAMA UNIT"])]?.dose || 0;
-  return db - da;
-});
+
 rawData.forEach(r=>{
 var key = normalizeName(r["NAMA UNIT"]);
 window.stationIndex[key] = r;
