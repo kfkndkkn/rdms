@@ -245,8 +245,13 @@ color:white;
 z-index:9999;
 border-radius:10px;
 
-/* 🔥 GANTI INI */
-margin-bottom:140px;
+/* 🔥 INI YANG BIKIN RESPONSIVE */
+max-height:calc(100vh - 180px);
+overflow-y:auto;
+
+transform:translateX(-110%);
+transition:transform 0.3s ease;
+}
 
 transform:translateX(-110%);
 transition:transform 0.3s ease;
@@ -285,7 +290,6 @@ opacity:0.9;
 
 #avgBarChart{
 height:auto !important;
-max-height:180px; /* 🔥 fleksibel */
 }
 
 .legend-highlight {
@@ -923,13 +927,24 @@ result.push({name:station,avg:avg});
 var screenWidth = window.innerWidth;
 
 // 🔥 RULE
-var topN = screenWidth >= 1336 ? 10 : 5;
+var topN;
+
+if(screenWidth >= 1920){
+    topN = 10;
+}else if(screenWidth >= 1336){
+    topN = 5;
+}else{
+    topN = 5;
+}
 
 // SORT
 result.sort((a,b)=>b.avg - a.avg);
 
 // 🔥 AMBIL SESUAI RESOLUSI
 var top = result.slice(0, topN);
+  // 🔥 AUTO HEIGHT BASED ON DATA
+var dynamicHeight = top.length * 35; // 35px per bar
+document.getElementById("avgBarChart").style.height = dynamicHeight + "px";
 var labels = top.map(r=>r.name);
 var values = top.map(r=>r.avg);
 
@@ -1291,10 +1306,7 @@ if(legendVisible){
 map.removeControl(legend);
 legendVisible = false;
 }
-// 🔥 RESPONSIVE SAAT RESIZE
-window.addEventListener("resize", function(){
-    drawAvgChart();
-});
+
 }
 
 setTimeout(()=>{
@@ -1409,6 +1421,10 @@ return div;
 };
 
 legend.addTo(map);
+
+window.addEventListener("resize", function(){
+drawAvgChart();
+});
 
 </script>
 
