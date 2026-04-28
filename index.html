@@ -995,15 +995,13 @@ plugins:{
   tooltip:{
     enabled:true,
 
-    // 🔥 KUNCI UTAMA
-    position:'nearest',
+    mode:'nearest',
+    intersect:true,   // 🔥 wajib biar nempel ke bar
 
-    yAlign:'bottom',   // 🔥 tooltip muncul ke atas bar
-    xAlign:'center',
+    position:'average', // 🔥 ini kunci (bukan nearest)
 
-    // 🔥 biar tidak keluar container
-    caretPadding:6,
-    padding:8,
+    xAlign:'right',     // 🔥 karena bar horizontal
+    yAlign:'center',
 
     callbacks:{
       label:function(ctx){
