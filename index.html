@@ -245,12 +245,12 @@ color:white;
 z-index:9999;
 border-radius:10px;
 
+display:flex;               /* 🔥 KUNCI */
+flex-direction:column;      /* 🔥 SUSUN VERTIKAL */
+gap:10px;                   /* 🔥 JARAK RAPI */
+
 transform:translateX(-110%);
 transition:transform 0.3s ease;
-
-/* 🔥 HAPUS INI */
- /* bottom:140px; */
- /* overflow-y:auto; */
 }
   
 .panel-box{
@@ -261,8 +261,12 @@ padding:8px;
 margin-bottom:10px;
 border-radius:6px;
 text-align:center;
+display:flex;
+ flex-direction:column;
 }
-
+.panel-box canvas{
+  width:100% !important;
+}
 .panel-box.highlight{
 background:#2b6cb0;
 color:white;
@@ -285,8 +289,8 @@ opacity:0.9;
 }
 
 #avgBarChart{
-height:auto !important;
-max-height:180px; /* 🔥 fleksibel */
+  height:auto !important;
+  max-height:none; /* 🔥 WAJIB */
 }
 
 .legend-highlight {
@@ -310,15 +314,9 @@ max-height:180px; /* 🔥 fleksibel */
 
 /* ===== RESPONSIVE WIDE SCREEN ===== */
 @media (min-width:1600px){
-
   #sidePanel{
     width:300px;
   }
-
-  #avgBarChart{
-    max-height:260px;
-  }
-
 }
   
 </style>
@@ -958,7 +956,12 @@ var top = result.slice(0, isWide ? 10 : 5);
 
 var labels = top.map(r=>r.name);
 var values = top.map(r=>r.avg);
+// 🔥 AUTO HEIGHT BERDASARKAN JUMLAH BAR
+var barCount = values.length;
+var dynamicHeight = barCount * 28 + 60; // 28px per bar
 
+var canvas = document.getElementById("avgBarChart");
+canvas.style.height = dynamicHeight + "px";
 // 🔥 CEK DATA SAMA → JANGAN UPDATE
 var currentData = JSON.stringify(values);
 
