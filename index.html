@@ -477,7 +477,8 @@ map.fitBounds(indonesiaBounds);
 // LAYERS
 
 var polygonLayer=L.layerGroup().addTo(map);
-var labelLayer=L.layerGroup().addTo(map);
+var labelLayer=L.layerGroup();
+
 // LAYER CONTROL
 
 L.control.layers(
@@ -667,22 +668,6 @@ if(callback) callback();
 });
 
 }
-function isTooClose(lat, lon, placedLabels, minDistancePx){
-  var point = map.latLngToContainerPoint([lat, lon]);
-
-  for(let p of placedLabels){
-    let dx = p.x - point.x;
-    let dy = p.y - point.y;
-    let dist = Math.sqrt(dx*dx + dy*dy);
-
-    if(dist < minDistancePx){
-      return true;
-    }
-  }
-
-  placedLabels.push(point);
-  return false;
-}
 // LOAD CSV
 function loadCSV(){
 
@@ -709,12 +694,7 @@ window.stationIndex[key] = r;
 });
   
 var zoom=map.getZoom();
-var placedLabels = [];
 
-var minDistance = 120;
-if(zoom > 6) minDistance = 80;
-if(zoom > 8) minDistance = 40;
-if(zoom > 10) minDistance = 20;
 var data;
 
 if(zoom<6){
@@ -854,20 +834,18 @@ if(!row.count){
 var labelOffsetLat = lat + (radius/111111)*0.9;
 var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
 
-// 🔥 FILTER OVERLAP + ZOOM
-if(!isTooClose(labelOffsetLat, labelOffsetLon, placedLabels, minDistance)){
+var label=L.marker([labelOffsetLat,labelOffsetLon],{
+icon:L.divIcon({
+className:'',
+html:'<div class="unit-label">'+row["NAMA UNIT"]+'</div>',
+iconSize:null
+})
+});
 
-  var label = L.marker([labelOffsetLat,labelOffsetLon],{
-    icon: L.divIcon({
-      className:'',
-      html:'<div class="unit-label">'+(row["NAMA UNIT"] || "")+'</div>',
-      iconSize:null
-    })
-  });
+label.addTo(labelLayer);
 
-  label.addTo(labelLayer);
 }
-}
+
 });
 
 });
