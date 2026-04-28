@@ -877,21 +877,6 @@ label.addTo(labelLayer);
 });
 });
 }
-var labelText = row.count 
-  ? row.count + " stations"
-  : row["NAMA UNIT"];
-
-var label=L.marker([labelOffsetLat,labelOffsetLon],{
-icon:L.divIcon({
-className:'',
-html:'<div class="unit-label">'+labelText+'</div>',
-iconSize:null
-})
-});
-
-label.addTo(labelLayer);
-
-}
 
 });
 
