@@ -919,10 +919,17 @@ var avg = arr.reduce((a,b)=>a+b,0) / arr.length;
 result.push({name:station,avg:avg});
 });
 
-// SORT TOP 5
-result.sort((a,b)=>b.avg - a.avg);
-var top = result.slice(0,5);
+// 🔥 DETEKSI RESOLUSI LAYAR
+var screenWidth = window.innerWidth;
 
+// 🔥 RULE
+var topN = screenWidth >= 1336 ? 10 : 5;
+
+// SORT
+result.sort((a,b)=>b.avg - a.avg);
+
+// 🔥 AMBIL SESUAI RESOLUSI
+var top = result.slice(0, topN);
 var labels = top.map(r=>r.name);
 var values = top.map(r=>r.avg);
 
@@ -1274,7 +1281,7 @@ legendVisible = true;
 }
 
 }else{
-
+  
 // 🟢 SHOW PANEL
 panel.style.transform = "translateX(0)";
 panelVisible = true;
@@ -1284,7 +1291,10 @@ if(legendVisible){
 map.removeControl(legend);
 legendVisible = false;
 }
-
+// 🔥 RESPONSIVE SAAT RESIZE
+window.addEventListener("resize", function(){
+    drawAvgChart();
+});
 }
 
 setTimeout(()=>{
