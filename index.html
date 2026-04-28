@@ -250,7 +250,12 @@ margin-bottom:140px;
 transform:translateX(-110%);
 transition:transform 0.3s ease;
 }
-
+@media (min-width:1367px){
+  #sidePanel{
+    max-height: calc(100vh - 180px); /* 🔥 tidak nabrak header & bawah */
+    overflow-y: auto;               /* 🔥 kalau penuh → scroll */
+  }
+}
 /* 🔥 LAYAR BESAR (1920) → fleksibel */
 @media (min-width:1600px){
   #sidePanel{
@@ -963,7 +968,12 @@ labels:labels,
 datasets:[{
 data:values,
 backgroundColor:'#2b83ba',
-barThickness:12
+
+// 🔥 HANYA BERLAKU SAAT TOP 10
+barThickness: topN === 10 ? 8 : 12,
+categoryPercentage: topN === 10 ? 0.7 : 1.0,
+barPercentage: topN === 10 ? 0.8 : 1.0
+
 }]
 },
 options:{
