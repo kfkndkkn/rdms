@@ -958,12 +958,22 @@ var labels = top.map(r=>r.name);
 var values = top.map(r=>r.avg);
 // 🔥 AUTO HEIGHT BERDASARKAN JUMLAH BAR
 var barCount = values.length;
-var dynamicHeight = barCount * 28 + 60; // 28px per bar
 
-var canvas = document.getElementById("avgBarChart");
-canvas.style.height = dynamicHeight + "px";
-// 🔥 CEK DATA SAMA → JANGAN UPDATE
-var currentData = JSON.stringify(values);
+// 🔥 SIMPAN STATE GLOBAL
+if(!window.lastBarCount){
+  window.lastBarCount = 0;
+}
+
+// 🔥 HANYA UPDATE JIKA JUMLAH BAR BERUBAH
+if(window.lastBarCount !== barCount){
+
+  var dynamicHeight = Math.min(barCount * 26 + 50, 320); // 🔥 BATAS MAKS
+
+  var canvas = document.getElementById("avgBarChart");
+  canvas.style.height = dynamicHeight + "px";
+
+  window.lastBarCount = barCount;
+}
 
 // 🔥 TAMBAHKAN JUMLAH DATA KE CACHE
 var currentData = JSON.stringify({
