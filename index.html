@@ -477,7 +477,7 @@ map.fitBounds(indonesiaBounds);
 // LAYERS
 
 var polygonLayer=L.layerGroup().addTo(map);
-var labelLayer=L.layerGroup().addTo(map);
+var labelLayer=L.layerGroup();
 
 // LAYER CONTROL
 
@@ -497,18 +497,7 @@ L.control.layers(
 ).addTo(map);
 
 // RADIUS
-function isTooClose(lat, lon, existing, minDist){
-  for(let i=0;i<existing.length;i++){
-    let dLat = lat - existing[i].lat;
-    let dLon = lon - existing[i].lon;
-    let dist = Math.sqrt(dLat*dLat + dLon*dLon);
 
-    if(dist < minDist){
-      return true;
-    }
-  }
-  return false;
-}
 function getRadius(){
 var zoom=map.getZoom();
 var base=40000;
@@ -690,7 +679,7 @@ fetch("output.csv?nocache="+Date.now())
 
 polygonLayer.clearLayers();
 labelLayer.clearLayers();
-window.displayedLabels = [];
+
 var radius=getRadius();
 
 var rawData=Papa.parse(text,{
@@ -842,52 +831,19 @@ hex.addTo(polygonLayer);
 
 if(!row.count){
 
-// 🔥 pastikan array ada
-if(!window.displayedLabels){
-  window.displayedLabels = [];
-}
+var labelOffsetLat = lat + (radius/111111)*0.9;
+var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
 
-var zoom = map.getZoom();
+var label=L.marker([labelOffsetLat,labelOffsetLon],{
+icon:L.divIcon({
+className:'',
+html:'<div class="unit-label">'+row["NAMA UNIT"]+'</div>',
+iconSize:null
+})
+});
 
-// 🔥 RULE ZOOM (SUDAH DIPERBAIKI)
-var minDist;
+label.addTo(labelLayer);
 
-ivar minDist = (12 - zoom) * 0.1;
-if(minDist < 0) minDist = 0;
-}else if(zoom < 8){
-  minDist = 0.4;
-}else if(zoom < 10){
-  minDist = 0.15;
-}else{
-  minDist = 0;     // zoom dekat → semua muncul
-}
-
-// 🔥 fallback: minimal 1 label harus tampil
-var allow = false;
-
-if(window.displayedLabels.length === 0){
-  allow = true;
-}else{
-  allow = (minDist === 0 || !isTooClose(lat, lon, window.displayedLabels, minDist));
-}
-
-if(allow){
-
-  window.displayedLabels.push({lat:lat, lon:lon});
-
-  var labelOffsetLat = lat + (radius/111111)*0.9;
-  var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
-
-  var label=L.marker([labelOffsetLat,labelOffsetLon],{
-    icon:L.divIcon({
-      className:'',
-      html:'<div class="unit-label">'+row["NAMA UNIT"]+'</div>',
-      iconSize:null
-    })
-  });
-
-  label.addTo(labelLayer);
-}
 }
 
 });
