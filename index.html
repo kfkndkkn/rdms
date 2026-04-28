@@ -477,7 +477,7 @@ map.fitBounds(indonesiaBounds);
 // LAYERS
 
 var polygonLayer=L.layerGroup().addTo(map);
-var labelLayer=L.layerGroup();
+var labelLayer=L.layerGroup().addTo(map);
 
 // LAYER CONTROL
 
@@ -711,8 +711,9 @@ window.stationIndex[key] = r;
 });
   
 var zoom=map.getZoom();
-var minDistance = 80;
+var minDistance = 120; // zoom jauh → lebih jarang tapi tetap ada
 
+if(zoom > 6) minDistance = 80;
 if(zoom > 8) minDistance = 40;
 if(zoom > 10) minDistance = 20;
 var data;
@@ -850,7 +851,9 @@ popupContent = listHTML;
 hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
 hex.addTo(polygonLayer);
 
-if(!row.count){
+var showLabel = true;
+
+if(showLabel){
 
 var labelOffsetLat = lat + (radius/111111)*0.9;
 var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
@@ -863,7 +866,11 @@ if(isTooClose(labelOffsetLat, labelOffsetLon, placedLabels, minDistance)){
 var label=L.marker([labelOffsetLat,labelOffsetLon],{
 icon:L.divIcon({
 className:'',
-html:'<div class="unit-label">'+row["NAMA UNIT"]+'</div>',
+var labelText = row.count 
+  ? row.count + " stations"
+  : row["NAMA UNIT"];
+
+html:'<div class="unit-label">'+labelText+'</div>',
 iconSize:null
 })
 });
