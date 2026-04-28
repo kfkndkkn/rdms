@@ -727,6 +727,11 @@ var key = normalizeName(s.name);
 return !window.latestTS[key];
 });
 
+var valid = row.stations.some(s=>{
+var key = normalizeName(s.name);
+return window.latestTS[key];
+});
+
 if(!valid){
 
 hex=createHex(lat,lon,radius,"#8fb9e3",{
@@ -775,7 +780,7 @@ var listHTML="<div style='max-height:180px;overflow-y:auto'>";
 
 row.stations.forEach(s=>{
 
-ar key = normalizeName(s.name);
+var key = normalizeName(s.name);
 var ts = window.latestTS[key];
 
 var doseText;
@@ -797,8 +802,13 @@ listHTML+=
 "<a href='#' onclick=\"openTS('"+s.name+"')\">View Time Series</a>"+
 "</div>";
 
-}
+}); // 🔥 WAJIB ADA
 
+listHTML += "</div>";
+
+popupContent = listHTML;
+}
+  
 hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
 hex.addTo(polygonLayer);
 
