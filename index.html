@@ -598,9 +598,49 @@ stations:g.stations
 return result;
 
 }
-// LOAD CSV
 
+
+window.latestTS = {};
+
+function loadLatestTimeseries(callback){
+
+fetch("timeseries.csv?nocache="+Date.now())
+.then(r=>r.text())
+.then(text=>{
+
+var data = Papa.parse(text,{header:true}).data;
+
+var latest = {};
+
+data.forEach(r=>{
+
+var key = normalizeName(r.station);
+var t = new Date(r.time);
+var v = parseFloat(r.dose);
+
+if(isNaN(v)) return;
+
+if(!latest[key] || t > latest[key].time){
+latest[key] = {
+dose: v,
+time: t,
+timeStr: r.time
+};
+}
+
+});
+
+window.latestTS = latest;
+
+if(callback) callback();
+
+});
+
+}
+// LOAD CSV
 function loadCSV(){
+
+loadLatestTimeseries(()=>{
 
 fetch("output.csv?nocache="+Date.now())
 .then(r=>r.text())
@@ -638,7 +678,10 @@ data.forEach(row=>{
 
 var lat=row.lat || parseFloat(row["LATITUDE"]);
 var lon=row.lon || parseFloat(row["LONGITUDE"]);
-var dose=row.dose || row["Gamma Dose Rate (nSv/h)"];
+var key = normalizeName(row["NAMA UNIT"]);
+var ts = window.latestTS[key];
+
+var dose = ts ? ts.dose : null;
 
 if(isNaN(lat)||isNaN(lon)) return;
 
@@ -739,19 +782,22 @@ popupContent=listHTML;
 
 }else{
 
-var displayDose=row["Gamma Dose Rate (nSv/h)"];
+var key = normalizeName(row["NAMA UNIT"]);
+var ts = window.latestTS[key];
+
+var displayDose = ts ? ts.dose : null;
+var displayTime = ts ? ts.timeStr : "-";
 var doseText="";
 
-if(displayDose==="Out of service"){
-doseText="Dose Rate: Out of service";
-}else if(displayDose!==""){
-doseText="Dose Rate: "+parseFloat(displayDose).toFixed(2)+" nSv/h";
+if(displayDose===null){
+doseText="Dose Rate: No data";
+}else{
+doseText="Dose Rate: "+displayDose.toFixed(2)+" nSv/h";
 }
-
 popupContent=
 "<b>"+row["NAMA UNIT"]+"</b><br>"+
 doseText+"<br>"+
-"Last Update: "+row["LAST UPDATE (WIB)"]+"<br><br>"+
+"Last Update: "+displayTime+"<br><br>"+
 "<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">View Time Series</a>";
 
 }
@@ -779,7 +825,7 @@ label.addTo(labelLayer);
 });
 
 });
-
+});
 }
 
 loadProfile();
@@ -787,42 +833,38 @@ loadCSV();
 setInterval(loadCSV,30000);
 map.on("zoomend",loadCSV);
 
-  function updateSidePanel(){
+ function updateSidePanel(){
 
-fetch("output.csv?nocache="+Date.now())
-.then(r=>r.text())
-.then(text=>{
+loadLatestTimeseries(()=>{
 
-var data = Papa.parse(text,{header:true}).data;
-
-var valid = data.filter(r=>!isNaN(parseFloat(r["Gamma Dose Rate (nSv/h)"])));
-
-if(valid.length===0) return;
-
-// 🔥 MAX
-var maxRow = valid.reduce((a,b)=>{
-return parseFloat(a["Gamma Dose Rate (nSv/h)"]) > parseFloat(b["Gamma Dose Rate (nSv/h)"]) ? a : b;
+var data = Object.keys(window.latestTS).map(k=>{
+return {
+station:k,
+dose:window.latestTS[k].dose
+};
 });
 
-// 🔥 MIN
-var minRow = valid.reduce((a,b)=>{
-return parseFloat(a["Gamma Dose Rate (nSv/h)"]) < parseFloat(b["Gamma Dose Rate (nSv/h)"]) ? a : b;
-});
+if(data.length===0) return;
+
+// MAX
+var maxRow = data.reduce((a,b)=> a.dose > b.dose ? a : b);
+
+// MIN
+var minRow = data.reduce((a,b)=> a.dose < b.dose ? a : b);
 
 // SET UI
 document.getElementById("maxValue").innerHTML =
-parseFloat(maxRow["Gamma Dose Rate (nSv/h)"]).toFixed(2);
+maxRow.dose.toFixed(2);
 
 document.getElementById("maxStation").innerHTML =
-maxRow["NAMA UNIT"];
+maxRow.station;
 
 document.getElementById("minValue").innerHTML =
-parseFloat(minRow["Gamma Dose Rate (nSv/h)"]).toFixed(2);
+minRow.dose.toFixed(2);
 
 document.getElementById("minStation").innerHTML =
-minRow["NAMA UNIT"];
+minRow.station;
 
-// 🔥 BAR CHART (TOP 10)
 drawAvgChart();
 
 });
