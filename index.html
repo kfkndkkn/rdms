@@ -170,12 +170,12 @@ border-radius:10px;
 box-shadow:0 4px 12px rgba(0,0,0,0.15);
 line-height:1.6;
 }
-/* ===== SAMAKAN TINGGI KIRI & KANAN ===== */
+/* ===== RATA KIRI & KANAN ===== */
 
 #tsContent{
 display:flex;
 gap:20px;
-align-items:stretch; /* 🔥 INI KUNCI */
+align-items:stretch; 
 }
 
 /* LEFT tetap */
@@ -216,7 +216,7 @@ flex-direction:column;
 
 /* CHART AREA */
 #tsContent > div:last-child > div:first-child{
-flex:3;   /* 🔥 chart ambil porsi besar */
+flex:3;   
 position:relative;
 }
 
@@ -250,11 +250,16 @@ margin-bottom:140px;
 transform:translateX(-110%);
 transition:transform 0.3s ease;
 }
+@media (min-width:1367px){
+  #sidePanel{
+    max-height: calc(100vh - 120px); 
+    overflow-y: auto;               
+  }
+}
 
-/* 🔥 LAYAR BESAR (1920) → fleksibel */
 @media (min-width:1600px){
   #sidePanel{
-    width:320px; /* boleh membesar */
+    width:320px; 
   }
 }
   
@@ -290,7 +295,14 @@ opacity:0.9;
 }
 
 #avgBarChart{
-height:180px !important;
+height:180px !important; 
+}
+
+
+@media (min-width:1367px){
+  #avgBarChart{
+    height:280px !important;  
+  }
 }
 
 .legend-highlight {
@@ -643,7 +655,7 @@ latest[key] = {
 dose: v,
 time: t,
 timeStr: r.time,
-name: r.station   // 🔥 simpan nama asli
+name: r.station   
 };
 }
 
@@ -930,10 +942,10 @@ let screenWidth = window.innerWidth;
 
 // 🔥 RULE
 let topN = 5;
-if(screenWidth >= 1600){
+if(screenWidth > 1366){
   topN = 10;
 }
-
+console.log("WIDTH:", screenWidth, "TOP:", topN);
 // SORT
 result.sort((a,b)=>b.avg - a.avg);
 var top = result.slice(0, topN);
@@ -941,16 +953,19 @@ var top = result.slice(0, topN);
 var labels = top.map(r=>r.name);
 var values = top.map(r=>r.avg);
 
-// 🔥 CEK DATA SAMA → JANGAN UPDATE
-var currentData = JSON.stringify(values);
+
+var currentData = JSON.stringify({
+  values: values,
+  topN: topN  
+});
 
 if(window.lastChartData === currentData){
-return;
+  return;
 }
 window.lastChartData = currentData;
 
 
-// 🔥 KALAU BELUM ADA → CREATE
+
 if(!window.avgChart){
 
 window.avgChart = new Chart(document.getElementById("avgBarChart"),{
@@ -960,17 +975,40 @@ labels:labels,
 datasets:[{
 data:values,
 backgroundColor:'#2b83ba',
-barThickness:12
+
+
+barThickness: topN === 10 ? 8 : 12,
+categoryPercentage: topN === 10 ? 0.7 : 1.0,
+barPercentage: topN === 10 ? 0.8 : 1.0
+
 }]
 },
 options:{
 indexAxis:'y',
 responsive:true,
 maintainAspectRatio:false,
-animation:false, // 🔥 NO FLICKER
+animation:false, 
 
 plugins:{
-legend:{display:false}
+  legend:{display:false},
+
+  tooltip:{
+    enabled:true,
+
+    mode:'nearest',
+    intersect:true,   
+
+    position:'average', 
+
+    xAlign:'right',    
+    yAlign:'center',
+
+    callbacks:{
+      label:function(ctx){
+        return ctx.raw.toFixed(2) + " nSv/h";
+      }
+    }
+  }
 },
 
 layout:{
@@ -980,7 +1018,7 @@ padding:{left:10,right:10}
 scales:{
 x:{
 beginAtZero:true,
-max:75,   // 🔥 BATAS MAKSIMUM
+max:75,   
 title:{display:true,text:"nSv/h"}
 },
 y:{
@@ -994,15 +1032,15 @@ callback:function(value){
 
 let label = this.getLabelForValue(value);
 
-// 🔥 NORMALISASI (INI KUNCI)
+
 label = label
-.replace(/\./g, " ")   // titik jadi spasi
-.replace(/\s+/g, " ")  // rapikan spasi
+.replace(/\./g, " ")   
+.replace(/\s+/g, " ")  
 .trim();
 
 let words = label.split(" ");
 
-// 🔥 kalau cuma 1 kata panjang → paksa split
+
 if(words.length === 1 && label.length > 12){
 return [
 label.substring(0,12),
@@ -1010,7 +1048,7 @@ label.substring(12)
 ];
 }
 
-// 🔥 normal 2 baris
+
 if(words.length >= 2){
 return [
 words.slice(0, Math.ceil(words.length/2)).join(" "),
@@ -1029,11 +1067,11 @@ grid:{display:false}
 
 }else{
 
-// 🔥 UPDATE TANPA DESTROY
+
 window.avgChart.data.labels = labels;
 window.avgChart.data.datasets[0].data = values;
 
-window.avgChart.update('none'); // 🔥 TANPA ANIMASI
+window.avgChart.update('none'); 
 
 }
 
@@ -1052,7 +1090,7 @@ var key = normalizeName(station);
 var stationData = window.stationIndex[key];
 var profileData = window.profileIndex[key];
 
-// 🔥 TAMBAHKAN DEBUG DI SINI
+
 console.log("STATION:", station);
 console.log("KEY:", key);
 console.log("PROFILE INDEX:", window.profileIndex);
