@@ -990,7 +990,27 @@ maintainAspectRatio:false,
 animation:false, // 🔥 NO FLICKER
 
 plugins:{
-legend:{display:false}
+  legend:{display:false},
+
+  tooltip:{
+    enabled:true,
+
+    // 🔥 KUNCI UTAMA
+    position:'nearest',
+
+    yAlign:'bottom',   // 🔥 tooltip muncul ke atas bar
+    xAlign:'center',
+
+    // 🔥 biar tidak keluar container
+    caretPadding:6,
+    padding:8,
+
+    callbacks:{
+      label:function(ctx){
+        return ctx.raw.toFixed(2) + " nSv/h";
+      }
+    }
+  }
 },
 
 layout:{
