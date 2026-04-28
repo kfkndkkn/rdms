@@ -705,6 +705,11 @@ skipEmptyLines:true
 }).data;
 window.stationIndex = {};
 
+  data.sort((a,b)=>{
+  let da = window.latestTS[normalizeName(a["NAMA UNIT"])]?.dose || 0;
+  let db = window.latestTS[normalizeName(b["NAMA UNIT"])]?.dose || 0;
+  return db - da;
+});
 rawData.forEach(r=>{
 var key = normalizeName(r["NAMA UNIT"]);
 window.stationIndex[key] = r;
@@ -851,9 +856,26 @@ popupContent = listHTML;
 hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
 hex.addTo(polygonLayer);
 
-var showLabel = true;
+var labelOffsetLat = lat + (radius/111111)*0.9;
+var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
 
-if(showLabel){
+// 🔥 hanya tampilkan jika tidak overlap
+if(!isTooClose(labelOffsetLat, labelOffsetLon, placedLabels, minDistance)){
+
+  // 🔥 SELALU pakai nama station (bukan count)
+  var labelText = row["NAMA UNIT"];
+
+  var label = L.marker([labelOffsetLat,labelOffsetLon],{
+    icon: L.divIcon({
+      className:'',
+      html:'<div class="unit-label">'+labelText+'</div>',
+      iconSize:null
+    })
+  });
+
+  label.addTo(labelLayer);
+
+}
 
 var labelOffsetLat = lat + (radius/111111)*0.9;
 var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
