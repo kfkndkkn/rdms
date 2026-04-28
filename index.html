@@ -236,6 +236,7 @@ height:100% !important;
 #sidePanel{
 position:absolute;
 top:140px;
+bottom:140px;   /* 🔥 KUNCI FLEX HEIGHT */
 left:10px;
 width:260px;
 
@@ -245,8 +246,7 @@ color:white;
 z-index:9999;
 border-radius:10px;
 
-/* 🔥 GANTI INI */
-margin-bottom:140px;
+overflow-y:auto; /* 🔥 kalau isi panjang bisa scroll */
 
 transform:translateX(-110%);
 transition:transform 0.3s ease;
@@ -293,6 +293,20 @@ max-height:180px; /* 🔥 fleksibel */
   transform: scale(1.05);
   transition: 0.2s;
 }
+
+/* ===== RESPONSIVE WIDE SCREEN ===== */
+@media (min-width:1600px){
+
+  #sidePanel{
+    width:300px;
+  }
+
+  #avgBarChart{
+    max-height:260px;
+  }
+
+}
+  
 </style>
 </head>
 
@@ -919,9 +933,14 @@ var avg = arr.reduce((a,b)=>a+b,0) / arr.length;
 result.push({name:station,avg:avg});
 });
 
-// SORT TOP 5
+// 🔥 DETEKSI RESOLUSI
+var isWide = window.innerWidth >= 1600;
+
+// 🔥 SORT
 result.sort((a,b)=>b.avg - a.avg);
-var top = result.slice(0,5);
+
+// 🔥 TOP DINAMIS
+var top = result.slice(0, isWide ? 10 : 5);
 
 var labels = top.map(r=>r.name);
 var values = top.map(r=>r.avg);
@@ -1399,7 +1418,10 @@ return div;
 };
 
 legend.addTo(map);
-
+// 🔥 AUTO UPDATE CHART SAAT RESIZE
+window.addEventListener("resize", ()=>{
+  drawAvgChart();
+});
 </script>
 
 </body>
