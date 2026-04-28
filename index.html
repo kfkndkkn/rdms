@@ -863,13 +863,13 @@ if(isTooClose(labelOffsetLat, labelOffsetLon, placedLabels, minDistance)){
   return;
 }
 
-var label=L.marker([labelOffsetLat,labelOffsetLon],{
-icon:L.divIcon({
-className:'',
 var labelText = row.count 
   ? row.count + " stations"
   : row["NAMA UNIT"];
 
+var label=L.marker([labelOffsetLat,labelOffsetLon],{
+icon:L.divIcon({
+className:'',
 html:'<div class="unit-label">'+labelText+'</div>',
 iconSize:null
 })
