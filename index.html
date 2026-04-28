@@ -237,7 +237,7 @@ height:100% !important;
 position:absolute;
 top:140px;
 left:10px;
-width:260px;
+width:260px; /* 🔥 default FIX */
 
 background:linear-gradient(180deg,#173a6b,#1f5fa8);
 padding:14px;
@@ -245,11 +245,17 @@ color:white;
 z-index:9999;
 border-radius:10px;
 
-/* 🔥 GANTI INI */
 margin-bottom:140px;
 
 transform:translateX(-110%);
 transition:transform 0.3s ease;
+}
+
+/* 🔥 LAYAR BESAR (1920) → fleksibel */
+@media (min-width:1600px){
+  #sidePanel{
+    width:320px; /* boleh membesar */
+  }
 }
   
 .panel-box{
@@ -284,8 +290,7 @@ opacity:0.9;
 }
 
 #avgBarChart{
-height:auto !important;
-max-height:180px; /* 🔥 fleksibel */
+height:180px !important;
 }
 
 .legend-highlight {
@@ -919,9 +924,19 @@ var avg = arr.reduce((a,b)=>a+b,0) / arr.length;
 result.push({name:station,avg:avg});
 });
 
-// SORT TOP 5
+
+// 🔥 DETEKSI LEBAR LAYAR
+let screenWidth = window.innerWidth;
+
+// 🔥 RULE
+let topN = 5;
+if(screenWidth >= 1600){
+  topN = 10;
+}
+
+// SORT
 result.sort((a,b)=>b.avg - a.avg);
-var top = result.slice(0,5);
+var top = result.slice(0, topN);
 
 var labels = top.map(r=>r.name);
 var values = top.map(r=>r.avg);
@@ -1399,7 +1414,9 @@ return div;
 };
 
 legend.addTo(map);
-
+window.addEventListener("resize", ()=>{
+  drawAvgChart();
+});
 </script>
 
 </body>
