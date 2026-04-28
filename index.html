@@ -170,12 +170,12 @@ border-radius:10px;
 box-shadow:0 4px 12px rgba(0,0,0,0.15);
 line-height:1.6;
 }
-/* ===== RATA KIRI & KANAN ===== */
+/* ===== SAMAKAN TINGGI KIRI & KANAN ===== */
 
 #tsContent{
 display:flex;
 gap:20px;
-align-items:stretch; 
+align-items:stretch; /* 🔥 INI KUNCI */
 }
 
 /* LEFT tetap */
@@ -216,7 +216,7 @@ flex-direction:column;
 
 /* CHART AREA */
 #tsContent > div:last-child > div:first-child{
-flex:3;   
+flex:3;   /* 🔥 chart ambil porsi besar */
 position:relative;
 }
 
@@ -252,14 +252,14 @@ transition:transform 0.3s ease;
 }
 @media (min-width:1367px){
   #sidePanel{
-    max-height: calc(100vh - 120px); 
-    overflow-y: auto;               
+    max-height: calc(100vh - 120px); /* 🔥 tidak nabrak header & bawah */
+    overflow-y: auto;               /* 🔥 kalau penuh → scroll */
   }
 }
-
+/* 🔥 LAYAR BESAR (1920) → fleksibel */
 @media (min-width:1600px){
   #sidePanel{
-    width:320px; 
+    width:320px; /* boleh membesar */
   }
 }
   
@@ -295,13 +295,13 @@ opacity:0.9;
 }
 
 #avgBarChart{
-height:180px !important; 
+height:180px !important; /* 🔥 tetap untuk 1336 */
 }
 
-
+/* 🔥 hanya layar besar */
 @media (min-width:1367px){
   #avgBarChart{
-    height:280px !important;  
+    height:280px !important;  /* 🔥 INI YANG BIKIN LABEL GA TABRAKAN */
   }
 }
 
@@ -655,7 +655,7 @@ latest[key] = {
 dose: v,
 time: t,
 timeStr: r.time,
-name: r.station   
+name: r.station   // 🔥 simpan nama asli
 };
 }
 
@@ -953,10 +953,10 @@ var top = result.slice(0, topN);
 var labels = top.map(r=>r.name);
 var values = top.map(r=>r.avg);
 
-
+// 🔥 CEK DATA SAMA → JANGAN UPDATE
 var currentData = JSON.stringify({
   values: values,
-  topN: topN  
+  topN: topN   // 🔥 TAMBAHAN PENTING
 });
 
 if(window.lastChartData === currentData){
@@ -965,7 +965,7 @@ if(window.lastChartData === currentData){
 window.lastChartData = currentData;
 
 
-
+// 🔥 KALAU BELUM ADA → CREATE
 if(!window.avgChart){
 
 window.avgChart = new Chart(document.getElementById("avgBarChart"),{
@@ -976,7 +976,7 @@ datasets:[{
 data:values,
 backgroundColor:'#2b83ba',
 
-
+// 🔥 HANYA BERLAKU SAAT TOP 10
 barThickness: topN === 10 ? 8 : 12,
 categoryPercentage: topN === 10 ? 0.7 : 1.0,
 barPercentage: topN === 10 ? 0.8 : 1.0
@@ -987,28 +987,10 @@ options:{
 indexAxis:'y',
 responsive:true,
 maintainAspectRatio:false,
-animation:false, 
+animation:false, // 🔥 NO FLICKER
 
 plugins:{
-  legend:{display:false},
-
-  tooltip:{
-    enabled:true,
-
-    mode:'nearest',
-    intersect:true,   
-
-    position:'average', 
-
-    xAlign:'right',    
-    yAlign:'center',
-
-    callbacks:{
-      label:function(ctx){
-        return ctx.raw.toFixed(2) + " nSv/h";
-      }
-    }
-  }
+legend:{display:false}
 },
 
 layout:{
@@ -1018,7 +1000,7 @@ padding:{left:10,right:10}
 scales:{
 x:{
 beginAtZero:true,
-max:75,   
+max:75,   // 🔥 BATAS MAKSIMUM
 title:{display:true,text:"nSv/h"}
 },
 y:{
@@ -1032,15 +1014,15 @@ callback:function(value){
 
 let label = this.getLabelForValue(value);
 
-
+// 🔥 NORMALISASI (INI KUNCI)
 label = label
-.replace(/\./g, " ")   
-.replace(/\s+/g, " ")  
+.replace(/\./g, " ")   // titik jadi spasi
+.replace(/\s+/g, " ")  // rapikan spasi
 .trim();
 
 let words = label.split(" ");
 
-
+// 🔥 kalau cuma 1 kata panjang → paksa split
 if(words.length === 1 && label.length > 12){
 return [
 label.substring(0,12),
@@ -1048,7 +1030,7 @@ label.substring(12)
 ];
 }
 
-
+// 🔥 normal 2 baris
 if(words.length >= 2){
 return [
 words.slice(0, Math.ceil(words.length/2)).join(" "),
@@ -1067,11 +1049,11 @@ grid:{display:false}
 
 }else{
 
-
+// 🔥 UPDATE TANPA DESTROY
 window.avgChart.data.labels = labels;
 window.avgChart.data.datasets[0].data = values;
 
-window.avgChart.update('none'); 
+window.avgChart.update('none'); // 🔥 TANPA ANIMASI
 
 }
 
@@ -1090,7 +1072,7 @@ var key = normalizeName(station);
 var stationData = window.stationIndex[key];
 var profileData = window.profileIndex[key];
 
-
+// 🔥 TAMBAHKAN DEBUG DI SINI
 console.log("STATION:", station);
 console.log("KEY:", key);
 console.log("PROFILE INDEX:", window.profileIndex);
