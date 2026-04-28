@@ -477,8 +477,7 @@ map.fitBounds(indonesiaBounds);
 // LAYERS
 
 var polygonLayer=L.layerGroup().addTo(map);
-var labelLayer=L.layerGroup();
-
+var labelLayer=L.layerGroup().addTo(map);
 // LAYER CONTROL
 
 L.control.layers(
