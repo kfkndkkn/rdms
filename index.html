@@ -250,12 +250,7 @@ margin-bottom:140px;
 transform:translateX(-110%);
 transition:transform 0.3s ease;
 }
-@media (min-width:1367px){
-  #sidePanel{
-    max-height: calc(100vh - 120px); /* 🔥 tidak nabrak header & bawah */
-    overflow-y: auto;               /* 🔥 kalau penuh → scroll */
-  }
-}
+
 /* 🔥 LAYAR BESAR (1920) → fleksibel */
 @media (min-width:1600px){
   #sidePanel{
@@ -295,14 +290,7 @@ opacity:0.9;
 }
 
 #avgBarChart{
-height:180px !important; /* 🔥 tetap untuk 1336 */
-}
-
-/* 🔥 hanya layar besar */
-@media (min-width:1367px){
-  #avgBarChart{
-    height:280px !important;  /* 🔥 INI YANG BIKIN LABEL GA TABRAKAN */
-  }
+height:180px !important;
 }
 
 .legend-highlight {
@@ -942,10 +930,10 @@ let screenWidth = window.innerWidth;
 
 // 🔥 RULE
 let topN = 5;
-if(screenWidth > 1366){
+if(screenWidth >= 1600){
   topN = 10;
 }
-console.log("WIDTH:", screenWidth, "TOP:", topN);
+
 // SORT
 result.sort((a,b)=>b.avg - a.avg);
 var top = result.slice(0, topN);
@@ -954,13 +942,10 @@ var labels = top.map(r=>r.name);
 var values = top.map(r=>r.avg);
 
 // 🔥 CEK DATA SAMA → JANGAN UPDATE
-var currentData = JSON.stringify({
-  values: values,
-  topN: topN   // 🔥 TAMBAHAN PENTING
-});
+var currentData = JSON.stringify(values);
 
 if(window.lastChartData === currentData){
-  return;
+return;
 }
 window.lastChartData = currentData;
 
@@ -975,12 +960,7 @@ labels:labels,
 datasets:[{
 data:values,
 backgroundColor:'#2b83ba',
-
-// 🔥 HANYA BERLAKU SAAT TOP 10
-barThickness: topN === 10 ? 8 : 12,
-categoryPercentage: topN === 10 ? 0.7 : 1.0,
-barPercentage: topN === 10 ? 0.8 : 1.0
-
+barThickness:12
 }]
 },
 options:{
