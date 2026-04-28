@@ -583,7 +583,20 @@ var result=[];
 
 Object.values(grid).forEach(g=>{
 
-var avgDose=g.count>0 ? g.doseSum/g.count : null;
+var sum = 0;
+var count = 0;
+
+g.stations.forEach(s=>{
+var key = normalizeName(s.name);
+var ts = window.latestTS[key];
+
+if(ts){
+sum += ts.dose;
+count++;
+}
+});
+
+var avgDose = count > 0 ? sum / count : null;
 
 result.push({
 lat:g.latSum/g.count,
@@ -624,7 +637,8 @@ if(!latest[key] || t > latest[key].time){
 latest[key] = {
 dose: v,
 time: t,
-timeStr: r.time
+timeStr: r.time,
+name: r.station   // 🔥 simpan nama asli
 };
 }
 
@@ -708,7 +722,10 @@ var hex;
 // ===== AGGREGATED GRID =====
 if(row.stations){
 
-var valid=row.stations.some(s=>!isNaN(parseFloat(s.dose)));
+var hasOOS = row.stations.some(s=>{
+var key = normalizeName(s.name);
+return !window.latestTS[key];
+});
 
 if(!valid){
 
@@ -758,47 +775,27 @@ var listHTML="<div style='max-height:180px;overflow-y:auto'>";
 
 row.stations.forEach(s=>{
 
-var doseText;
+ar key = normalizeName(s.name);
+var ts = window.latestTS[key];
 
-if(s.dose==="Out of service"){
-doseText="Out of service";
+var doseText;
+var timeText;
+
+if(!ts){
+doseText = "No data";
+timeText = "-";
 }else{
-doseText=parseFloat(s.dose).toFixed(2)+" nSv/h";
+doseText = ts.dose.toFixed(2)+" nSv/h";
+timeText = ts.timeStr;
 }
 
 listHTML+=
 "<div style='border-bottom:1px solid #ddd;padding:6px 0'>"+
 "<b>"+s.name+"</b><br>"+
 "Dose: "+doseText+"<br>"+
-"Update: "+s.time+"<br>"+
+"Update: "+timeText+"<br>"+
 "<a href='#' onclick=\"openTS('"+s.name+"')\">View Time Series</a>"+
 "</div>";
-
-});
-
-listHTML+="</div>";
-
-popupContent=listHTML;
-
-}else{
-
-var key = normalizeName(row["NAMA UNIT"]);
-var ts = window.latestTS[key];
-
-var displayDose = ts ? ts.dose : null;
-var displayTime = ts ? ts.timeStr : "-";
-var doseText="";
-
-if(displayDose===null){
-doseText="Dose Rate: No data";
-}else{
-doseText="Dose Rate: "+displayDose.toFixed(2)+" nSv/h";
-}
-popupContent=
-"<b>"+row["NAMA UNIT"]+"</b><br>"+
-doseText+"<br>"+
-"Last Update: "+displayTime+"<br><br>"+
-"<a href='#' onclick=\"openTS('"+row["NAMA UNIT"]+"')\">View Time Series</a>";
 
 }
 
@@ -839,7 +836,7 @@ loadLatestTimeseries(()=>{
 
 var data = Object.keys(window.latestTS).map(k=>{
 return {
-station:k,
+station:window.latestTS[k].name,
 dose:window.latestTS[k].dose
 };
 });
