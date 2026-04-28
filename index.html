@@ -252,7 +252,7 @@ transition:transform 0.3s ease;
 }
 @media (min-width:1367px){
   #sidePanel{
-    max-height: calc(100vh - 180px); /* 🔥 tidak nabrak header & bawah */
+    max-height: calc(100vh - 120px); /* 🔥 tidak nabrak header & bawah */
     overflow-y: auto;               /* 🔥 kalau penuh → scroll */
   }
 }
@@ -295,7 +295,14 @@ opacity:0.9;
 }
 
 #avgBarChart{
-height:180px !important;
+height:180px !important; /* 🔥 tetap untuk 1336 */
+}
+
+/* 🔥 hanya layar besar */
+@media (min-width:1367px){
+  #avgBarChart{
+    height:280px !important;  /* 🔥 INI YANG BIKIN LABEL GA TABRAKAN */
+  }
 }
 
 .legend-highlight {
