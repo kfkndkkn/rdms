@@ -262,7 +262,9 @@ margin-bottom:10px;
 border-radius:6px;
 text-align:center;
 display:flex;
- flex-direction:column;
+flex-direction:column;
+height:260px;           /* 🔥 panel tetap */
+overflow:hidden;
 }
 .panel-box canvas{
   width:100% !important;
@@ -289,8 +291,7 @@ opacity:0.9;
 }
 
 #avgBarChart{
-  height:auto !important;
-  max-height:none; /* 🔥 WAJIB */
+  height:180px !important;   /* 🔥 FIX HEIGHT */
 }
 
 .legend-highlight {
@@ -956,24 +957,7 @@ var top = result.slice(0, isWide ? 10 : 5);
 
 var labels = top.map(r=>r.name);
 var values = top.map(r=>r.avg);
-// 🔥 AUTO HEIGHT BERDASARKAN JUMLAH BAR
-var barCount = values.length;
 
-// 🔥 SIMPAN STATE GLOBAL
-if(!window.lastBarCount){
-  window.lastBarCount = 0;
-}
-
-// 🔥 HANYA UPDATE JIKA JUMLAH BAR BERUBAH
-if(window.lastBarCount !== barCount){
-
-  var dynamicHeight = Math.min(barCount * 26 + 50, 320); // 🔥 BATAS MAKS
-
-  var canvas = document.getElementById("avgBarChart");
-  canvas.style.height = dynamicHeight + "px";
-
-  window.lastBarCount = barCount;
-}
 
 // 🔥 TAMBAHKAN JUMLAH DATA KE CACHE
 var currentData = JSON.stringify({
