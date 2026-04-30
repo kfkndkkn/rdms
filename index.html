@@ -1405,20 +1405,23 @@ div.innerHTML = `
 </div>
 
 <div id="legendTooltip" style="
-    display:none;
-  position:fixed;
-  bottom:140px;
-  left:80px;
-  width:240px;
-  background:white;
-  border-radius:8px;
-  padding:10px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.25);
-  font-size:12px;
+display:none;
+position:fixed;
+bottom:140px;
+left:10px;
 
-  z-index:99999;
-  pointer-events:auto;
-  transform:translateZ(9999px);
+width:240px;
+background:white;
+border-radius:8px;
+padding:10px;
+box-shadow:0 4px 12px rgba(0,0,0,0.25);
+font-size:12px;
+
+/* 🔥 PALING ATAS */
+z-index:100000;
+
+/* biar interaktif */
+pointer-events:auto;
 ">
 
 <b>Keterangan:</b><br>
