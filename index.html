@@ -412,13 +412,7 @@ window.profileIndex = {};
 // function openTS()
 // dll
 
-loadProfile();
 
-map.whenReady(function(){
-  loadCSV();
-  updateSidePanel();
-  setInterval(updateSidePanel,30000);
-});
 function loadProfile(){
 
 fetch("profile.csv?nocache="+Date.now())
@@ -477,7 +471,14 @@ map.whenReady(function(){
   loadCSV();
 });
 // LAYERS
+loadProfile();
 
+map.whenReady(function(){
+  loadCSV();
+  updateSidePanel();
+  setInterval(updateSidePanel,30000);
+});
+  
 var polygonLayer=L.layerGroup().addTo(map);
 var labelLayer=L.layerGroup().addTo(map);
 
