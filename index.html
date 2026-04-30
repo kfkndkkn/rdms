@@ -477,7 +477,7 @@ map.fitBounds(indonesiaBounds);
 // LAYERS
 
 var polygonLayer=L.layerGroup().addTo(map);
-var labelLayer=L.layerGroup();
+var labelLayer=L.layerGroup().addTo(map);
 
 // LAYER CONTROL
 
@@ -829,8 +829,8 @@ popupContent = listHTML;
 hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
 hex.addTo(polygonLayer);
 
-if(!row.count){
-
+if(!row.count || map.getZoom() >= 6){
+  if(map.getZoom() < 5 && Math.random() > 0.3) return;
 var labelOffsetLat = lat + (radius/111111)*0.9;
 var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
 
