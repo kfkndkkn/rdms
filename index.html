@@ -789,44 +789,56 @@ weight:1
 
 }
   
-var popupContent;
+var popupContent = "";
 
+// ===== ZOOM JAUH (AGGREGATED) =====
 if(row.count){
 
-var listHTML="<div style='max-height:180px;overflow-y:auto'>";
+  var listHTML = "<div style='max-height:180px;overflow-y:auto'>";
 
-row.stations.forEach(s=>{
+  row.stations.forEach(s=>{
 
-var key = normalizeName(s.name);
-var ts = window.latestTS[key];
+    var key = normalizeName(s.name);
+    var ts = window.latestTS[key];
 
-var doseText;
-var timeText;
+    var doseText = ts ? ts.dose.toFixed(2)+" nSv/h" : "No data";
+    var timeText = ts ? ts.timeStr : "-";
 
-if(!ts){
-doseText = "No data";
-timeText = "-";
-}else{
-doseText = ts.dose.toFixed(2)+" nSv/h";
-timeText = ts.timeStr;
+    listHTML +=
+    "<div style='border-bottom:1px solid #ddd;padding:6px 0'>"+
+    "<b>"+s.name+"</b><br>"+
+    "Dose: "+doseText+"<br>"+
+    "Update: "+timeText+"<br>"+
+    "<a href='#' onclick=\"openTS('"+s.name+"')\">View Time Series</a>"+
+    "</div>";
+
+  });
+
+  listHTML += "</div>";
+  popupContent = listHTML;
 }
 
-listHTML+=
-"<div style='border-bottom:1px solid #ddd;padding:6px 0'>"+
-"<b>"+s.name+"</b><br>"+
-"Dose: "+doseText+"<br>"+
-"Update: "+timeText+"<br>"+
-"<a href='#' onclick=\"openTS('"+s.name+"')\">View Time Series</a>"+
-"</div>";
+// ===== ZOOM DEKAT (1 STATION) =====
+else{
 
-}); // 🔥 WAJIB ADA
+  var stationName = row["NAMA UNIT"];
+  var key = normalizeName(stationName);
+  var ts = window.latestTS[key];
 
-listHTML += "</div>";
+  var doseText = ts ? ts.dose.toFixed(2)+" nSv/h" : "No data";
+  var timeText = ts ? ts.timeStr : "-";
 
-popupContent = listHTML;
+  popupContent =
+  "<b>"+stationName+"</b><br>"+
+  "Dose: "+doseText+"<br>"+
+  "Update: "+timeText+"<br>"+
+  "<a href='#' onclick=\"openTS('"+stationName+"')\">View Time Series</a>";
 }
   
 hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
+  hex.on('click', function(){
+  this.openPopup();
+});
 hex.addTo(polygonLayer);
 
 if(!row.count || map.getZoom() >= 5){
