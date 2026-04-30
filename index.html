@@ -1406,7 +1406,8 @@ div.innerHTML = `
 
 <div id="legendTooltip" style="
   display:none;
-  position:absolute;
+  position:fixed; /* 🔥 KUNCI UTAMA */
+  z-index:99999;  /* 🔥 PALING ATAS */
   bottom:120px;
   left:10px;
   width:240px;
@@ -1486,6 +1487,19 @@ legend.addTo(map);
 window.addEventListener("resize", ()=>{
   drawAvgChart();
 });
+function adjustLegendTooltip(){
+
+  var tooltip = document.getElementById("legendTooltip");
+  if(!tooltip) return;
+
+  if(panelVisible){
+    tooltip.style.left = "300px"; // geser saat panel buka
+  }else{
+    tooltip.style.left = "80px"; // posisi normal
+  }
+
+}
+  
 </script>
 
 </body>
