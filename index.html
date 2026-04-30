@@ -473,7 +473,9 @@ map.attributionControl.addAttribution("© DKKN-BAPETEN 2026");
 
 var indonesiaBounds=[[-11,94],[6,141]];
 map.fitBounds(indonesiaBounds);
-
+map.whenReady(function(){
+  loadCSV();
+});
 // LAYERS
 
 var polygonLayer=L.layerGroup().addTo(map);
@@ -829,7 +831,7 @@ popupContent = listHTML;
 hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
 hex.addTo(polygonLayer);
 
-if(!row.count || map.getZoom() >= 6){
+if(!row.count || map.getZoom() >= 5){
   if(map.getZoom() < 5 && Math.random() > 0.3) return;
 var labelOffsetLat = lat + (radius/111111)*0.9;
 var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
@@ -837,7 +839,23 @@ var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
 var label=L.marker([labelOffsetLat,labelOffsetLon],{
 icon:L.divIcon({
 className:'',
-html:'<div class="unit-label">'+row["NAMA UNIT"]+'</div>',
+var labelName;
+
+if(row["NAMA UNIT"]){
+  labelName = row["NAMA UNIT"];
+}else if(row.stations && row.stations.length > 0){
+  labelName = row.stations[0].name; // ambil representatif
+}else{
+  labelName = "-";
+}
+
+var label=L.marker([labelOffsetLat,labelOffsetLon],{
+icon:L.divIcon({
+className:'',
+html:'<div class="unit-label">'+labelName+'</div>',
+iconSize:null
+})
+});
 iconSize:null
 })
 });
@@ -853,7 +871,10 @@ label.addTo(labelLayer);
 }
 
 loadProfile();
-loadCSV();
+map.whenReady(function(){
+  loadCSV();
+});
+
 setInterval(loadCSV,30000);
 map.on("zoomend",loadCSV);
 
