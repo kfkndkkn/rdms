@@ -1337,39 +1337,43 @@ var panelVisible = false; // 🔥 default hidden
 
 function togglePanel(){
 
-var panel = document.getElementById("sidePanel");
+  var panel = document.getElementById("sidePanel");
 
-if(panelVisible){
+  // ===== HIDE PANEL =====
+  if(panelVisible){
 
-// 🔴 HIDE PANEL
-panel.style.transform = "translateX(-110%)";
-panelVisible = false;
+    panel.style.transform = "translateX(-110%)";
+    panelVisible = false;
 
-// 🟢 SHOW LEGEND
-if(window.innerWidth < 1920){
-  if(!legendVisible){
-    legend.addTo(map);
-    legendVisible = true;
+    // 🔥 tampilkan legend lagi (hanya layar kecil)
+    if(window.innerWidth < 1920){
+      if(!legendVisible){
+        legend.addTo(map);
+        legendVisible = true;
+      }
+    }
+
   }
-}
 
-else{
+  // ===== SHOW PANEL =====
+  else{
 
-// 🟢 SHOW PANEL
-panel.style.transform = "translateX(0)";
-panelVisible = true;
+    panel.style.transform = "translateX(0)";
+    panelVisible = true;
 
-// 🔴 HIDE LEGEND
-if(window.innerWidth < 1920){
-  if(legendVisible){
-    map.removeControl(legend);
-    legendVisible = false;
+    // 🔥 sembunyikan legend hanya kalau layar kecil
+    if(window.innerWidth < 1920){
+      if(legendVisible){
+        map.removeControl(legend);
+        legendVisible = false;
+      }
+    }
+
   }
-}
 
-setTimeout(()=>{
-map.invalidateSize();
-},300);
+  setTimeout(()=>{
+    map.invalidateSize();
+  },300);
 
 }
 // LEGEND
