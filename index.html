@@ -1346,9 +1346,11 @@ panel.style.transform = "translateX(-110%)";
 panelVisible = false;
 
 // 🟢 SHOW LEGEND
-if(!legendVisible){
-legend.addTo(map);
-legendVisible = true;
+if(window.innerWidth < 1920){
+  if(!legendVisible){
+    legend.addTo(map);
+    legendVisible = true;
+  }
 }
 
 }else{
@@ -1358,11 +1360,11 @@ panel.style.transform = "translateX(0)";
 panelVisible = true;
 
 // 🔴 HIDE LEGEND
-if(legendVisible){
-map.removeControl(legend);
-legendVisible = false;
-}
-
+if(window.innerWidth < 1920){
+  if(legendVisible){
+    map.removeControl(legend);
+    legendVisible = false;
+  }
 }
 
 setTimeout(()=>{
