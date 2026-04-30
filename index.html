@@ -414,11 +414,11 @@ window.profileIndex = {};
 
 loadProfile();
 
-setTimeout(()=>{
-loadCSV();
-updateSidePanel();
-setInterval(updateSidePanel,30000);
-},300);
+map.whenReady(function(){
+  loadCSV();
+  updateSidePanel();
+  setInterval(updateSidePanel,30000);
+});
 function loadProfile(){
 
 fetch("profile.csv?nocache="+Date.now())
@@ -832,36 +832,30 @@ hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
 hex.addTo(polygonLayer);
 
 if(!row.count || map.getZoom() >= 5){
-  if(map.getZoom() < 5 && Math.random() > 0.3) return;
-var labelOffsetLat = lat + (radius/111111)*0.9;
-var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
 
-var label=L.marker([labelOffsetLat,labelOffsetLon],{
-icon:L.divIcon({
-className:'',
-var labelName;
+  var labelOffsetLat = lat + (radius/111111)*0.9;
+  var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
 
-if(row["NAMA UNIT"]){
-  labelName = row["NAMA UNIT"];
-}else if(row.stations && row.stations.length > 0){
-  labelName = row.stations[0].name; // ambil representatif
-}else{
-  labelName = "-";
-}
+  // 🔥 FIX NAMA (ANTI UNDEFINED)
+  var labelName = "";
 
-var label=L.marker([labelOffsetLat,labelOffsetLon],{
-icon:L.divIcon({
-className:'',
-html:'<div class="unit-label">'+labelName+'</div>',
-iconSize:null
-})
-});
-iconSize:null
-})
-});
+  if(row["NAMA UNIT"]){
+    labelName = row["NAMA UNIT"];
+  }else if(row.stations && row.stations.length > 0){
+    labelName = row.stations[0].name;
+  }else{
+    labelName = "-";
+  }
 
-label.addTo(labelLayer);
+  var label = L.marker([labelOffsetLat,labelOffsetLon],{
+    icon: L.divIcon({
+      className:'',
+      html:'<div class="unit-label">'+labelName+'</div>',
+      iconSize:null
+    })
+  });
 
+  label.addTo(labelLayer);
 }
 
 });
