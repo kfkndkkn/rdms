@@ -380,46 +380,14 @@ style="width:98%;border-radius:8px;margin-bottom:10px;border:1px solid rgba(0,0,
 </div>
 
 <!-- RIGHT -->
-<div style="display:flex;gap:10px;margin-bottom:10px">
+<div style="flex:1;display:flex;flex-direction:column">
 
-<input type="datetime-local" id="fromTime" style="flex:1">
-<input type="datetime-local" id="toTime" style="flex:1">
-
-</div>
-
-<div style="flex:3;position:relative">
-
-  <!-- 🔥 DATE PICKER -->
-  <div style="
-    position:absolute;
-    top:10px;
-    right:10px;
-    z-index:10;
-    background:white;
-    padding:6px 8px;
-    border-radius:6px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.2);
-    font-size:12px;
-  ">
-    From:
-    <input type="datetime-local" id="dateFrom" style="font-size:11px">
-    To:
-    <input type="datetime-local" id="dateTo" style="font-size:11px">
-    <button onclick="applyDateFilter()" style="
-      margin-left:5px;
-      background:#0b1e3f;
-      color:white;
-      border:none;
-      padding:4px 6px;
-      border-radius:4px;
-      cursor:pointer;
-    ">Apply</button>
+  <div style="flex:3;position:relative">
+    <canvas id="tsChart"></canvas>
   </div>
 
-  <canvas id="tsChart"></canvas>
-
-</div>
-<div id="selectedTime"></div>
+  <input type="range" id="timeSlider">
+  <div id="selectedTime"></div>
   <div id="tsStats"></div>
 
 </div>
@@ -1140,115 +1108,33 @@ window.avgChart.update('none');
 var tsChart=null;
 var allLabels=[];
 var allValues=[];
-var filteredLabels = [];
-var filteredValues = [];
-function drawChart(labels, values){
 
-if(values.length === 0){
-  document.getElementById("tsStats").innerHTML = "No data";
-  return;
-}
+function openTS(station){
+var key = normalizeName(station);
 
-document.getElementById("selectedTime").innerHTML =
-"Selected Time : "+labels[0]+" – "+labels[labels.length-1];
+var stationData = window.stationIndex[key];
+var profileData = window.profileIndex[key];
 
-var sum = values.reduce((a,b)=>a+b,0);
-var avg = sum/values.length;
-var min = Math.min(...values);
-var max = Math.max(...values);
 
-if(tsChart) tsChart.destroy();
+console.log("STATION:", station);
+console.log("KEY:", key);
+console.log("PROFILE INDEX:", window.profileIndex);
+console.log("PROFILE DATA:", profileData);
+  
+document.getElementById("tsModal").style.display="block";
+document.getElementById("tsTitle").innerHTML="Time Series - "+station;
 
-tsChart = new Chart(document.getElementById("tsChart"),{
-type:'line',
-data:{
-labels:labels,
-datasets:[{
-data:values,
-borderColor:'#2b83ba',
-backgroundColor:'rgba(43,131,186,0.15)',
-fill:true,
-tension:0.25,
-pointRadius:2
-}]
-},
-options:{
-responsive:true,
-maintainAspectRatio:false,
-plugins:{legend:{display:false}},
-scales:{
-y:{title:{display:true,text:"nSv/h"}}
-}
-}
-});
+allLabels=[];
+allValues=[];
 
-document.getElementById("tsStats").innerHTML =
-"<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
-"<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
-"<b>Max:</b> "+max.toFixed(2)+" nSv/h";
-
+if(tsChart){
+tsChart.destroy();
+tsChart=null;
 }
 
 document.getElementById("selectedTime").innerHTML="";
 document.getElementById("tsStats").innerHTML="";
 
-
-var fromVal = document.getElementById("fromTime").value;
-var toVal = document.getElementById("toTime").value;
-
-if(!fromVal || !toVal) return;
-
-var fromDate = new Date(fromVal);
-var toDate = new Date(toVal);
-
-var labels = [];
-var values = [];
-
-for(let i=0;i<allLabels.length;i++){
-
-  var t = new Date(allLabels[i]);
-
-  if(t >= fromDate && t <= toDate){
-    labels.push(allLabels[i]);
-    values.push(allValues[i]);
-  }
-}
-
-drawChart(labels, values);
-
-}
-function applyDateFilter(){
-
-var fromVal = document.getElementById("fromTime").value;
-var toVal = document.getElementById("toTime").value;
-
-if(!fromVal || !toVal) return;
-
-var fromDate = new Date(fromVal);
-var toDate = new Date(toVal);
-
-filteredLabels = [];
-filteredValues = [];
-
-for(let i=0;i<allLabels.length;i++){
-
-  var t = new Date(allLabels[i]);
-
-  if(t >= fromDate && t <= toDate){
-    filteredLabels.push(allLabels[i]);
-    filteredValues.push(allValues[i]);
-  }
-}
-
-if(filteredValues.length === 0){
-  document.getElementById("tsStats").innerHTML = "No data in selected range";
-  return;
-}
-
-// 🔥 UPDATE CHART
-drawChart(filteredLabels, filteredValues);
-
-}
 // IMAGE
 var img = document.getElementById("tsImage");
 
@@ -1313,187 +1199,33 @@ allValues.push(v);
 }
 
 });
-// ===== SET RANGE OTOMATIS =====
-var fromInput = document.getElementById("fromTime");
-var toInput = document.getElementById("toTime");
 
-var minTime = new Date(allLabels[0]);
-var maxTime = new Date(allLabels[allLabels.length - 1]);
-
-function toLocalInputFormat(d){
-  return d.toISOString().slice(0,16);
-}
-
-// SET LIMIT
-fromInput.min = toLocalInputFormat(minTime);
-fromInput.max = toLocalInputFormat(maxTime);
-
-toInput.min = toLocalInputFormat(minTime);
-toInput.max = toLocalInputFormat(maxTime);
-
-// DEFAULT = FULL RANGE
-fromInput.value = toLocalInputFormat(minTime);
-toInput.value = toLocalInputFormat(maxTime);
-  // EVENT
-fromInput.onchange = applyDateFilter;
-toInput.onchange = applyDateFilter;
-
-// DRAW AWAL
-drawChart(allLabels, allValues);
 if(allValues.length===0){
 document.getElementById("tsStats").innerHTML="No data available";
 return;
 }
 
+var slider=document.getElementById("timeSlider");
 
-updateRangeChart();
-fromInput.onchange = updateRangeChart;
-toInput.onchange = updateRangeChart;
+var lastIndex=allValues.length-1;
+
+slider.min=0;
+slider.max=lastIndex;
+slider.step=1;
+slider.value=lastIndex;
+
+updateChart(lastIndex);
+
+slider.oninput=function(){
+updateChart(parseInt(this.value));
+};
+
 });
 
 }
 
+function updateChart(index){
 
-var fromVal = document.getElementById("fromTime").value;
-var toVal = document.getElementById("toTime").value;
-
-if(!fromVal || !toVal) return;
-
-var fromDate = new Date(fromVal);
-var toDate = new Date(toVal);
-
-var labels = [];
-var values = [];
-
-for(let i=0;i<allLabels.length;i++){
-  var t = new Date(allLabels[i]);
-
-  if(t >= fromDate && t <= toDate){
-    labels.push(allLabels[i]);
-    values.push(allValues[i]);
-  }
-}
-
-if(values.length === 0){
-  document.getElementById("tsStats").innerHTML = "No data in selected range";
-  return;
-}
-
-// UPDATE TEXT
-document.getElementById("selectedTime").innerHTML =
-"Selected Time : "+labels[0]+" – "+labels[labels.length-1];
-
-// HITUNG
-var sum = values.reduce((a,b)=>a+b,0);
-var avg = sum/values.length;
-var min = Math.min(...values);
-var max = Math.max(...values);
-
-// DRAW CHART
-if(tsChart) tsChart.destroy();
-
-tsChart = new Chart(document.getElementById("tsChart"),{
-type:'line',
-data:{
-labels:labels,
-datasets:[{
-data:values,
-borderColor:'#2b83ba',
-backgroundColor:'rgba(43,131,186,0.15)',
-fill:true,
-tension:0.25
-}]
-},
-options:{
-responsive:true,
-maintainAspectRatio:false,
-plugins:{legend:{display:false}},
-scales:{
-y:{title:{display:true,text:"nSv/h"}}
-}
-}
-});
-
-// STATS
-document.getElementById("tsStats").innerHTML =
-"<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
-"<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
-"<b>Max:</b> "+max.toFixed(2)+" nSv/h";
-
-}
-
-var fromVal = document.getElementById("fromTime").value;
-var toVal = document.getElementById("toTime").value;
-
-if(!fromVal || !toVal) return;
-
-var fromDate = new Date(fromVal);
-var toDate = new Date(toVal);
-
-var labels = [];
-var values = [];
-
-for(let i=0;i<allLabels.length;i++){
-
-  var t = new Date(allLabels[i]);
-
-  if(t >= fromDate && t <= toDate){
-    labels.push(allLabels[i]);
-    values.push(allValues[i]);
-  }
-}
-
-if(values.length === 0){
-  document.getElementById("tsStats").innerHTML = "No data in selected range";
-  return;
-}
-
-// TEXT
-document.getElementById("selectedTime").innerHTML =
-"Selected Time : "+labels[0]+" – "+labels[labels.length-1];
-
-// STAT
-var sum = values.reduce((a,b)=>a+b,0);
-var avg = sum/values.length;
-var min = Math.min(...values);
-var max = Math.max(...values);
-
-// CHART
-if(tsChart) tsChart.destroy();
-
-tsChart = new Chart(document.getElementById("tsChart"),{
-
-type:'line',
-
-data:{
-labels:labels,
-datasets:[{
-data:values,
-borderColor:'#2b83ba',
-backgroundColor:'rgba(43,131,186,0.15)',
-tension:0.25,
-pointRadius:2,
-fill:true
-}]
-},
-
-options:{
-responsive:true,
-maintainAspectRatio:false,
-plugins:{legend:{display:false}},
-scales:{
-y:{title:{display:true,text:"nSv/h"}}
-}
-}
-});
-
-// OUTPUT
-document.getElementById("tsStats").innerHTML =
-"<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
-"<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
-"<b>Max:</b> "+max.toFixed(2)+" nSv/h";
-
-}
 var labels=allLabels.slice(0,index+1);
 var values=allValues.slice(0,index+1);
 
