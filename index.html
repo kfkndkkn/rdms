@@ -380,19 +380,16 @@ style="width:98%;border-radius:8px;margin-bottom:10px;border:1px solid rgba(0,0,
 </div>
 
 <!-- RIGHT -->
-<div style="flex:1;display:flex;flex-direction:column">
-
-  <div style="flex:3;position:relative">
-    <canvas id="tsChart"></canvas>
-  </div>
-
-  <div style="display:flex;gap:10px;margin-top:10px">
+<div style="display:flex;gap:10px;margin-bottom:10px">
 
 <input type="datetime-local" id="fromTime" style="flex:1">
 <input type="datetime-local" id="toTime" style="flex:1">
 
 </div>
 
+<div style="flex:3;position:relative">
+  <canvas id="tsChart"></canvas>
+</div>
 <div id="selectedTime"></div>
   <div id="tsStats"></div>
 
@@ -1115,32 +1112,81 @@ var tsChart=null;
 var allLabels=[];
 var allValues=[];
 
-function openTS(station){
-var key = normalizeName(station);
+function drawChart(labels, values){
 
-var stationData = window.stationIndex[key];
-var profileData = window.profileIndex[key];
+if(values.length === 0){
+  document.getElementById("tsStats").innerHTML = "No data";
+  return;
+}
 
+document.getElementById("selectedTime").innerHTML =
+"Selected Time : "+labels[0]+" – "+labels[labels.length-1];
 
-console.log("STATION:", station);
-console.log("KEY:", key);
-console.log("PROFILE INDEX:", window.profileIndex);
-console.log("PROFILE DATA:", profileData);
-  
-document.getElementById("tsModal").style.display="block";
-document.getElementById("tsTitle").innerHTML="Time Series - "+station;
+var sum = values.reduce((a,b)=>a+b,0);
+var avg = sum/values.length;
+var min = Math.min(...values);
+var max = Math.max(...values);
 
-allLabels=[];
-allValues=[];
+if(tsChart) tsChart.destroy();
 
-if(tsChart){
-tsChart.destroy();
-tsChart=null;
+tsChart = new Chart(document.getElementById("tsChart"),{
+type:'line',
+data:{
+labels:labels,
+datasets:[{
+data:values,
+borderColor:'#2b83ba',
+backgroundColor:'rgba(43,131,186,0.15)',
+fill:true,
+tension:0.25,
+pointRadius:2
+}]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false,
+plugins:{legend:{display:false}},
+scales:{
+y:{title:{display:true,text:"nSv/h"}}
+}
+}
+});
+
+document.getElementById("tsStats").innerHTML =
+"<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
+"<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
+"<b>Max:</b> "+max.toFixed(2)+" nSv/h";
+
 }
 
 document.getElementById("selectedTime").innerHTML="";
 document.getElementById("tsStats").innerHTML="";
+function applyDateFilter(){
 
+var fromVal = document.getElementById("fromTime").value;
+var toVal = document.getElementById("toTime").value;
+
+if(!fromVal || !toVal) return;
+
+var fromDate = new Date(fromVal);
+var toDate = new Date(toVal);
+
+var labels = [];
+var values = [];
+
+for(let i=0;i<allLabels.length;i++){
+
+  var t = new Date(allLabels[i]);
+
+  if(t >= fromDate && t <= toDate){
+    labels.push(allLabels[i]);
+    values.push(allValues[i]);
+  }
+}
+
+drawChart(labels, values);
+
+}
 // IMAGE
 var img = document.getElementById("tsImage");
 
@@ -1226,6 +1272,12 @@ toInput.max = toLocalInputFormat(maxTime);
 // DEFAULT = FULL RANGE
 fromInput.value = toLocalInputFormat(minTime);
 toInput.value = toLocalInputFormat(maxTime);
+  // EVENT
+fromInput.onchange = applyDateFilter;
+toInput.onchange = applyDateFilter;
+
+// DRAW AWAL
+drawChart(allLabels, allValues);
 if(allValues.length===0){
 document.getElementById("tsStats").innerHTML="No data available";
 return;
