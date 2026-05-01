@@ -1231,20 +1231,7 @@ document.getElementById("tsStats").innerHTML="No data available";
 return;
 }
 
-var slider=document.getElementById("timeSlider");
 
-var lastIndex=allValues.length-1;
-
-slider.min=0;
-slider.max=lastIndex;
-slider.step=1;
-slider.value=lastIndex;
-
-updateChart(lastIndex);
-
-slider.oninput=function(){
-updateChart(parseInt(this.value));
-};
 updateRangeChart();
 fromInput.onchange = updateRangeChart;
 toInput.onchange = updateRangeChart;
@@ -1252,8 +1239,75 @@ toInput.onchange = updateRangeChart;
 
 }
 
-function updateChart(index){
 function updateRangeChart(){
+
+var fromVal = document.getElementById("fromTime").value;
+var toVal = document.getElementById("toTime").value;
+
+if(!fromVal || !toVal) return;
+
+var fromDate = new Date(fromVal);
+var toDate = new Date(toVal);
+
+var labels = [];
+var values = [];
+
+for(let i=0;i<allLabels.length;i++){
+  var t = new Date(allLabels[i]);
+
+  if(t >= fromDate && t <= toDate){
+    labels.push(allLabels[i]);
+    values.push(allValues[i]);
+  }
+}
+
+if(values.length === 0){
+  document.getElementById("tsStats").innerHTML = "No data in selected range";
+  return;
+}
+
+// UPDATE TEXT
+document.getElementById("selectedTime").innerHTML =
+"Selected Time : "+labels[0]+" – "+labels[labels.length-1];
+
+// HITUNG
+var sum = values.reduce((a,b)=>a+b,0);
+var avg = sum/values.length;
+var min = Math.min(...values);
+var max = Math.max(...values);
+
+// DRAW CHART
+if(tsChart) tsChart.destroy();
+
+tsChart = new Chart(document.getElementById("tsChart"),{
+type:'line',
+data:{
+labels:labels,
+datasets:[{
+data:values,
+borderColor:'#2b83ba',
+backgroundColor:'rgba(43,131,186,0.15)',
+fill:true,
+tension:0.25
+}]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false,
+plugins:{legend:{display:false}},
+scales:{
+y:{title:{display:true,text:"nSv/h"}}
+}
+}
+});
+
+// STATS
+document.getElementById("tsStats").innerHTML =
+"<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
+"<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
+"<b>Max:</b> "+max.toFixed(2)+" nSv/h";
+
+}
 
 var fromVal = document.getElementById("fromTime").value;
 var toVal = document.getElementById("toTime").value;
