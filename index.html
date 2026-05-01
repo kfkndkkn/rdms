@@ -388,7 +388,36 @@ style="width:98%;border-radius:8px;margin-bottom:10px;border:1px solid rgba(0,0,
 </div>
 
 <div style="flex:3;position:relative">
+
+  <!-- 🔥 DATE PICKER -->
+  <div style="
+    position:absolute;
+    top:10px;
+    right:10px;
+    z-index:10;
+    background:white;
+    padding:6px 8px;
+    border-radius:6px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.2);
+    font-size:12px;
+  ">
+    From:
+    <input type="datetime-local" id="dateFrom" style="font-size:11px">
+    To:
+    <input type="datetime-local" id="dateTo" style="font-size:11px">
+    <button onclick="applyDateFilter()" style="
+      margin-left:5px;
+      background:#0b1e3f;
+      color:white;
+      border:none;
+      padding:4px 6px;
+      border-radius:4px;
+      cursor:pointer;
+    ">Apply</button>
+  </div>
+
   <canvas id="tsChart"></canvas>
+
 </div>
 <div id="selectedTime"></div>
   <div id="tsStats"></div>
@@ -1111,7 +1140,8 @@ window.avgChart.update('none');
 var tsChart=null;
 var allLabels=[];
 var allValues=[];
-
+var filteredLabels = [];
+var filteredValues = [];
 function drawChart(labels, values){
 
 if(values.length === 0){
@@ -1161,7 +1191,7 @@ document.getElementById("tsStats").innerHTML =
 
 document.getElementById("selectedTime").innerHTML="";
 document.getElementById("tsStats").innerHTML="";
-function applyDateFilter(){
+
 
 var fromVal = document.getElementById("fromTime").value;
 var toVal = document.getElementById("toTime").value;
@@ -1185,6 +1215,38 @@ for(let i=0;i<allLabels.length;i++){
 }
 
 drawChart(labels, values);
+
+}
+function applyDateFilter(){
+
+var fromVal = document.getElementById("fromTime").value;
+var toVal = document.getElementById("toTime").value;
+
+if(!fromVal || !toVal) return;
+
+var fromDate = new Date(fromVal);
+var toDate = new Date(toVal);
+
+filteredLabels = [];
+filteredValues = [];
+
+for(let i=0;i<allLabels.length;i++){
+
+  var t = new Date(allLabels[i]);
+
+  if(t >= fromDate && t <= toDate){
+    filteredLabels.push(allLabels[i]);
+    filteredValues.push(allValues[i]);
+  }
+}
+
+if(filteredValues.length === 0){
+  document.getElementById("tsStats").innerHTML = "No data in selected range";
+  return;
+}
+
+// 🔥 UPDATE CHART
+drawChart(filteredLabels, filteredValues);
 
 }
 // IMAGE
@@ -1291,7 +1353,6 @@ toInput.onchange = updateRangeChart;
 
 }
 
-function updateRangeChart(){
 
 var fromVal = document.getElementById("fromTime").value;
 var toVal = document.getElementById("toTime").value;
