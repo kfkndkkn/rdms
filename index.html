@@ -387,7 +387,7 @@ style="width:98%;border-radius:8px;margin-bottom:10px;border:1px solid rgba(0,0,
   <!-- DATE PICKER -->
   <div style="
     position:absolute;
-    top:10px;
+    top:-40px;
     right:10px;
     z-index:10;
     background:white;
@@ -1396,7 +1396,9 @@ document.getElementById("tsStats").innerHTML=
 "<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
 "<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
 "<b>Max:</b> "+max.toFixed(2)+" nSv/h";
-
+// 🔥 SYNC KE DATE PICKER
+document.getElementById("dateFrom").value = labels[0].replace(" ", "T");
+document.getElementById("dateTo").value = labels[labels.length-1].replace(" ", "T");
 }
 function updateChartFiltered(index){
 
