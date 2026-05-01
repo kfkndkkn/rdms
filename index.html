@@ -1416,7 +1416,7 @@ callback:function(value, i){
 const mid = Math.floor(index / 2);
 
 if(i === 0 || i === mid || i === index){
-return allLabels[i];
+return labels[i];
 }
 
 return "";
@@ -1507,8 +1507,12 @@ function updateChartUnified(index){
     values = allValues;
   }
 
+  if(labels.length === 0) return;
+
   var slicedLabels = labels.slice(0,index+1);
   var slicedValues = values.slice(0,index+1);
+
+  if(slicedLabels.length === 0) return;
 
   var startTime = slicedLabels[0];
   var endTime = slicedLabels[slicedLabels.length-1];
@@ -1528,7 +1532,9 @@ function updateChartUnified(index){
   if(tsChart) tsChart.destroy();
 
   tsChart = new Chart(document.getElementById("tsChart"),{
+
     type:'line',
+
     data:{
       labels: labels,
       datasets:[{
@@ -1540,14 +1546,56 @@ function updateChartUnified(index){
         fill:true
       }]
     },
+
     options:{
       responsive:true,
       maintainAspectRatio:false,
+
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            title:function(items){
+              return items[0].label;
+            }
+          }
+        }
+      },
+
       scales:{
-        x:{min:0,max:index},
-        y:{min:ymin,max:ymax}
+        x:{
+          type:'category',
+          min:0,
+          max:index,
+          offset:false,
+
+          ticks:{
+            autoSkip:false,
+            maxRotation:0,
+            minRotation:0,
+
+            callback:function(value, i){
+              const mid = Math.floor(index / 2);
+
+              if(i === 0 || i === mid || i === index){
+                return labels[i];
+              }
+              return "";
+            }
+          },
+
+          grid:{display:false}
+        },
+
+        y:{
+          min:ymin,
+          max:ymax,
+          title:{display:true,text:"nSv/h"},
+          grid:{color:"rgba(0,0,0,0.08)"}
+        }
       }
     }
+
   });
 
   document.getElementById("tsStats").innerHTML =
