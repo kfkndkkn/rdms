@@ -382,9 +382,28 @@ style="width:98%;border-radius:8px;margin-bottom:10px;border:1px solid rgba(0,0,
 <!-- RIGHT -->
 <div style="flex:1;display:flex;flex-direction:column">
 
-  <div style="flex:3;position:relative">
-    <canvas id="tsChart"></canvas>
+<div style="flex:3;position:relative">
+
+  <!-- DATE PICKER -->
+  <div style="
+    position:absolute;
+    top:10px;
+    right:10px;
+    z-index:10;
+    background:white;
+    padding:6px 10px;
+    border-radius:8px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.2);
+    font-size:12px;
+  ">
+    From:
+    <input type="datetime-local" id="dateFrom">
+    To:
+    <input type="datetime-local" id="dateTo">
   </div>
+
+  <canvas id="tsChart"></canvas>
+</div>
 
   <input type="range" id="timeSlider">
   <div id="selectedTime"></div>
@@ -1108,8 +1127,10 @@ window.avgChart.update('none');
 var tsChart=null;
 var allLabels=[];
 var allValues=[];
-
+var filteredLabels=[];
+var filteredValues=[];
 function openTS(station){
+
 var key = normalizeName(station);
 
 var stationData = window.stationIndex[key];
@@ -1204,7 +1225,18 @@ if(allValues.length===0){
 document.getElementById("tsStats").innerHTML="No data available";
 return;
 }
+// ===== DATE PICKER INIT =====
+var fromInput = document.getElementById("dateFrom");
+var toInput = document.getElementById("dateTo");
 
+if(allLabels.length > 0){
+  fromInput.value = allLabels[0].replace(" ", "T");
+  toInput.value = allLabels[allLabels.length-1].replace(" ", "T");
+}
+
+// EVENT
+fromInput.onchange = applyDateFilter;
+toInput.onchange = applyDateFilter;
 var slider=document.getElementById("timeSlider");
 
 var lastIndex=allValues.length-1;
@@ -1223,7 +1255,44 @@ updateChart(parseInt(this.value));
 });
 
 }
+function applyDateFilter(){
 
+  var fromVal = document.getElementById("dateFrom").value;
+  var toVal = document.getElementById("dateTo").value;
+
+  if(!fromVal || !toVal) return;
+
+  var fromDate = new Date(fromVal);
+  var toDate = new Date(toVal);
+
+  filteredLabels = [];
+  filteredValues = [];
+
+  for(let i=0;i<allLabels.length;i++){
+
+    let t = new Date(allLabels[i]);
+
+    if(t >= fromDate && t <= toDate){
+      filteredLabels.push(allLabels[i]);
+      filteredValues.push(allValues[i]);
+    }
+  }
+
+  if(filteredValues.length === 0) return;
+
+  // 🔥 UPDATE SLIDER
+  var slider = document.getElementById("timeSlider");
+
+  slider.min = 0;
+  slider.max = filteredValues.length - 1;
+  slider.value = filteredValues.length - 1;
+
+  slider.oninput = function(){
+    updateChartFiltered(parseInt(this.value));
+  };
+
+  updateChartFiltered(slider.value);
+}
 function updateChart(index){
 
 var labels=allLabels.slice(0,index+1);
@@ -1329,7 +1398,57 @@ document.getElementById("tsStats").innerHTML=
 "<b>Max:</b> "+max.toFixed(2)+" nSv/h";
 
 }
+function updateChartFiltered(index){
 
+  var labels = filteredLabels.slice(0,index+1);
+  var values = filteredValues.slice(0,index+1);
+
+  var startTime = labels[0];
+  var endTime = labels[labels.length-1];
+
+  document.getElementById("selectedTime").innerHTML =
+  "Selected Time : "+startTime+" – "+endTime;
+
+  var sum = values.reduce((a,b)=>a+b,0);
+  var avg = sum/values.length;
+  var min = Math.min(...values);
+  var max = Math.max(...values);
+
+  var ymin = min-(max-min)*0.2;
+  var ymax = max+(max-min)*0.2;
+  if(ymin<0) ymin=0;
+
+  if(tsChart) tsChart.destroy();
+
+  tsChart = new Chart(document.getElementById("tsChart"),{
+    type:'line',
+    data:{
+      labels: filteredLabels,
+      datasets:[{
+        data: filteredValues,
+        borderColor:'#2b83ba',
+        backgroundColor:'rgba(43,131,186,0.15)',
+        tension:0.25,
+        pointRadius:2,
+        fill:true
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{min:0,max:index},
+        y:{min:ymin,max:ymax}
+      }
+    }
+  });
+
+  document.getElementById("tsStats").innerHTML =
+  "<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
+  "<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
+  "<b>Max:</b> "+max.toFixed(2)+" nSv/h";
+}
 function closeTS(){
 document.getElementById("tsModal").style.display="none";
 }
