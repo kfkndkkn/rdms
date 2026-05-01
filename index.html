@@ -1299,6 +1299,25 @@ updateChartUnified(parseInt(this.value));
 });
 
 }
+function snapToNearest(dateStr){
+
+  var target = new Date(dateStr).getTime();
+
+  var closest = allLabels[0];
+  var minDiff = Math.abs(new Date(allLabels[0]).getTime() - target);
+
+  for(let i=1;i<allLabels.length;i++){
+    let t = new Date(allLabels[i]).getTime();
+    let diff = Math.abs(t - target);
+
+    if(diff < minDiff){
+      minDiff = diff;
+      closest = allLabels[i];
+    }
+  }
+
+  return closest;
+}
 function applyDateFilter(){
 
   var fromVal = document.getElementById("dateFrom").value;
@@ -1306,8 +1325,14 @@ function applyDateFilter(){
 
   if(!fromVal || !toVal) return;
 
-  var fromDate = new Date(fromVal);
-  var toDate = new Date(toVal);
+var snappedFrom = snapToNearest(fromVal);
+var snappedTo = snapToNearest(toVal);
+
+document.getElementById("dateFrom").value = snappedFrom.replace(" ", "T");
+document.getElementById("dateTo").value = snappedTo.replace(" ", "T");
+
+var fromDate = new Date(snappedFrom);
+var toDate = new Date(snappedTo);
 
   filteredLabels = [];
   filteredValues = [];
