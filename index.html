@@ -104,14 +104,10 @@ overflow:hidden;
 }
 
 #tsHeader{
-  background:#0b1e3f;
-  color:white;
-  padding:14px 20px;   /* 🔥 lebih tinggi */
   display:flex;
-  justify-content:space-between;
   align-items:center;
-  font-weight:bold;
-  position:relative;   /* 🔥 penting */
+  justify-content:space-between;
+  gap:15px;
 }
 
 #tsContent{
@@ -351,6 +347,19 @@ height:180px !important;
 #dateWrapper input:focus{
   box-shadow:0 0 0 2px #4da3ff;
 }
+#tsTitle{
+  flex:1;
+}
+
+#dateWrapper{
+  flex:2;
+  justify-content:center;
+}
+
+#tsHeader button{
+  flex:1;
+}
+  
 </style>
 </head>
 
@@ -419,8 +428,7 @@ font-weight:bold;
   <button onclick="closeTS()">Close</button>
 
 </div>
-<div id="tsTitle">Time Series</div>
-<button onclick="closeTS()" style="background:#c00;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer">Close</button>
+
 </div>
 
 <div id="tsContent" style="display:flex;gap:20px;align-items:stretch">
