@@ -233,11 +233,7 @@ width:100% !important;
 height:100% !important;
 }
 
-#sidePanel{
-position:absolute;
-top:140px;
-left:10px;
-width:260px; /* 🔥 default FIX */
+
 
 background:linear-gradient(180deg,#173a6b,#1f5fa8);
 padding:14px;
@@ -356,34 +352,98 @@ outline:none;
 border-color:#2b83ba;
 box-shadow:0 0 4px rgba(43,131,186,0.4);
 }
+/* MAIN FLEX LAYOUT */
+#mainLayout{
+display:flex;
+height:100vh;
+margin-top:70px;
+}
+
+/* SIDEBAR */
+#sidePanel{
+width:260px;
+background:linear-gradient(180deg,#173a6b,#1f5fa8);
+color:white;
+padding:14px;
+
+transition:0.3s;
+overflow-y:auto;
+}
+
+/* COLLAPSE */
+#sidePanel.collapsed{
+width:0;
+padding:0;
+overflow:hidden;
+}
+
+/* MAIN CONTENT */
+#mainContent{
+flex:1;
+transition:0.3s;
+}
+
+/* MAP */
+#map{
+width:100%;
+height:calc(100vh - 70px);
+}
+
 </style>
 </head>
 
 <body>
 
 <div id="header">
-<img src="logo/logo-bapeten.png">
-<h2>Indonesia Radiation Data Monitoring System</h2>
-</div>
 
-<div id="map"></div>
-<button id="togglePanelBtn" onclick="togglePanel()"
-style="
-position:absolute;
-top:90px;
-left:10px;
-z-index:10000;
-background:#0b1e3f;
+<button onclick="togglePanel()" style="
+margin-right:15px;
+background:#173a6b;
 color:white;
 border:none;
-padding:10px 14px;
-border-radius:8px;
+padding:8px 12px;
+border-radius:6px;
 cursor:pointer;
-font-weight:bold;
+font-size:16px;
 ">
-☰ Statistic Summary
+☰
 </button>
-<div id="sidePanel">
+
+<img src="logo/logo-bapeten.png">
+<h2>Indonesia Radiation Data Monitoring System</h2>
+
+</div>
+
+<div id="mainLayout">
+
+  <!-- SIDEBAR -->
+  <div id="sidePanel">
+
+    <div class="panel-box highlight">
+      <div class="title">Maximum Dose Rate (nSv/h)</div>
+      <div id="maxValue" class="big">-</div>
+      <div id="maxStation" class="sub">-</div>
+    </div>
+
+    <div class="panel-box highlight">
+      <div class="title">Minimum Dose Rate (nSv/h)</div>
+      <div id="minValue" class="big">-</div>
+      <div id="minStation" class="sub">-</div>
+    </div>
+
+    <div class="panel-box">
+      <div class="title">Average Dose Rate in Last 7 Days (nSv/h)</div>
+      <canvas id="avgBarChart"></canvas>
+    </div>
+
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="mainContent">
+    <div id="map"></div>
+  </div>
+
+</div>
 
 
 <div class="panel-box highlight">
@@ -1640,37 +1700,7 @@ function togglePanel(){
 
   var panel = document.getElementById("sidePanel");
 
-  // ===== HIDE PANEL =====
-  if(panelVisible){
-
-    panel.style.transform = "translateX(-110%)";
-    panelVisible = false;
-
-    // 🔥 tampilkan legend lagi (hanya layar kecil)
-    if(window.innerWidth < 1920){
-      if(!legendVisible){
-        legend.addTo(map);
-        legendVisible = true;
-      }
-    }
-
-  }
-
-  // ===== SHOW PANEL =====
-  else{
-
-    panel.style.transform = "translateX(0)";
-    panelVisible = true;
-
-    // 🔥 sembunyikan legend hanya kalau layar kecil
-    if(window.innerWidth < 1920){
-      if(legendVisible){
-        map.removeControl(legend);
-        legendVisible = false;
-      }
-    }
-
-  }
+  panel.classList.toggle("collapsed");
 
   setTimeout(()=>{
     map.invalidateSize();
