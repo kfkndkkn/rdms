@@ -384,7 +384,13 @@ flex:1;
 transition:0.3s;
 }
 
-
+#legendInside{
+margin-top:10px;
+background:white;
+color:#000;
+border-radius:8px;
+padding:10px;
+}
 
 </style>
 </head>
@@ -414,7 +420,7 @@ font-size:16px;
 <div id="mainLayout">
 
   <!-- SIDEBAR -->
-  <div id="sidePanel">
+  <div id="sidePanel" class="collapsed">
 
     <div class="panel-box highlight">
       <div class="title">Maximum Dose Rate (nSv/h)</div>
@@ -434,13 +440,6 @@ font-size:16px;
     </div>
 
   </div>
-
-  <!-- MAIN CONTENT -->
-  <div id="mainContent">
-    <div id="map"></div>
-  </div>
-
-</div>
 
   <!-- MAIN CONTENT -->
   <div id="mainContent">
@@ -570,9 +569,8 @@ var esriGrayLabel=L.tileLayer(
 // MAP
 
 var map=L.map('map',{
-
 zoomControl:true,
-layers:[osm],
+layers:[esriGray], // 🔥 DEFAULT ESRI
 zoomSnap:0.25,
 zoomDelta:0.25,
 wheelPxPerZoomLevel:120
@@ -1693,7 +1691,22 @@ function togglePanel(){
 
   var panel = document.getElementById("sidePanel");
 
+  var isOpen = !panel.classList.contains("collapsed");
+
   panel.classList.toggle("collapsed");
+
+  if(!isOpen){
+    // 👉 PANEL DIBUKA → pindah legend ke sidebar
+    map.removeControl(legend);
+    moveLegendToSidebar();
+  }else{
+    // 👉 PANEL DITUTUP → balik ke map
+
+    var existing = document.getElementById("legendInside");
+    if(existing) existing.remove();
+
+    legend.addTo(map);
+  }
 
   setTimeout(()=>{
     map.invalidateSize();
@@ -1817,6 +1830,23 @@ legend.addTo(map);
 window.addEventListener("resize", ()=>{
   drawAvgChart();
 });
+  function moveLegendToSidebar(){
+
+  var panel = document.getElementById("sidePanel");
+
+  if(!panel.querySelector("#legendInside")){
+
+    var legendDiv = legend.onAdd(map);
+    legendDiv.id = "legendInside";
+
+    // 🔥 hapus tooltip biar clean
+    var tooltip = legendDiv.querySelector("#legendTooltip");
+    if(tooltip) tooltip.remove();
+
+    panel.appendChild(legendDiv);
+  }
+
+}
 function adjustLegendTooltip(){
 
   var tooltip = document.getElementById("legendTooltip");
