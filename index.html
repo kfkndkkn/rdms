@@ -1366,7 +1366,10 @@ var v = parseFloat(r.dose);
 
 // 🔥 FILTER 1 BULAN TERAKHIR
 if(t >= oneMonthAgo && t <= now && !isNaN(v)){
-allLabels.push(r.time);
+var t = parseTime(r.time);
+
+allLabels.push(t);        // 🔥 simpan Date object
+allValues.push(v);
 allValues.push(v);
 }
 
@@ -1416,7 +1419,7 @@ function snapToNearest(dateStr){
   var minDiff = Math.abs(new Date(allLabels[0]).getTime() - target);
 
   for(let i=1;i<allLabels.length;i++){
-    let t = new Date(allLabels[i]).getTime();
+    let t = allLabels[i].getTime()
     let diff = Math.abs(t - target);
 
     if(diff < minDiff){
@@ -1447,8 +1450,7 @@ var toDate = new Date(snappedTo);
   filteredValues = [];
 
   for(let i=0;i<allLabels.length;i++){
-    let t = new Date(allLabels[i]);
-
+   let t = allLabels[i];
     if(t >= fromDate && t <= toDate){
       filteredLabels.push(allLabels[i]);
       filteredValues.push(allValues[i]);
@@ -1550,7 +1552,7 @@ callback:function(value, i){
 const mid = Math.floor(index / 2);
 
 if(i === 0 || i === mid || i === index){
-return labels[i];
+return labels[i].toLocaleString()
 }
 
 return "";
@@ -1575,7 +1577,7 @@ document.getElementById("tsStats").innerHTML=
 "<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
 "<b>Max:</b> "+max.toFixed(2)+" nSv/h";
 // 🔥 SYNC KE DATE PICKER
-document.getElementById("dateFrom").value = labels[0].replace(" ", "T");
+document.getElementById("dateFrom").value = labels[0].toISOString().slice(0,16);
 document.getElementById("dateTo").value = labels[labels.length-1].replace(" ", "T");
 }
 function updateChartFiltered(index){
