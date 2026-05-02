@@ -261,8 +261,6 @@ transition:transform 0.3s ease;
 }
   
 .panel-box{
-  display:flex;
-flex-direction:column;
 background:#f4f7fb;
 box-shadow:0 2px 6px rgba(0,0,0,0.15);
 color:#222;
@@ -294,9 +292,7 @@ opacity:0.9;
 }
 
 #avgBarChart{
-  flex:1;
-height:auto !important;
-min-height:160px;
+height:180px !important; 
 }
 
 
@@ -390,43 +386,19 @@ transition:0.3s;
 
 #legendInside{
 margin-top:12px;
-width:100%;
-box-sizing:border-box;
+
+width:100%;              /* 🔥 ikut sidebar */
+box-sizing:border-box;   /* 🔥 biar tidak keluar */
 
 background:white;
 color:#000;
 
 border-radius:8px;
-padding:12px 10px;
+padding:10px;
 
 box-shadow:0 2px 6px rgba(0,0,0,0.2);
 }
 
-box-shadow:0 2px 6px rgba(0,0,0,0.2);
-}
-.panel-header{
-border-left:4px solid #2b83ba;
-background:white;
-color:#222;
-
-padding:12px;
-border-radius:10px;
-
-margin-bottom:12px;
-
-box-shadow:0 2px 6px rgba(0,0,0,0.15);
-}
-
-.panel-title{
-font-size:15px;
-font-weight:bold;
-margin-bottom:4px;
-}
-
-.panel-sub{
-font-size:11px;
-color:#666;
-}
 </style>
 </head>
 
@@ -456,15 +428,7 @@ font-size:16px;
 
   <!-- SIDEBAR -->
   <div id="sidePanel" class="collapsed">
-    <div class="panel-header">
 
-  <div class="panel-title">Statistic Summary</div>
-
-  <div class="panel-sub">
-    Last Update : <span id="lastUpdateText">-</span>
-  </div>
-
-</div>
     <div class="panel-box highlight">
       <div class="title">Maximum Dose Rate (nSv/h)</div>
       <div id="maxValue" class="big">-</div>
@@ -475,6 +439,11 @@ font-size:16px;
       <div class="title">Minimum Dose Rate (nSv/h)</div>
       <div id="minValue" class="big">-</div>
       <div id="minStation" class="sub">-</div>
+    </div>
+
+    <div class="panel-box">
+      <div class="title">Average Dose Rate in Last 7 Days (nSv/h)</div>
+      <canvas id="avgBarChart"></canvas>
     </div>
 
   </div>
@@ -1034,19 +1003,7 @@ setInterval(loadCSV,30000);
 map.on("zoomend",loadCSV);
 
  function updateSidePanel(){
-// 🔥 AMBIL WAKTU TERBARU GLOBAL
-var latestTime = null;
 
-Object.values(window.latestTS).forEach(r=>{
-  if(!latestTime || r.time > latestTime){
-    latestTime = r.time;
-  }
-});
-
-if(latestTime){
-  document.getElementById("lastUpdateText").innerHTML =
-  latestTime.toLocaleString();
-}
 loadLatestTimeseries(()=>{
 
 var data = Object.keys(window.latestTS).map(k=>{
@@ -1179,19 +1136,7 @@ animation:false,
 
 plugins:{
   legend:{display:false},
- title:{
-    display:true,
-    text:'Average Dose Rate in Last 7 Days (nSv/h)',
-    align:'start',
-    font:{
-      size:12,
-      weight:'bold'
-    },
-    padding:{
-      top:4,
-      bottom:8
-    }
-  },
+
   tooltip:{
     enabled:true,
 
@@ -1750,7 +1695,7 @@ document.getElementById("tsModal").style.display="none";
 var panelVisible = false; // 🔥 default hidden
 
 function togglePanel(){
-panelVisible = !panel.classList.contains("collapsed");
+
   var panel = document.getElementById("sidePanel");
 
   var isOpen = !panel.classList.contains("collapsed");
@@ -1856,11 +1801,11 @@ Nilai ambang laju dosis radiasi untuk menentukan tindakan proteksi darurat.
 
 </div>
 
-<div style="width:100%;height:14px;
+<div style="width:260px;height:14px;
 background:linear-gradient(to right,#2b83ba,#ffe600,#ff9b00,#ff2b2b);
 margin-bottom:6px;border:1px solid #999;"></div>
 
-<div style="display:flex;justify-content:space-between;width:100%;font-size:11px;">
+<div style="display:flex;justify-content:space-between;width:260px;font-size:11px;">
 <span>0</span>
 <span>1.000</span>
 <span>100.000</span>
