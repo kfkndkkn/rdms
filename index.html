@@ -805,7 +805,7 @@ var latest = {};
 data.forEach(r=>{
 
 var key = normalizeName(r.station);
-var t = parseTime(r.time);
+var t = new Date(r.time);
 var v = parseFloat(r.dose);
 
 if(isNaN(v)) return;
@@ -1107,7 +1107,7 @@ sevenDaysAgo.setDate(now.getDate() - 7);
 var grouped = {};
 
 data.forEach(r=>{
-var t = parseTime(r.time);
+var t = new Date(r.time);
 var v = parseFloat(r.dose);
 
 if(t >= sevenDaysAgo && t <= now && !isNaN(v)){
@@ -1361,15 +1361,12 @@ data.forEach(r=>{
 
 if(normalizeName(r.station) === normalizeName(station)){
 
-var t = parseTime(r.time);
+var t = new Date(r.time);
 var v = parseFloat(r.dose);
 
 // 🔥 FILTER 1 BULAN TERAKHIR
 if(t >= oneMonthAgo && t <= now && !isNaN(v)){
-var t = parseTime(r.time);
-
-allLabels.push(t);        // 🔥 simpan Date object
-allValues.push(v);
+allLabels.push(r.time);
 allValues.push(v);
 }
 
@@ -1419,7 +1416,7 @@ function snapToNearest(dateStr){
   var minDiff = Math.abs(new Date(allLabels[0]).getTime() - target);
 
   for(let i=1;i<allLabels.length;i++){
-    let t = allLabels[i].getTime()
+    let t = new Date(allLabels[i]).getTime();
     let diff = Math.abs(t - target);
 
     if(diff < minDiff){
@@ -1450,7 +1447,8 @@ var toDate = new Date(snappedTo);
   filteredValues = [];
 
   for(let i=0;i<allLabels.length;i++){
-   let t = allLabels[i];
+    let t = new Date(allLabels[i]);
+
     if(t >= fromDate && t <= toDate){
       filteredLabels.push(allLabels[i]);
       filteredValues.push(allValues[i]);
@@ -1552,7 +1550,7 @@ callback:function(value, i){
 const mid = Math.floor(index / 2);
 
 if(i === 0 || i === mid || i === index){
-return labels[i].toLocaleString()
+return labels[i];
 }
 
 return "";
@@ -1577,7 +1575,7 @@ document.getElementById("tsStats").innerHTML=
 "<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
 "<b>Max:</b> "+max.toFixed(2)+" nSv/h";
 // 🔥 SYNC KE DATE PICKER
-document.getElementById("dateFrom").value = labels[0].toISOString().slice(0,16);
+document.getElementById("dateFrom").value = labels[0].replace(" ", "T");
 document.getElementById("dateTo").value = labels[labels.length-1].replace(" ", "T");
 }
 function updateChartFiltered(index){
@@ -1741,21 +1739,6 @@ function updateChartUnified(index){
 
   document.getElementById("dateFrom").value = slicedLabels[0].replace(" ", "T");
   document.getElementById("dateTo").value = slicedLabels[slicedLabels.length-1].replace(" ", "T");
-}
-function parseTime(str){
-
-  if(!str) return null;
-
-  // 🔥 CASE SUPADIO (format: MM/DD/YYYY HH:mm)
-  if(str.includes("/")){
-    let [date, time] = str.split(" ");
-    let [m, d, y] = date.split("/");
-
-    return new Date(`${y}-${m.padStart(2,"0")}-${d.padStart(2,"0")}T${time}`);
-  }
-
-  // 🔥 CASE NORMAL (format: YYYY-MM-DD HH:mm)
-  return new Date(str.replace(" ", "T"));
 }
 function closeTS(){
 document.getElementById("tsModal").style.display="none";
