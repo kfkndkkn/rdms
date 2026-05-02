@@ -805,7 +805,7 @@ var latest = {};
 data.forEach(r=>{
 
 var key = normalizeName(r.station);
-var t = new Date(r.time);
+var t = parseTime(r.time);
 var v = parseFloat(r.dose);
 
 if(isNaN(v)) return;
@@ -1107,7 +1107,7 @@ sevenDaysAgo.setDate(now.getDate() - 7);
 var grouped = {};
 
 data.forEach(r=>{
-var t = new Date(r.time);
+var t = parseTime(r.time);
 var v = parseFloat(r.dose);
 
 if(t >= sevenDaysAgo && t <= now && !isNaN(v)){
@@ -1361,7 +1361,7 @@ data.forEach(r=>{
 
 if(normalizeName(r.station) === normalizeName(station)){
 
-var t = new Date(r.time);
+var t = parseTime(r.time);
 var v = parseFloat(r.dose);
 
 // 🔥 FILTER 1 BULAN TERAKHIR
@@ -1739,6 +1739,21 @@ function updateChartUnified(index){
 
   document.getElementById("dateFrom").value = slicedLabels[0].replace(" ", "T");
   document.getElementById("dateTo").value = slicedLabels[slicedLabels.length-1].replace(" ", "T");
+}
+function parseTime(str){
+
+  if(!str) return null;
+
+  // 🔥 CASE SUPADIO (format: MM/DD/YYYY HH:mm)
+  if(str.includes("/")){
+    let [date, time] = str.split(" ");
+    let [m, d, y] = date.split("/");
+
+    return new Date(`${y}-${m.padStart(2,"0")}-${d.padStart(2,"0")}T${time}`);
+  }
+
+  // 🔥 CASE NORMAL (format: YYYY-MM-DD HH:mm)
+  return new Date(str.replace(" ", "T"));
 }
 function closeTS(){
 document.getElementById("tsModal").style.display="none";
