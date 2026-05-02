@@ -362,13 +362,22 @@ margin-top:70px;
 
 /* SIDEBAR */
 #sidePanel{
-width:300px;
-background:linear-gradient(180deg,#173a6b,#1f5fa8);
-color:white;
-padding:16px;
+  width:300px;
+  background:linear-gradient(180deg,#173a6b,#1f5fa8);
+  color:white;
+  padding:16px;
 
-transition:0.3s;
-overflow-y:auto;
+  transition:0.3s;
+  overflow-y:auto;
+
+  /* 🔥 SHADOW LEBIH HALUS */
+  box-shadow: 
+    2px 0 8px rgba(0,0,0,0.15),
+    8px 0 24px rgba(0,0,0,0.2);
+
+  /* 🔥 DEPTH EFFECT */
+  border-right:1px solid rgba(255,255,255,0.08);
+  transform: translateX(0);
 }
 
 /* COLLAPSE */
@@ -376,6 +385,8 @@ overflow-y:auto;
 width:0;
 padding:0;
 overflow:hidden;
+  transform: translateX(-100%);
+  box-shadow:none; /* 🔥 hilang saat close biar clean */
 }
 
 /* MAIN CONTENT */
