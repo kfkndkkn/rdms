@@ -398,7 +398,33 @@ padding:10px;
 
 box-shadow:0 2px 6px rgba(0,0,0,0.2);
 }
+.summary-box{
+  background:linear-gradient(135deg,#ffffff,#eaf2ff);
+  border-left:5px solid #2b83ba;
+  text-align:left;
+  padding:12px;
+}
 
+.summary-title{
+  font-size:16px;
+  font-weight:bold;
+  color:#0b1e3f;
+  margin-bottom:4px;
+}
+
+.summary-sub{
+  font-size:12px;
+  color:#444;
+}
+
+.leaflet-control {
+  z-index: 1000 !important;
+}
+
+.legend {
+  z-index: 2000 !important;
+  position: relative;
+}
 </style>
 </head>
 
@@ -428,7 +454,10 @@ font-size:16px;
 
   <!-- SIDEBAR -->
   <div id="sidePanel" class="collapsed">
-
+<div class="panel-box summary-box">
+  <div class="summary-title">Statistic Summary</div>
+  <div id="lastUpdate" class="summary-sub">Last Updated : -</div>
+</div>
     <div class="panel-box highlight">
       <div class="title">Maximum Dose Rate (nSv/h)</div>
       <div id="maxValue" class="big">-</div>
@@ -1005,7 +1034,18 @@ map.on("zoomend",loadCSV);
  function updateSidePanel(){
 
 loadLatestTimeseries(()=>{
+var latestTime = null;
 
+Object.values(window.latestTS).forEach(v=>{
+  if(!latestTime || v.time > latestTime){
+    latestTime = v.time;
+  }
+});
+
+if(latestTime){
+  document.getElementById("lastUpdate").innerHTML =
+    "Last Updated : " + latestTime.toLocaleString();
+}
 var data = Object.keys(window.latestTS).map(k=>{
 return {
 station:window.latestTS[k].name,
