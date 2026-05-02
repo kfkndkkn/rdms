@@ -261,6 +261,8 @@ transition:transform 0.3s ease;
 }
   
 .panel-box{
+  display:flex;
+flex-direction:column;
 background:#f4f7fb;
 box-shadow:0 2px 6px rgba(0,0,0,0.15);
 color:#222;
@@ -292,7 +294,9 @@ opacity:0.9;
 }
 
 #avgBarChart{
-height:180px !important; 
+  flex:1;
+height:auto !important;
+min-height:160px;
 }
 
 
@@ -386,15 +390,16 @@ transition:0.3s;
 
 #legendInside{
 margin-top:12px;
-
-width:100%;              /* 🔥 ikut sidebar */
-box-sizing:border-box;   /* 🔥 biar tidak keluar */
+width:100%;
+box-sizing:border-box;
 
 background:white;
 color:#000;
 
 border-radius:8px;
-padding:12px 10px;   /* 🔥 sedikit lebih dalam */
+padding:12px 10px;
+
+box-shadow:0 2px 6px rgba(0,0,0,0.2);
 }
 
 box-shadow:0 2px 6px rgba(0,0,0,0.2);
@@ -470,11 +475,6 @@ font-size:16px;
       <div class="title">Minimum Dose Rate (nSv/h)</div>
       <div id="minValue" class="big">-</div>
       <div id="minStation" class="sub">-</div>
-    </div>
-
-    <div class="panel-box">
-      <div class="title">Average Dose Rate in Last 7 Days (nSv/h)</div>
-      <canvas id="avgBarChart"></canvas>
     </div>
 
   </div>
@@ -1179,7 +1179,19 @@ animation:false,
 
 plugins:{
   legend:{display:false},
-
+ title:{
+    display:true,
+    text:'Average Dose Rate in Last 7 Days (nSv/h)',
+    align:'start',
+    font:{
+      size:12,
+      weight:'bold'
+    },
+    padding:{
+      top:4,
+      bottom:8
+    }
+  },
   tooltip:{
     enabled:true,
 
@@ -1738,7 +1750,7 @@ document.getElementById("tsModal").style.display="none";
 var panelVisible = false; // 🔥 default hidden
 
 function togglePanel(){
-
+panelVisible = !panel.classList.contains("collapsed");
   var panel = document.getElementById("sidePanel");
 
   var isOpen = !panel.classList.contains("collapsed");
