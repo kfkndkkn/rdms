@@ -362,24 +362,23 @@ margin-top:70px;
 
 /* SIDEBAR */
 #sidePanel{
-  width:300px;
+  width:260px;              /* default lebih ramping */
+  max-width:28vw;           /* 🔥 responsive (max 28% layar) */
+  min-width:230px;          /* 🔥 jangan terlalu kecil */
+
   background:linear-gradient(180deg,#173a6b,#1f5fa8);
   color:white;
-  padding:16px;
+  padding:14px;
 
   transition:0.3s;
   overflow-y:auto;
 
-  /* 🔥 SHADOW LEBIH HALUS */
   box-shadow: 
     2px 0 8px rgba(0,0,0,0.15),
     8px 0 24px rgba(0,0,0,0.2);
 
-  /* 🔥 DEPTH EFFECT */
   border-right:1px solid rgba(255,255,255,0.08);
-  transform: translateX(0);
 }
-
 /* COLLAPSE */
 #sidePanel.collapsed{
 width:0;
@@ -440,6 +439,7 @@ box-shadow:0 2px 6px rgba(0,0,0,0.2);
 
   /* 🔥 kecilkan padding sidebar */
   #sidePanel{
+     width:220px; 
     padding:10px;
   }
 
