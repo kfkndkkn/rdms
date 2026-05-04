@@ -1379,13 +1379,7 @@ document.getElementById("tsStats").innerHTML="No data available";
 return;
 }
 // ===== DATE PICKER INIT =====
-var fromInput = document.getElementById("dateFrom");
-var toInput = document.getElementById("dateTo");
 
-if(allLabels.length > 0){
-fromInput.value = allLabels[startIndex].replace(" ", "T");
-toInput.value = allLabels[lastIndex].replace(" ", "T");
-}
 
 // EVENT
 fromInput.onchange = applyDateFilter;
@@ -1396,6 +1390,14 @@ var lastIndex = allValues.length - 1;
 
 // 🔥 cari posisi 7 hari terakhir
 var sevenDaysAgo = new Date();
+// ===== DATE PICKER INIT (FIX POSISI) =====
+var fromInput = document.getElementById("dateFrom");
+var toInput = document.getElementById("dateTo");
+
+if(allLabels.length > 0){
+  fromInput.value = allLabels[startIndex].replace(" ", "T");
+  toInput.value = allLabels[lastIndex].replace(" ", "T");
+}
 sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
 var startIndex = 0;
