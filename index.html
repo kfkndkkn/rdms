@@ -1383,23 +1383,47 @@ var fromInput = document.getElementById("dateFrom");
 var toInput = document.getElementById("dateTo");
 
 if(allLabels.length > 0){
-  fromInput.value = allLabels[0].replace(" ", "T");
-  toInput.value = allLabels[allLabels.length-1].replace(" ", "T");
+fromInput.value = allLabels[startIndex].replace(" ", "T");
+toInput.value = allLabels[lastIndex].replace(" ", "T");
 }
 
 // EVENT
 fromInput.onchange = applyDateFilter;
 toInput.onchange = applyDateFilter;
-var slider=document.getElementById("timeSlider");
+var slider = document.getElementById("timeSlider");
 
-var lastIndex=allValues.length-1;
+var lastIndex = allValues.length - 1;
 
-slider.min=0;
-slider.max=lastIndex;
-slider.step=1;
-slider.value=lastIndex;
+// 🔥 cari posisi 7 hari terakhir
+var sevenDaysAgo = new Date();
+sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-updateChart(lastIndex);
+var startIndex = 0;
+
+for(let i=0;i<allLabels.length;i++){
+  let t = new Date(allLabels[i]);
+  if(t >= sevenDaysAgo){
+    startIndex = i;
+    break;
+  }
+}
+
+// 🔥 slider tetap full range
+slider.min = 0;
+slider.max = lastIndex;
+slider.step = 1;
+slider.value = lastIndex;
+
+// 🔥 render chart full
+updateChartUnified(lastIndex);
+
+// 🔥 tapi tampilkan hanya 7 hari terakhir
+setTimeout(()=>{
+  if(tsChart){
+    tsChart.options.scales.x.min = startIndex;
+    tsChart.update();
+  }
+},50);
 
 slider.oninput=function(){
 updateChartUnified(parseInt(this.value));
@@ -1504,8 +1528,8 @@ datasets:[{
 data:allValues,
 borderColor:'#2b83ba',
 backgroundColor:'rgba(43,131,186,0.15)',
-tension:0.25,
-pointRadius:2,
+tension:0.4,
+pointRadius:0,
 fill:true
 }]
 },
@@ -1594,8 +1618,19 @@ function updateChartFiltered(index){
   var min = Math.min(...values);
   var max = Math.max(...values);
 
-  var ymin = min-(max-min)*0.2;
-  var ymax = max+(max-min)*0.2;
+  var range = max - min;
+
+// 🔥 AUTO CALM LOGIC
+if(range > 50){
+  ymin = min - range * 0.05;
+  ymax = min + range * 0.4;   // 🔥 spike dipotong (tidak full max)
+}else{
+  ymin = min - range * 0.2;
+  ymax = max + range * 0.2;
+}
+
+// clamp
+if(ymin < 0) ymin = 0;
   if(ymin<0) ymin=0;
 
   if(tsChart) tsChart.destroy();
@@ -1608,8 +1643,8 @@ function updateChartFiltered(index){
         data: filteredValues,
         borderColor:'#2b83ba',
         backgroundColor:'rgba(43,131,186,0.15)',
-        tension:0.25,
-        pointRadius:2,
+        tension:0.4,
+        pointRadius:0,
         fill:true
       }]
     },
@@ -1659,8 +1694,19 @@ function updateChartUnified(index){
   var min = Math.min(...slicedValues);
   var max = Math.max(...slicedValues);
 
-  var ymin = min-(max-min)*0.2;
-  var ymax = max+(max-min)*0.2;
+var range = max - min;
+
+// 🔥 AUTO CALM LOGIC
+if(range > 50){
+  ymin = min - range * 0.05;
+  ymax = min + range * 0.4;   // 🔥 spike dipotong (tidak full max)
+}else{
+  ymin = min - range * 0.2;
+  ymax = max + range * 0.2;
+}
+
+// clamp
+if(ymin < 0) ymin = 0;
   if(ymin<0) ymin=0;
 
   if(tsChart) tsChart.destroy();
@@ -1675,8 +1721,8 @@ function updateChartUnified(index){
         data: values,
         borderColor:'#2b83ba',
         backgroundColor:'rgba(43,131,186,0.15)',
-        tension:0.25,
-        pointRadius:2,
+        tension:0.4,
+        pointRadius:0,
         fill:true
       }]
     },
