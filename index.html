@@ -1378,13 +1378,56 @@ if(allValues.length===0){
 document.getElementById("tsStats").innerHTML="No data available";
 return;
 }
+// ===== INIT SLIDER =====
+var slider = document.getElementById("timeSlider");
+var lastIndex = allValues.length - 1;
+
+// ===== HITUNG 7 HARI =====
+var sevenDaysAgo = new Date();
+sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+var startIndex = 0;
+
+for(let i=0;i<allLabels.length;i++){
+  let t = new Date(allLabels[i]);
+  if(t >= sevenDaysAgo){
+    startIndex = i;
+    break;
+  }
+}
+
 // ===== DATE PICKER INIT =====
+var fromInput = document.getElementById("dateFrom");
+var toInput = document.getElementById("dateTo");
 
+if(allLabels.length > 0){
+  fromInput.value = allLabels[startIndex].replace(" ", "T");
+  toInput.value = allLabels[lastIndex].replace(" ", "T");
+}
 
-// EVENT
+// ===== EVENT PICKER =====
 fromInput.onchange = applyDateFilter;
 toInput.onchange = applyDateFilter;
-var slider = document.getElementById("timeSlider");
+
+// ===== SLIDER FULL RANGE =====
+slider.min = 0;
+slider.max = lastIndex;
+slider.step = 1;
+slider.value = lastIndex;
+
+// ===== RENDER CHART =====
+updateChartUnified(lastIndex);
+
+// ===== LIMIT VIEW 7 HARI =====
+if(tsChart){
+  tsChart.options.scales.x.min = startIndex;
+  tsChart.update();
+}
+
+// ===== EVENT SLIDER =====
+slider.oninput = function(){
+  updateChartUnified(parseInt(this.value));
+};
 
 var lastIndex = allValues.length - 1;
 
