@@ -1487,16 +1487,8 @@ var avg=sum/values.length;
 var min=Math.min(...values);
 var max=Math.max(...values);
 
-var range = max - min;
-
-if(range < 20){
-  var mid = (max + min) / 2;
-  ymin = mid - 10;
-  ymax = mid + 10;
-}else{
-  ymin = min;
-  ymax = max;
-}
+var ymin=min-(max-min)*0.2;
+var ymax=max+(max-min)*0.2;
 
 if(ymin<0) ymin=0;
 
@@ -1602,16 +1594,8 @@ function updateChartFiltered(index){
   var min = Math.min(...values);
   var max = Math.max(...values);
 
- var range = max - min;
-
-if(range < 20){
-  var mid = (max + min) / 2;
-  ymin = mid - 10;
-  ymax = mid + 10;
-}else{
-  ymin = min;
-  ymax = max;
-}
+  var ymin = min-(max-min)*0.2;
+  var ymax = max+(max-min)*0.2;
   if(ymin<0) ymin=0;
 
   if(tsChart) tsChart.destroy();
@@ -1675,16 +1659,8 @@ function updateChartUnified(index){
   var min = Math.min(...slicedValues);
   var max = Math.max(...slicedValues);
 
- var range = max - min;
-
-if(range < 20){
-  var mid = (max + min) / 2;
-  ymin = mid - 10;
-  ymax = mid + 10;
-}else{
-  ymin = min;
-  ymax = max;
-}
+  var ymin = min-(max-min)*0.2;
+  var ymax = max+(max-min)*0.2;
   if(ymin<0) ymin=0;
 
   if(tsChart) tsChart.destroy();
