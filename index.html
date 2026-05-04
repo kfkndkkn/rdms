@@ -533,12 +533,12 @@ style="width:98%;border-radius:8px;margin-bottom:10px;border:1px solid rgba(0,0,
 <div id="datePickerBar">
   <div class="date-group">
     <label>From</label>
-    <input type="datetime-local" id="dateFrom">
+   <input type="date" id="dateFrom">
   </div>
 
   <div class="date-group">
     <label>To</label>
-    <input type="datetime-local" id="dateTo">
+    <input type="date" id="dateTo">
   </div>
 </div>
 
@@ -1357,6 +1357,8 @@ const now = new Date();
 const oneMonthAgo = new Date();
 oneMonthAgo.setMonth(now.getMonth() - 1);
 
+var dailyGroup = {};
+
 data.forEach(r=>{
 
 if(normalizeName(r.station) === normalizeName(station)){
@@ -1364,13 +1366,32 @@ if(normalizeName(r.station) === normalizeName(station)){
 var t = new Date(r.time);
 var v = parseFloat(r.dose);
 
-// 🔥 FILTER 1 BULAN TERAKHIR
 if(t >= oneMonthAgo && t <= now && !isNaN(v)){
-allLabels.push(r.time);
-allValues.push(v);
+
+// 🔥 GROUP PER HARI
+var dayKey = t.toISOString().split("T")[0];
+
+if(!dailyGroup[dayKey]){
+dailyGroup[dayKey] = [];
 }
 
+dailyGroup[dayKey].push(v);
 }
+}
+});
+
+// 🔥 HITUNG RATA2 HARIAN
+allLabels = [];
+allValues = [];
+
+Object.keys(dailyGroup).sort().forEach(day=>{
+
+var arr = dailyGroup[day];
+var avg = arr.reduce((a,b)=>a+b,0) / arr.length;
+
+// label jadi tanggal saja
+allLabels.push(day);
+allValues.push(avg);
 
 });
 
@@ -1378,97 +1399,28 @@ if(allValues.length===0){
 document.getElementById("tsStats").innerHTML="No data available";
 return;
 }
-// ===== INIT SLIDER =====
-var slider = document.getElementById("timeSlider");
-var lastIndex = allValues.length - 1;
-
-// ===== HITUNG 7 HARI =====
-var sevenDaysAgo = new Date();
-sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-var startIndex = 0;
-
-for(let i=0;i<allLabels.length;i++){
-  let t = new Date(allLabels[i]);
-  if(t >= sevenDaysAgo){
-    startIndex = i;
-    break;
-  }
-}
-
 // ===== DATE PICKER INIT =====
 var fromInput = document.getElementById("dateFrom");
 var toInput = document.getElementById("dateTo");
 
 if(allLabels.length > 0){
-  fromInput.value = allLabels[startIndex].replace(" ", "T");
-  toInput.value = allLabels[lastIndex].replace(" ", "T");
+  fromInput.value = allLabels[0].replace(" ", "T");
+  toInput.value = allLabels[allLabels.length-1].replace(" ", "T");
 }
 
-// ===== EVENT PICKER =====
+// EVENT
 fromInput.onchange = applyDateFilter;
 toInput.onchange = applyDateFilter;
+var slider=document.getElementById("timeSlider");
 
-// ===== SLIDER FULL RANGE =====
-slider.min = 0;
-slider.max = lastIndex;
-slider.step = 1;
-slider.value = lastIndex;
+var lastIndex=allValues.length-1;
 
-// ===== RENDER CHART =====
-updateChartUnified(lastIndex);
+slider.min=0;
+slider.max=lastIndex;
+slider.step=1;
+slider.value=lastIndex;
 
-// ===== LIMIT VIEW 7 HARI =====
-if(tsChart){
-  tsChart.options.scales.x.min = startIndex;
-  tsChart.update();
-}
-
-// ===== EVENT SLIDER =====
-slider.oninput = function(){
-  updateChartUnified(parseInt(this.value));
-};
-
-var lastIndex = allValues.length - 1;
-
-// 🔥 cari posisi 7 hari terakhir
-var sevenDaysAgo = new Date();
-// ===== DATE PICKER INIT (FIX POSISI) =====
-var fromInput = document.getElementById("dateFrom");
-var toInput = document.getElementById("dateTo");
-
-if(allLabels.length > 0){
-  fromInput.value = allLabels[startIndex].replace(" ", "T");
-  toInput.value = allLabels[lastIndex].replace(" ", "T");
-}
-sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-var startIndex = 0;
-
-for(let i=0;i<allLabels.length;i++){
-  let t = new Date(allLabels[i]);
-  if(t >= sevenDaysAgo){
-    startIndex = i;
-    break;
-  }
-}
-
-// 🔥 slider tetap full range
-slider.min = 0;
-slider.max = lastIndex;
-slider.step = 1;
-slider.value = lastIndex;
-
-// 🔥 render chart full
-updateChartUnified(lastIndex);
-
-// 🔥 tapi tampilkan hanya 7 hari terakhir
-setTimeout(()=>{
-  if(tsChart){
-    tsChart.options.scales.x.min = startIndex;
-    tsChart.update();
-  }
-},50);
+updateChart(lastIndex);
 
 slider.oninput=function(){
 updateChartUnified(parseInt(this.value));
@@ -1478,23 +1430,7 @@ updateChartUnified(parseInt(this.value));
 
 }
 function snapToNearest(dateStr){
-
-  var target = new Date(dateStr).getTime();
-
-  var closest = allLabels[0];
-  var minDiff = Math.abs(new Date(allLabels[0]).getTime() - target);
-
-  for(let i=1;i<allLabels.length;i++){
-    let t = new Date(allLabels[i]).getTime();
-    let diff = Math.abs(t - target);
-
-    if(diff < minDiff){
-      minDiff = diff;
-      closest = allLabels[i];
-    }
-  }
-
-  return closest;
+  return dateStr;
 }
 function applyDateFilter(){
 
@@ -1503,14 +1439,8 @@ function applyDateFilter(){
 
   if(!fromVal || !toVal) return;
 
-var snappedFrom = snapToNearest(fromVal);
-var snappedTo = snapToNearest(toVal);
-
-document.getElementById("dateFrom").value = snappedFrom.replace(" ", "T");
-document.getElementById("dateTo").value = snappedTo.replace(" ", "T");
-
-var fromDate = new Date(snappedFrom);
-var toDate = new Date(snappedTo);
+var fromDate = new Date(fromVal);
+var toDate = new Date(toVal);
 
   filteredLabels = [];
   filteredValues = [];
@@ -1573,8 +1503,8 @@ datasets:[{
 data:allValues,
 borderColor:'#2b83ba',
 backgroundColor:'rgba(43,131,186,0.15)',
-tension:0.4,
-pointRadius:0,
+tension:0.25,
+pointRadius:2,
 fill:true
 }]
 },
@@ -1663,19 +1593,8 @@ function updateChartFiltered(index){
   var min = Math.min(...values);
   var max = Math.max(...values);
 
-  var range = max - min;
-
-// 🔥 AUTO CALM LOGIC
-if(range > 50){
-  ymin = min - range * 0.05;
-  ymax = min + range * 0.4;   // 🔥 spike dipotong (tidak full max)
-}else{
-  ymin = min - range * 0.2;
-  ymax = max + range * 0.2;
-}
-
-// clamp
-if(ymin < 0) ymin = 0;
+  var ymin = min-(max-min)*0.2;
+  var ymax = max+(max-min)*0.2;
   if(ymin<0) ymin=0;
 
   if(tsChart) tsChart.destroy();
@@ -1688,8 +1607,8 @@ if(ymin < 0) ymin = 0;
         data: filteredValues,
         borderColor:'#2b83ba',
         backgroundColor:'rgba(43,131,186,0.15)',
-        tension:0.4,
-        pointRadius:0,
+        tension:0.25,
+        pointRadius:2,
         fill:true
       }]
     },
@@ -1739,18 +1658,10 @@ function updateChartUnified(index){
   var min = Math.min(...slicedValues);
   var max = Math.max(...slicedValues);
 
-var range = max - min;
+  var padding = Math.max((max - min) * 0.3, 5); // 🔥 lebih smooth
+var ymin = min - padding;
+var ymax = max + padding;
 
-// 🔥 AUTO CALM LOGIC
-if(range > 50){
-  ymin = min - range * 0.05;
-  ymax = min + range * 0.4;   // 🔥 spike dipotong (tidak full max)
-}else{
-  ymin = min - range * 0.2;
-  ymax = max + range * 0.2;
-}
-
-// clamp
 if(ymin < 0) ymin = 0;
   if(ymin<0) ymin=0;
 
@@ -1766,8 +1677,8 @@ if(ymin < 0) ymin = 0;
         data: values,
         borderColor:'#2b83ba',
         backgroundColor:'rgba(43,131,186,0.15)',
-        tension:0.4,
-        pointRadius:0,
+        tension:0.25,
+        pointRadius:2,
         fill:true
       }]
     },
@@ -1827,7 +1738,9 @@ if(ymin < 0) ymin = 0;
   "<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
   "<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
   "<b>Max:</b> "+max.toFixed(2)+" nSv/h";
-
+// 🔥 SYNC DATE PICKER ↔ SLIDER (PER HARI)
+document.getElementById("dateFrom").value = slicedLabels[0];
+document.getElementById("dateTo").value = slicedLabels[slicedLabels.length-1];
   document.getElementById("dateFrom").value = slicedLabels[0].replace(" ", "T");
   document.getElementById("dateTo").value = slicedLabels[slicedLabels.length-1].replace(" ", "T");
 }
