@@ -1217,7 +1217,7 @@ beginAtZero:true,
 max:75,   
 title:{display:true,text:"nSv/h"}
 },
-
+y:{
 offset:true,
 ticks:{
 autoSkip:false,
@@ -1487,14 +1487,8 @@ var avg=sum/values.length;
 var min=Math.min(...values);
 var max=Math.max(...values);
 
-// 🔥 FIX Y AXIS BIAR TIDAK DRAMATIS
-var step = 10; // interval yang kamu mau
-
-var ymin = Math.floor(min / step) * step;
-var ymax = Math.ceil(max / step) * step;
-
-// optional buffer kecil (biar tidak nempel)
-ymax += step;
+var ymin=min-(max-min)*0.2;
+var ymax=max+(max-min)*0.2;
 
 if(ymin<0) ymin=0;
 
@@ -1566,15 +1560,10 @@ return "";
 grid:{display:false}
 },
 y:{
-  min:ymin,
-  max:ymax,
-
-  ticks:{
-    count: 4
-  },
-
-  title:{display:true,text:"nSv/h"},
-  grid:{color:"rgba(0,0,0,0.08)"}
+min:ymin,
+max:ymax,
+title:{display:true,text:"nSv/h"},
+grid:{color:"rgba(0,0,0,0.08)"} // 🔥 tambahan dari step 4
 }
 }
 }
@@ -1605,14 +1594,8 @@ function updateChartFiltered(index){
   var min = Math.min(...values);
   var max = Math.max(...values);
 
-// 🔥 FIX Y AXIS BIAR TIDAK DRAMATIS
-var step = 10; // interval yang kamu mau
-
-var ymin = Math.floor(min / step) * step;
-var ymax = Math.ceil(max / step) * step;
-
-// optional buffer kecil (biar tidak nempel)
-ymax += step;
+  var ymin = min-(max-min)*0.2;
+  var ymax = max+(max-min)*0.2;
   if(ymin<0) ymin=0;
 
   if(tsChart) tsChart.destroy();
@@ -1635,19 +1618,9 @@ ymax += step;
       maintainAspectRatio:false,
       plugins:{legend:{display:false}},
       scales:{
-  x:{min:0,max:index},
- y:{
-  min:ymin,
-  max:ymax,
-
-  ticks:{
-    count: 4
-  },
-
-  title:{display:true,text:"nSv/h"},
-  grid:{color:"rgba(0,0,0,0.08)"}
-}
-}
+        x:{min:0,max:index},
+        y:{min:ymin,max:ymax}
+      }
     }
   });
 
@@ -1686,14 +1659,8 @@ function updateChartUnified(index){
   var min = Math.min(...slicedValues);
   var max = Math.max(...slicedValues);
 
- // 🔥 FIX Y AXIS BIAR TIDAK DRAMATIS
-var step = 10; // interval yang kamu mau
-
-var ymin = Math.floor(min / step) * step;
-var ymax = Math.ceil(max / step) * step;
-
-// optional buffer kecil (biar tidak nempel)
-ymax += step;
+  var ymin = min-(max-min)*0.2;
+  var ymax = max+(max-min)*0.2;
   if(ymin<0) ymin=0;
 
   if(tsChart) tsChart.destroy();
@@ -1754,17 +1721,12 @@ ymax += step;
           grid:{display:false}
         },
 
- y:{
-  min:ymin,
-  max:ymax,
-
-  ticks:{
-    count: 4
-  },
-
-  title:{display:true,text:"nSv/h"},
-  grid:{color:"rgba(0,0,0,0.08)"}
-}
+        y:{
+          min:ymin,
+          max:ymax,
+          title:{display:true,text:"nSv/h"},
+          grid:{color:"rgba(0,0,0,0.08)"}
+        }
       }
     }
 
