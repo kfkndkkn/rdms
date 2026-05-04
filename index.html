@@ -1217,7 +1217,7 @@ beginAtZero:true,
 max:75,   
 title:{display:true,text:"nSv/h"}
 },
-y:{
+
 offset:true,
 ticks:{
 autoSkip:false,
@@ -1566,10 +1566,16 @@ return "";
 grid:{display:false}
 },
 y:{
-min:ymin,
-max:ymax,
-title:{display:true,text:"nSv/h"},
-grid:{color:"rgba(0,0,0,0.08)"} // 🔥 tambahan dari step 4
+  min:ymin,
+  max:ymax,
+
+  ticks:{
+    stepSize: 10,   // 🔥 KUNCI UTAMA
+    precision: 0    // 🔥 biar tidak 37.5 dll
+  },
+
+  title:{display:true,text:"nSv/h"},
+  grid:{color:"rgba(0,0,0,0.08)"}
 }
 }
 }
@@ -1630,9 +1636,17 @@ ymax += step;
       maintainAspectRatio:false,
       plugins:{legend:{display:false}},
       scales:{
-        x:{min:0,max:index},
-        y:{min:ymin,max:ymax}
-      }
+  x:{min:0,max:index},
+  y:{
+    min:ymin,
+    max:ymax,
+
+    ticks:{
+      stepSize: 10,
+      precision: 0
+    }
+  }
+}
     }
   });
 
@@ -1739,12 +1753,18 @@ ymax += step;
           grid:{display:false}
         },
 
-        y:{
-          min:ymin,
-          max:ymax,
-          title:{display:true,text:"nSv/h"},
-          grid:{color:"rgba(0,0,0,0.08)"}
-        }
+   y:{
+  min:ymin,
+  max:ymax,
+
+  ticks:{
+    stepSize: 10,
+    precision: 0
+  },
+
+  title:{display:true,text:"nSv/h"},
+  grid:{color:"rgba(0,0,0,0.08)"}
+}
       }
     }
 
