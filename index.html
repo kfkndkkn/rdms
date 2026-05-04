@@ -1658,9 +1658,25 @@ function updateChartUnified(index){
   var min = Math.min(...slicedValues);
   var max = Math.max(...slicedValues);
 
-  var padding = Math.max((max - min) * 0.3, 5); // 🔥 lebih smooth
-var ymin = min - padding;
-var ymax = max + padding;
+// 🔥 SUPER CALM MODE (ANTI DRAMATIS)
+var range = max - min;
+
+// minimal range biar tidak sempit
+var minRange = 50;
+
+// kalau range kecil → dipaksa lebar
+if(range < minRange){
+  var mid = (max + min) / 2;
+  ymin = mid - minRange;
+  ymax = mid + minRange;
+}else{
+  var padding = range * 1.0; // 🔥 BESARIN (sebelumnya 0.3)
+  ymin = min - padding;
+  ymax = max + padding;
+}
+
+// safety
+if(ymin < 0) ymin = 0;
 
 if(ymin < 0) ymin = 0;
   if(ymin<0) ymin=0;
