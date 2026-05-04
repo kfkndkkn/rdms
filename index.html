@@ -22,8 +22,8 @@ margin:0;
 padding:0;
 font-family:Arial;
 
-height:100%;        /* 🔥 TAMBAH */
-overflow:hidden;    /* 🔥 TAMBAH (ini yang hilangkan scroll) */
+height:100%;        
+overflow:hidden;    
 }
 
 #header{
@@ -1501,11 +1501,11 @@ type:'line',
 data:{
 labels:allLabels,
 datasets:[{
-data:allValues,
+data:smoothData(allValues),   // 🔥 pakai smoothing
 borderColor:'#2b83ba',
-backgroundColor:'rgba(43,131,186,0.15)',
-tension:0.25,
-pointRadius:2,
+backgroundColor:'rgba(43,131,186,0.05)', // lebih soft
+tension:0.1,
+pointRadius:0,   // 🔥 hilangkan titik
 fill:true
 }]
 },
@@ -1562,6 +1562,8 @@ grid:{display:false}
 y:{
 min:ymin,
 max:ymax,
+  ticks:{
+    stepSize:10   // 🔥 interval fix
 title:{display:true,text:"nSv/h"},
 grid:{color:"rgba(0,0,0,0.08)"} // 🔥 tambahan dari step 4
 }
@@ -1594,13 +1596,19 @@ function updateChartFiltered(index){
   var min = Math.min(...values);
   var max = Math.max(...values);
 
-// 🔥 ROUND KE KELIPATAN 10
+// 🔥 SCALE LEBIH STABIL
 var ymin = Math.floor(min / 10) * 10;
 var ymax = Math.ceil(max / 10) * 10;
 
-// 🔥 MINIMAL RANGE BIAR GA TERLALU ZOOM
-if((ymax - ymin) < 10){
-  ymax = ymin + 10;
+// 🔥 BUFFER AGAR TIDAK MELEKAT
+ymin = ymin - 10;
+ymax = ymax + 10;
+
+if(ymin < 0) ymin = 0;
+
+// 🔥 MIN RANGE BIAR GA ZOOM
+if((ymax - ymin) < 20){
+  ymax = ymin + 20;
 }
 
   if(tsChart) tsChart.destroy();
@@ -1664,9 +1672,17 @@ function updateChartUnified(index){
   var min = Math.min(...slicedValues);
   var max = Math.max(...slicedValues);
 
-  var ymin = min-(max-min)*0.2;
-  var ymax = max+(max-min)*0.2;
-  if(ymin<0) ymin=0;
+var ymin = Math.floor(min / 10) * 10;
+var ymax = Math.ceil(max / 10) * 10;
+
+ymin = ymin - 10;
+ymax = ymax + 10;
+
+if(ymin < 0) ymin = 0;
+
+if((ymax - ymin) < 20){
+  ymax = ymin + 20;
+}
 
   if(tsChart) tsChart.destroy();
 
@@ -1677,11 +1693,11 @@ function updateChartUnified(index){
     data:{
       labels: labels,
       datasets:[{
-        data: values,
+       data: smoothData(values),
         borderColor:'#2b83ba',
         backgroundColor:'rgba(43,131,186,0.15)',
         tension:0.25,
-        pointRadius:2,
+        pointRadius:10,
         fill:true
       }]
     },
