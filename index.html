@@ -1594,9 +1594,14 @@ function updateChartFiltered(index){
   var min = Math.min(...values);
   var max = Math.max(...values);
 
-  var ymin = min-(max-min)*0.2;
-  var ymax = max+(max-min)*0.2;
-  if(ymin<0) ymin=0;
+// 🔥 ROUND KE KELIPATAN 10
+var ymin = Math.floor(min / 10) * 10;
+var ymax = Math.ceil(max / 10) * 10;
+
+// 🔥 MINIMAL RANGE BIAR GA TERLALU ZOOM
+if((ymax - ymin) < 10){
+  ymax = ymin + 10;
+}
 
   if(tsChart) tsChart.destroy();
 
@@ -1721,12 +1726,15 @@ function updateChartUnified(index){
           grid:{display:false}
         },
 
-        y:{
-          min:ymin,
-          max:ymax,
-          title:{display:true,text:"nSv/h"},
-          grid:{color:"rgba(0,0,0,0.08)"}
-        }
+       y:{
+  min:ymin,
+  max:ymax,
+  ticks:{
+    stepSize:10   // 🔥 interval tetap 10
+  },
+  title:{display:true,text:"nSv/h"},
+  grid:{color:"rgba(0,0,0,0.08)"}
+}
       }
     }
 
