@@ -22,8 +22,8 @@ margin:0;
 padding:0;
 font-family:Arial;
 
-height:100%;        /* 🔥 TAMBAH */
-overflow:hidden;    /* 🔥 TAMBAH (ini yang hilangkan scroll) */
+height:100%;        
+overflow:hidden;    
 }
 
 #header{
@@ -370,12 +370,12 @@ margin-top:70px;
   transition:0.3s;
   overflow-y:auto;
 
-  /* 🔥 SHADOW LEBIH HALUS */
+
   box-shadow: 
     2px 0 8px rgba(0,0,0,0.15),
     8px 0 24px rgba(0,0,0,0.2);
 
-  /* 🔥 DEPTH EFFECT */
+
   border-right:1px solid rgba(255,255,255,0.08);
   transform: translateX(0);
 }
@@ -386,7 +386,7 @@ width:0;
 padding:0;
 overflow:hidden;
   transform: translateX(-100%);
-  box-shadow:none; /* 🔥 hilang saat close biar clean */
+  box-shadow:none; 
 }
 
 /* MAIN CONTENT */
@@ -398,9 +398,8 @@ transition:0.3s;
 #legendInside{
 margin-top:12px;
  min-width:0;
-width:100%;              /* 🔥 ikut sidebar */
-box-sizing:border-box;   /* 🔥 biar tidak keluar */
-
+width:100%;              
+box-sizing:border-box;   
 background:white;
 color:#000;
 
@@ -617,7 +616,7 @@ var esriGrayLabel=L.tileLayer(
 
 var map=L.map('map',{
 zoomControl:true,
-layers:[esriGray], // 🔥 DEFAULT ESRI
+layers:[esriGray], 
 zoomSnap:0.25,
 zoomDelta:0.25,
 wheelPxPerZoomLevel:120
@@ -1511,7 +1510,7 @@ fill:true
 
 options:{
 responsive:true,
-maintainAspectRatio:false, // 🔥 wajib
+maintainAspectRatio:false, 
 
 layout:{
 padding:{
@@ -1524,7 +1523,7 @@ legend:{display:false},
 tooltip:{
 callbacks:{
 title:function(items){
-return items[0].label; // 🔥 tampil full label saat hover
+return items[0].label; 
 }
 }
 }
@@ -1537,7 +1536,7 @@ type:'category',
 min:0,
 max:index,
 
-offset:false, // 🔥 INI KUNCI
+offset:false, 
 
 ticks:{
 autoSkip:false,
@@ -1562,7 +1561,7 @@ y:{
 min:ymin,
 max:ymax,
 title:{display:true,text:"nSv/h"},
-grid:{color:"rgba(0,0,0,0.08)"} // 🔥 tambahan dari step 4
+grid:{color:"rgba(0,0,0,0.08)"} 
 }
 }
 }
@@ -1573,7 +1572,8 @@ document.getElementById("tsStats").innerHTML=
 "<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
 "<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
 "<b>Max:</b> "+max.toFixed(2)+" nSv/h";
-// 🔥 SYNC KE DATE PICKER
+
+  
 document.getElementById("dateFrom").value = labels[0].replace(" ", "T");
 document.getElementById("dateTo").value = labels[labels.length-1].replace(" ", "T");
 }
@@ -1658,19 +1658,19 @@ function updateChartUnified(index){
   var min = Math.min(...slicedValues);
   var max = Math.max(...slicedValues);
 
-// 🔥 SUPER CALM MODE (ANTI DRAMATIS)
+
 var range = max - min;
 
-// minimal range biar tidak sempit
+
 var minRange = 50;
 
-// kalau range kecil → dipaksa lebar
+
 if(range < minRange){
   var mid = (max + min) / 2;
   ymin = mid - minRange;
   ymax = mid + minRange;
 }else{
-  var padding = range * 1.0; // 🔥 BESARIN (sebelumnya 0.3)
+  var padding = range * 1.0; 
   ymin = min - padding;
   ymax = max + padding;
 }
@@ -1754,7 +1754,7 @@ if(ymin < 0) ymin = 0;
   "<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
   "<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
   "<b>Max:</b> "+max.toFixed(2)+" nSv/h";
-// 🔥 SYNC DATE PICKER ↔ SLIDER (PER HARI)
+
 document.getElementById("dateFrom").value = slicedLabels[0];
 document.getElementById("dateTo").value = slicedLabels[slicedLabels.length-1];
   document.getElementById("dateFrom").value = slicedLabels[0].replace(" ", "T");
@@ -1763,7 +1763,7 @@ document.getElementById("dateTo").value = slicedLabels[slicedLabels.length-1];
 function closeTS(){
 document.getElementById("tsModal").style.display="none";
 }
-var panelVisible = false; // 🔥 default hidden
+var panelVisible = false; 
 
 function togglePanel(){
 
@@ -1774,11 +1774,11 @@ function togglePanel(){
   panel.classList.toggle("collapsed");
 
   if(!isOpen){
-    // 👉 PANEL DIBUKA → pindah legend ke sidebar
+   
     map.removeControl(legend);
     moveLegendToSidebar();
   }else{
-    // 👉 PANEL DITUTUP → balik ke map
+ 
 
     var existing = document.getElementById("legendInside");
     if(existing) existing.remove();
@@ -1836,7 +1836,7 @@ font-size:12px;
 z-index:100000;
 pointer-events:auto;
 
-/* 🔥 INI KUNCI */
+
 transform: translateZ(9999px);
 ">
 
@@ -1861,10 +1861,10 @@ OILs relokasi s.d OILs evakuasi
 OILs evakuasi
 </div>
 
-<!-- 🔥 GARIS PEMISAH -->
+
 <hr style="border:none;border-top:1px solid #ddd;margin:8px 0;">
 
-<!-- 🔥 DEFINISI DI BAWAH -->
+
 <div style="font-size:11px;line-height:1.4;">
 <b>Operational Intervention Level (OIL) : </b><br>
 Nilai ambang laju dosis radiasi untuk menentukan tindakan proteksi darurat.
@@ -1931,9 +1931,9 @@ function adjustLegendTooltip(){
   if(!tooltip) return;
 
   if(panelVisible){
-    tooltip.style.left = "300px"; // geser saat panel buka
+    tooltip.style.left = "300px"; 
   }else{
-    tooltip.style.left = "80px"; // posisi normal
+    tooltip.style.left = "80px"; 
   }
 
 }
