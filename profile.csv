@@ -1,15 +1,15 @@
 ﻿station;IMAGE_URL;Address;Province;Latitude;Longitude
-CTBT Lembang;https://iili.io/FMzWcSn.jpg;Jl. Peneropongan Bintang No.45, Lembang;Jawa Barat;-682.636;1.076.178
-CTBT Jayapura;https://iili.io/FMzWKMB.jpg;Jalan Drs. Krisna Sunarya No.26, Angkasapura, Kec. Jayapura Utara, Kota Jayapura;Papua;-251.444;1.407.038
-St.Mteo.Kls.III Tanjung Pinang;https://iili.io/FMzWQRa.jpg;Jl. Adi Sucipto Km 12,5 Bandara Kijang, Tanjung Pinang;Kepulauan Riau;0.922694;1.045.283
-St.Mteo.Kls.III Tapanuli Tengah;https://iili.io/FMzWtDv.jpg;Gn. Marijo, Kec. Pinangsori, Kabupaten Tapanuli Tengah;Sumatra Utara;1.553.194;9.889.733
-St.Mteo.Kls.III Tana Toraja;https://iili.io/FMzW6KP.jpg;Jalan Bandara, Simbuang, Kec. Mengkendek, Kabupaten Tana Toraja;Sulawesi Selatan;-304.508;1.198.187
-St.Mteo.Kls.III Sintang;https://iili.io/FMzWgVV.jpg;Manter, Kec. Sungai Tebelian, Kabupaten Sintang;Kalimantan Barat;-0.04303;1.114.594
-St.Mteo.Kls.III Bengkulu;https://iili.io/FMzVpae.jpg;Jl. Depati Payung Negara, Komplek Bandar Udara Fatmawati Soekarno, Kel. Pekan Sabtu, Kec. Selebar, Kota Bengkulu;Bengkulu;-385.822;1.023.366
-St.Mteo.Kls.III Cilacap;https://iili.io/FMzWJuj.jpg;Jl. Gatot Subroto No.20, Tambaksari, Sidanegara, Kec. Cilacap Tengah, Kabupaten Cilacap;Jawa Tengah;-771.875;109.015
-St.Mteo.Kls I Pekanbaru;https://iili.io/FMzWXPS.jpg;Bandar Udara Sultan Syarif Kasim II, Pekanbaru, Maharatu, Marpoyan Damai, Pekanbaru;Riau;0.459222;1.014.473
-St.Geof.Kls.III Banjarnegara;https://iili.io/BLGgsII.th.jpg;Jl. Raya Purbayasa, Purbayasa, Kec. Purbayasa, Kabupaten Banjarnegara;Jawa Tengah;-733.322;1.097.098
-St.Mteo.Kls.I.Supadio.Pontianak;https://iili.io/BijGtae.jpg;Jl. Adi Sucipto Km 17 Bandara Supadio Pontianak, Kec. Sungai Raya, Kab. Kubu Raya;Kalimantan Barat;-0.14185;1.094.026
+CTBT Lembang;https://iili.io/FMzWcSn.jpg;Jl. Peneropongan Bintang No.45, Lembang;Jawa Barat;-6.82636;107.6178
+CTBT Jayapura;https://iili.io/FMzWKMB.jpg;Jalan Drs. Krisna Sunarya No.26, Angkasapura, Kec. Jayapura Utara, Kota Jayapura;Papua;-2.51444;140.7038
+St.Mteo.Kls.III Tanjung Pinang;https://iili.io/FMzWQRa.jpg;Jl. Adi Sucipto Km 12,5 Bandara Kijang, Tanjung Pinang;Kepulauan Riau;-0.922694;104.5283
+St.Mteo.Kls.III Tapanuli Tengah;https://iili.io/FMzWtDv.jpg;Gn. Marijo, Kec. Pinangsori, Kabupaten Tapanuli Tengah;Sumatra Utara;1.553194;98.89733
+St.Mteo.Kls.III Tana Toraja;https://iili.io/FMzW6KP.jpg;Jalan Bandara, Simbuang, Kec. Mengkendek, Kabupaten Tana Toraja;Sulawesi Selatan;-3.04508;119.8187
+St.Mteo.Kls.III Sintang;https://iili.io/FMzWgVV.jpg;Manter, Kec. Sungai Tebelian, Kabupaten Sintang;Kalimantan Barat;-0.04303;111.4594
+St.Mteo.Kls.III Bengkulu;https://iili.io/FMzVpae.jpg;Jl. Depati Payung Negara, Komplek Bandar Udara Fatmawati Soekarno, Kel. Pekan Sabtu, Kec. Selebar, Kota Bengkulu;Bengkulu;-3.85822;102.3366
+St.Mteo.Kls.III Cilacap;https://iili.io/FMzWJuj.jpg;Jl. Gatot Subroto No.20, Tambaksari, Sidanegara, Kec. Cilacap Tengah, Kabupaten Cilacap;Jawa Tengah;-7.71875;109.015
+St.Mteo.Kls I Pekanbaru;https://iili.io/FMzWXPS.jpg;Bandar Udara Sultan Syarif Kasim II, Pekanbaru, Maharatu, Marpoyan Damai, Pekanbaru;Riau;0.459222;101.4473
+St.Geof.Kls.III Banjarnegara;https://iili.io/BLGgsII.th.jpg;Jl. Raya Purbayasa, Purbayasa, Kec. Purbayasa, Kabupaten Banjarnegara;Jawa Tengah;-7.33322;109.7098
+St.Mteo.Kls.I.Supadio.Pontianak;https://iili.io/BijGtae.jpg;Jl. Adi Sucipto Km 17 Bandara Supadio Pontianak, Kec. Sungai Raya, Kab. Kubu Raya;Kalimantan Barat;-0.14185;109.4026
 St.Mteo.Kls.I Gorontalo;https://iili.io/FMzWFnV.jpg;"Stasiun Meteorologi Kelas I Komplek Bandar Udara Djalaluddin, Tolotio, Kec. Tibawa, Kabupaten Gorontalo";Sulawesi Utara;0.638444;122.8524
 Istana Kepresidenan Yogyakarta;https://iili.io/FGXliDF.jpg;"Jalan Ahmad Yani, Ngupasan, Kec. Gondomanan, Kota Yogyakarta";DI Yogyakarta;-7.80031;110.3631
 Istana Kepresidenan Bali;https://iili.io/FMzW9yb.jpg;"Jl. Dr. Ir. Soekarno, Manukaya, Kec. Tampaksiring, Kabupaten Gianyar";Bali;-8.41308;115.3139
