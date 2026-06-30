@@ -572,7 +572,28 @@ window.profileIndex = {};
 // function openTS()
 // dll
 
+const zoomOffsets = {
+    "cilacap":      {lat:-0.12, lon:-0.18},
+    "banjarnegara": {lat: 0.12, lon: 0.18}
+};
 
+function applyZoomOffset(name, lat, lon){
+
+    if(map.getZoom() >= 8){
+        return {lat, lon};
+    }
+
+    const o = zoomOffsets[normalizeName(name)];
+
+    if(!o){
+        return {lat, lon};
+    }
+
+    return {
+        lat: lat + o.lat,
+        lon: lon + o.lon
+    };
+}
 function loadProfile(){
 
 fetch("profile.csv?nocache="+Date.now())
@@ -866,8 +887,16 @@ data=rawData;
 
 data.forEach(row=>{
 
-var lat=row.lat || parseFloat(row["LATITUDE"]);
-var lon=row.lon || parseFloat(row["LONGITUDE"]);
+var lat = row.lat || parseFloat(row["LATITUDE"]);
+var lon = row.lon || parseFloat(row["LONGITUDE"]);
+
+var stationName = row["NAMA UNIT"] ||
+                  (row.stations ? row.stations[0].name : "");
+
+var pos = applyZoomOffset(stationName, lat, lon);
+
+lat = pos.lat;
+lon = pos.lon
 var key = normalizeName(row["NAMA UNIT"]);
 var ts = window.latestTS[key];
 
