@@ -1191,20 +1191,28 @@ const sevenDaysAgo = new Date();
 sevenDaysAgo.setDate(now.getDate() - 7);
 
 var grouped = {};
-
+// Daftar stasiun yang masih aktif di peta
+const activeStations = new Set(
+    Object.keys(window.stationIndex)
+);
 data.forEach(r=>{
 var t = new Date(r.time);
 var v = parseFloat(r.dose);
 
 if(t >= sevenDaysAgo && t <= now && !isNaN(v)){
 
-var name = r.station;
+var key = normalizeName(r.station);
 
-if(!grouped[name]){
-grouped[name] = [];
+// Lewati jika stasiun tidak ada di output.csv
+if(!activeStations.has(key)){
+    return;
 }
 
-grouped[name].push(v);
+if(!grouped[r.station]){
+    grouped[r.station] = [];
+}
+
+grouped[r.station].push(v);
 }
 });
 
