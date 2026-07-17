@@ -1177,75 +1177,190 @@ updateStatusTicker();
 
 }
 window.lastChartData = "";
-
 function drawAvgChart(){
 
-    // Ambil data yang sama dengan Statistic Summary
-    var result = Object.values(window.latestTS).map(r => ({
-        name: r.name,
-        avg: r.dose
-    }));
+fetch("timeseries.csv?nocache="+Date.now())
+.then(r=>r.text())
+.then(text=>{
 
-    // Urutkan dari terbesar
-    result.sort((a,b)=>b.avg-a.avg);
+var data = Papa.parse(text,{header:true}).data;
 
-    let topN = window.innerWidth > 1366 ? 10 : 5;
+// FILTER 7 HARI
+const now = new Date();
+const sevenDaysAgo = new Date();
+sevenDaysAgo.setDate(now.getDate() - 7);
 
-    var top = result.slice(0, topN);
+var grouped = {};
 
-    var labels = top.map(r=>r.name);
-    var values = top.map(r=>r.avg);
+data.forEach(r=>{
+var t = new Date(r.time);
+var v = parseFloat(r.dose);
 
-    if(!window.avgChart){
+if(t >= sevenDaysAgo && t <= now && !isNaN(v)){
 
-        window.avgChart = new Chart(document.getElementById("avgBarChart"),{
+var name = r.station;
 
-            type:'bar',
+if(!grouped[name]){
+grouped[name] = [];
+}
 
-            data:{
-                labels:labels,
-                datasets:[{
-                    data:values,
-                    backgroundColor:'#2b83ba'
-                }]
-            },
+grouped[name].push(v);
+}
+});
 
-            options:{
-                indexAxis:'y',
-                responsive:true,
-                maintainAspectRatio:false,
-                animation:false,
-                plugins:{
-                    legend:{display:false}
-                },
-                scales:{
-                    x:{
-                        beginAtZero:true,
-                        title:{
-                            display:true,
-                            text:"nSv/h"
-                        }
-                    },
-                    y:{
-                        ticks:{
-                            autoSkip:false,
-                            font:{size:10}
-                        }
-                    }
-                }
-            }
+// HITUNG AVG
+var result = [];
 
-        });
+Object.keys(grouped).forEach(station=>{
+var arr = grouped[station];
+var avg = arr.reduce((a,b)=>a+b,0) / arr.length;
 
-    }else{
+result.push({name:station,avg:avg});
+});
 
-        window.avgChart.data.labels = labels;
-        window.avgChart.data.datasets[0].data = values;
-        window.avgChart.update('none');
 
+// 🔥 DETEKSI LEBAR LAYAR
+let screenWidth = window.innerWidth;
+
+// 🔥 RULE
+let topN = 5;
+if(screenWidth > 1366){
+  topN = 10;
+}
+console.log("WIDTH:", screenWidth, "TOP:", topN);
+// SORT
+result.sort((a,b)=>b.avg - a.avg);
+var top = result.slice(0, topN);
+
+var labels = top.map(r=>r.name);
+var values = top.map(r=>r.avg);
+
+
+var currentData = JSON.stringify({
+  values: values,
+  topN: topN  
+});
+
+if(window.lastChartData === currentData){
+  return;
+}
+window.lastChartData = currentData;
+
+
+
+if(!window.avgChart){
+
+window.avgChart = new Chart(document.getElementById("avgBarChart"),{
+type:'bar',
+data:{
+labels:labels,
+datasets:[{
+data:values,
+backgroundColor:'#2b83ba',
+
+
+barThickness: topN === 10 ? 8 : 12,
+categoryPercentage: topN === 10 ? 0.7 : 1.0,
+barPercentage: topN === 10 ? 0.8 : 1.0
+
+}]
+},
+options:{
+indexAxis:'y',
+responsive:true,
+maintainAspectRatio:false,
+animation:false, 
+
+plugins:{
+  legend:{display:false},
+
+  tooltip:{
+    enabled:true,
+
+    mode:'nearest',
+    intersect:true,   
+
+    position:'average', 
+
+    xAlign:'right',    
+    yAlign:'center',
+
+    callbacks:{
+      label:function(ctx){
+        return ctx.raw.toFixed(2) + " nSv/h";
+      }
     }
+  }
+},
+
+layout:{
+padding:{left:10,right:10}
+},
+
+scales:{
+x:{
+beginAtZero:true,
+max:75,   
+title:{display:true,text:"nSv/h"}
+},
+y:{
+offset:true,
+ticks:{
+autoSkip:false,
+font:{size:10},
+padding:4,
+
+callback:function(value){
+
+let label = this.getLabelForValue(value);
+
+
+label = label
+.replace(/\./g, " ")   
+.replace(/\s+/g, " ")  
+.trim();
+
+let words = label.split(" ");
+
+
+if(words.length === 1 && label.length > 12){
+return [
+label.substring(0,12),
+label.substring(12)
+];
+}
+
+
+if(words.length >= 2){
+return [
+words.slice(0, Math.ceil(words.length/2)).join(" "),
+words.slice(Math.ceil(words.length/2)).join(" ")
+];
+}
+
+return label;
+}
+},
+grid:{display:false}
+}
+}
+}
+});
+
+}else{
+
+
+window.avgChart.data.labels = labels;
+window.avgChart.data.datasets[0].data = values;
+
+window.avgChart.update('none'); 
 
 }
+
+});
+}
+  
+// TIME SERIES
 
 var tsChart=null;
 var allLabels=[];
