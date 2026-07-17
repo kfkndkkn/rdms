@@ -435,6 +435,49 @@ box-shadow:0 2px 6px rgba(0,0,0,0.2);
   z-index: 2000 !important;
   position: relative;
 }
+
+/* ===========================
+RUNNING STATUS BAR
+=========================== */
+
+#statusTicker{
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+height:36px;
+display:flex;
+align-items:center;
+overflow:hidden;
+font-size:15px;
+font-weight:bold;
+color:#fff;
+z-index:999999;
+box-shadow:0 -2px 8px rgba(0,0,0,.3);
+}
+
+#statusTicker marquee{
+width:100%;
+padding-left:10px;
+}
+
+.status-green{
+background:#0b8f3c;
+}
+
+.status-yellow{
+background:#ffe600;
+color:#000;
+}
+
+.status-orange{
+background:#ff8c00;
+}
+
+.status-red{
+background:#d90000;
+}
+  
 </style>
 </head>
 
@@ -1114,6 +1157,8 @@ document.getElementById("minStation").innerHTML =
 minRow.station;
 
 drawAvgChart();
+
+updateStatusTicker();
 
 });
 
@@ -1966,8 +2011,70 @@ function adjustLegendTooltip(){
   }
 
 }
-  
+  function updateStatusTicker(){
+
+let maxDose = -1;
+let latestTime = null;
+
+Object.values(window.latestTS).forEach(v=>{
+
+    if(v.dose > maxDose){
+        maxDose = v.dose;
+    }
+
+    if(!latestTime || v.time > latestTime){
+        latestTime = v.time;
+    }
+
+});
+
+if(maxDose < 0) return;
+
+let css="";
+let status="";
+
+if(maxDose < 1000){
+
+    css="status-green";
+    status="Radioaktivitas lingkungan di wilayah NKRI dalam kategori AMAN dan SELAMAT";
+
+}
+else if(maxDose < 100000){
+
+    css="status-yellow";
+    status="Radioaktivitas lingkungan di wilayah NKRI dalam kategori SIAGA";
+
+}
+else if(maxDose < 1000000){
+
+    css="status-orange";
+    status="Radioaktivitas lingkungan di wilayah NKRI dalam kategori WASPADA";
+
+}
+else{
+
+    css="status-red";
+    status="Radioaktivitas lingkungan di wilayah NKRI dalam kategori BAHAYA";
+
+}
+
+let waktu="-";
+
+if(latestTime){
+    waktu=latestTime.toLocaleString("id-ID");
+}
+
+document.getElementById("statusTicker").className=css;
+
+document.getElementById("tickerText").innerHTML=
+"["+waktu+"] "+status;
+
+}
 </script>
+
+<div id="statusTicker" class="status-green">
+<marquee id="tickerText" scrollamount="6"></marquee>
+</div>
 
 </body>
 </html>
