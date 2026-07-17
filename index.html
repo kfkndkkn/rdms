@@ -435,7 +435,14 @@ box-shadow:0 2px 6px rgba(0,0,0,0.2);
   z-index: 2000 !important;
   position: relative;
 }
+/* Naikkan legend agar tidak tertutup ticker */
+.leaflet-bottom.leaflet-left{
+    bottom:40px !important;
+}
 
+.leaflet-bottom.leaflet-right{
+    bottom:40px !important;
+}
 /* ===========================
 RUNNING STATUS BAR
 =========================== */
@@ -454,6 +461,8 @@ font-weight:bold;
 color:#fff;
 z-index:999999;
 box-shadow:0 -2px 8px rgba(0,0,0,.3);
+
+transition:left .3s;
 }
 
 #statusTicker marquee{
@@ -1850,6 +1859,13 @@ function togglePanel(){
   var isOpen = !panel.classList.contains("collapsed");
 
   panel.classList.toggle("collapsed");
+  const ticker = document.getElementById("statusTicker");
+
+if(panel.classList.contains("collapsed")){
+    ticker.style.left = "0px";
+}else{
+    ticker.style.left = panel.offsetWidth + "px";
+}
 
   if(!isOpen){
    
@@ -2070,8 +2086,16 @@ if(latestTime){
 
 document.getElementById("statusTicker").className=css;
 
-document.getElementById("tickerText").innerHTML=
-"["+waktu+"] "+status;
+const msg =
+`[${waktu}] ${status}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[${waktu}] ${status}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[${waktu}] ${status}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[${waktu}] ${status}`;
+
+document.getElementById("tickerText").innerHTML = msg;
 
 }
 </script>
