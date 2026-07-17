@@ -1185,18 +1185,27 @@ fetch("timeseries.csv?nocache="+Date.now())
 
 var data = Papa.parse(text,{header:true}).data;
 
-// FILTER 7 HARI
-const now = new Date();
-const sevenDaysAgo = new Date();
-sevenDaysAgo.setDate(now.getDate() - 7);
+// Cari waktu terbaru di CSV
+let latestTime = new Date(0);
+
+data.forEach(r=>{
+    let t = new Date(r.time.replace(" ","T"));
+    if(!isNaN(t) && t > latestTime){
+        latestTime = t;
+    }
+});
+
+// 7 hari sebelum data terbaru
+let sevenDaysAgo = new Date(latestTime);
+sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
 var grouped = {};
 
 data.forEach(r=>{
-var t = new Date(r.time);
+var t = new Date(r.time.replace(" ","T"));
 var v = parseFloat(r.dose);
 
-if(t >= sevenDaysAgo && t <= now && !isNaN(v)){
+if(!isNaN(t) && t >= sevenDaysAgo && t <= latestTime && !isNaN(v)){
 
 var name = r.station;
 
