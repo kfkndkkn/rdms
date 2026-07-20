@@ -956,7 +956,9 @@ lon = pos.lon
 var key = normalizeName(row["NAMA UNIT"]);
 var ts = window.latestTS[key];
 
-var dose = ts ? ts.dose : null;
+var dose = ts
+    ? ts.dose
+    : parseFloat(row["Gamma Dose Rate (nSv/h)"]);
 
 if(isNaN(lat)||isNaN(lon)) return;
 
@@ -995,6 +997,20 @@ return window.latestTS[key];
 
 if(!valid){
 
+    // tetap tampilkan simbol memakai data output_all.csv
+    hex = createHex(
+        lat,
+        lon,
+        radius,
+        getColor(parseFloat(row["Gamma Dose Rate (nSv/h)"])),
+        {
+            opacity:0.75,
+            stroke:"#222",
+            weight:1
+        }
+    );
+
+}
 hex=createHex(lat,lon,radius,"#8fb9e3",{
 opacity:0.6,
 stroke:"#4a90c2",
