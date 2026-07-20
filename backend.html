@@ -1172,13 +1172,21 @@ if(row.stations){
     if(status==="offline") hasOffline=true;
 }
 
+const profileCurrent=window.profileIndex[normalizeName(stationName)];
+const statusCurrent=(profileCurrent?.Status||"").toLowerCase();
+const isTopOnline=(map.getZoom()>=8 && statusCurrent==="online");
+
 if(hasMaintenance){
-    opacity=0.45;
+    opacity=isTopOnline?0.85:0.45;
     stroke="#ff9800";
 }
 if(hasOffline){
-    opacity=0.30;
+    opacity=isTopOnline?0.85:0.30;
     stroke="#d32f2f";
+}
+
+if(isTopOnline){
+    opacity=0.85;
 }
 
 hex=createHex(lat,lon,radius,color,{
