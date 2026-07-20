@@ -499,15 +499,16 @@ z-index:9999999;
 }
 
 #loginBox{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:white;
-width:360px;
-border-radius:10px;
-padding:25px;
-box-shadow:0 5px 20px rgba(0,0,0,.3);
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:430px;
+    background:#fff;
+    border-radius:20px;
+    padding:35px;
+    box-shadow:0 15px 40px rgba(0,0,0,.35);
+    border-top:6px solid #0b1e3f;
 }
 
 #loginBox input{
@@ -618,17 +619,61 @@ Login
 
 <div id="loginBox">
 
-<h2>I-RDMS Login</h2>
+<div style="text-align:center">
 
-<input id="username" placeholder="Username">
+<img src="logo/logo-bapeten.png"
+style="width:90px;margin-bottom:10px;">
 
-<input id="password" type="password" placeholder="Password">
+<h2 style="
+margin:5px 0;
+color:#0b1e3f;
+font-size:34px;">
+I-RDMS Login
+</h2>
 
-<div style="text-align:right">
+<div style="
+color:#666;
+margin-bottom:25px;">
+Indonesia Radiation Data Monitoring System
+</div>
 
-<button onclick="closeLogin()">Cancel</button>
+</div>
 
-<button onclick="login()">Login</button>
+<input
+id="username"
+placeholder="Username">
+
+<input
+id="password"
+type="password"
+placeholder="Password">
+
+<div
+id="loginError"
+style="
+display:none;
+color:#d00000;
+font-weight:bold;
+text-align:center;
+margin-bottom:15px;">
+Username atau Password salah
+</div>
+
+<div style="
+display:flex;
+justify-content:space-between;">
+
+<button
+onclick="closeLogin()">
+Cancel
+</button>
+
+<button
+onclick="login()">
+Login
+</button>
+
+</div>
 
 </div>
 
@@ -1462,6 +1507,29 @@ var allValues=[];
 var filteredLabels=[];
 var filteredValues=[];
 var isFiltered = false;
+function login(){
+
+    const user =
+    document.getElementById("username").value.trim();
+
+    const pass =
+    document.getElementById("password").value;
+
+    if(user==="dkkn" && pass==="sos123"){
+
+        sessionStorage.setItem("login","true");
+
+        window.location.href="detail.html";
+
+    }else{
+
+        document.getElementById("loginError").style.display="block";
+
+        document.getElementById("password").value="";
+
+    }
+
+}
 function openTS(station){
 isFiltered = false;
 var key = normalizeName(station);
@@ -2219,6 +2287,23 @@ function login(){
 alert("Login berhasil (sementara)");
 
 closeLogin();
+
+}
+function openLogin(){
+
+    document.getElementById("loginError").style.display="none";
+
+    document.getElementById("username").value="";
+
+    document.getElementById("password").value="";
+
+    document.getElementById("loginModal").style.display="block";
+
+}
+
+function closeLogin(){
+
+    document.getElementById("loginModal").style.display="none";
 
 }
 </script>
