@@ -793,8 +793,8 @@ var grid={};
 
 data.forEach(row=>{
 
-var lat = parseFloat(row["Latitude"]);
-var lon = parseFloat(row["Longitude"]);
+var lat = parseFloat(row["LATITUDE"]);
+var lon = parseFloat(row["LONGITUDE"]);
 var dose=row["Gamma Dose Rate (nSv/h)"];
 
 if(isNaN(lat)||isNaN(lon)) return;
@@ -951,8 +951,8 @@ var lon = row.lon;
 
 // Zoom dekat gunakan koordinat dari output_all.csv
 if(!row.stations){
-    lat = parseFloat(row["Latitude"]);
-    lon = parseFloat(row["Longitude"]);
+  lat = parseFloat(row["LATITUDE"]);
+  lon = parseFloat(row["LONGITUDE"]);
 }
 
 var pos = applyZoomOffset(stationName, lat, lon);
