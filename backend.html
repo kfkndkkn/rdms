@@ -489,11 +489,10 @@ background:#d90000;
 #statusDonutModal{
     display:none;
     position:fixed;
-
-    top:90px;
+    top:140px;
     left:20px;
-
-    z-index:99999999;
+    right:auto;
+    z-index:999999;
 }
 
 #statusDonutBox{
@@ -539,16 +538,12 @@ background:#d90000;
 }
 
 #openDonutBtn{
-
-    position:fixed;
-
+    position:absolute;
     top:85px;
-
     left:20px;
-
     right:auto;
 
-    z-index:50;
+    z-index:99999;
 
     width:45px;
     height:45px;
@@ -563,8 +558,6 @@ background:#d90000;
     cursor:pointer;
 
     box-shadow:0 5px 15px rgba(0,0,0,.3);
-
-    transition:left .3s ease;
 }
 </style>
 </head>
@@ -2091,19 +2084,11 @@ function togglePanel(){
 
   panel.classList.toggle("collapsed");
   const ticker = document.getElementById("statusTicker");
-  const donutBtn = document.getElementById("openDonutBtn");
+
 if(panel.classList.contains("collapsed")){
-
     ticker.style.left = "0px";
-
-    donutBtn.style.left = "20px";
-
 }else{
-
     ticker.style.left = panel.offsetWidth + "px";
-
-    donutBtn.style.left = (panel.offsetWidth + 20) + "px";
-
 }
 
   if(!isOpen){
