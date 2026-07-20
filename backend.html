@@ -652,7 +652,7 @@ function applyZoomOffset(name, lat, lon){
 }
 function loadProfile(){
 
-fetch("profile.csv?nocache="+Date.now())
+fetch("profile_backend.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
@@ -870,7 +870,7 @@ window.latestTS = {};
 
 function loadLatestTimeseries(callback){
 
-fetch("timeseries.csv?nocache="+Date.now())
+fetch("timeseries_all.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
@@ -909,7 +909,7 @@ function loadCSV(){
 
 loadLatestTimeseries(()=>{
 
-fetch("output.csv?nocache="+Date.now())
+fetch("output_all.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
@@ -1189,7 +1189,7 @@ updateStatusTicker();
 window.lastChartData = "";
 function drawAvgChart(){
 
-fetch("timeseries.csv?nocache="+Date.now())
+fetch("timeseries_all.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
@@ -1213,7 +1213,7 @@ if(t >= sevenDaysAgo && t <= now && !isNaN(v)){
 
 var key = normalizeName(r.station);
 
-// Lewati jika stasiun tidak ada di output.csv
+// Lewati jika stasiun tidak ada di output_all.csv
 if(!activeStations.has(key)){
     return;
 }
@@ -1386,6 +1386,32 @@ var allValues=[];
 var filteredLabels=[];
 var filteredValues=[];
 var isFiltered = false;
+function formatDate(dateStr){
+
+    if(!dateStr) return "-";
+
+    const d = new Date(dateStr);
+
+    if(isNaN(d)) return "-";
+
+    return d.toLocaleDateString("en-GB",{
+        day:"2-digit",
+        month:"short",
+        year:"numeric"
+    });
+}
+  function runningDays(dateStr){
+
+    if(!dateStr) return "-";
+
+    const d = new Date(dateStr);
+
+    if(isNaN(d)) return "-";
+
+    const now = new Date();
+
+    return Math.floor((now-d)/(1000*60*60*24));
+}
 function openTS(station){
 isFiltered = false;
 var key = normalizeName(station);
@@ -1433,25 +1459,54 @@ img.src = "https://via.placeholder.com/250x150?text=No+Image";
 }
 
 // STATUS
-var statusText = stationData?.["Gamma Dose Rate (nSv/h)"] === "Out of service"
-? "<span class='status-oos'>Out of Service</span>"
-: "<span class='status-online'>Online</span>";
+const status = (profileData?.["Status"] || "").toLowerCase();
+
+let statusText = "";
+
+if(status === "online"){
+    statusText = "<span style='color:#00b050;font-weight:bold'>● ONLINE</span>";
+}
+else if(status === "offline"){
+    statusText = "<span style='color:#d90000;font-weight:bold'>● OFFLINE</span>";
+}
+else if(status === "maintenance"){
+    statusText = "<span style='color:#ffb300;font-weight:bold'>● MAINTENANCE</span>";
+}
+else{
+    statusText = "<span style='color:#666;font-weight:bold'>● UNKNOWN</span>";
+}
 
 // META
+const operationDate = profileData?.["Operation Start Date"];
+const maintenanceDate = profileData?.["Last Maintenance Date"];
+
 document.getElementById("tsMeta").innerHTML =
+
 "<b>"+station+"</b><br><br>"+
 
-"Address: "+(profileData?.["Address"] || profileData?.["ADDRESS"] || "-")+"<br>"+
+"<b>Address</b><br>"+(profileData?.["Address"] || "-")+"<br><br>"+
 
-"Province: "+(profileData?.["Province"] || profileData?.["PROVINCE"] || "-")+"<br>"+
+"<b>Province</b><br>"+(profileData?.["Province"] || "-")+"<br><br>"+
 
-"Lat: "+(profileData?.["Latitude"] || profileData?.["LATITUDE"] || "-")+"<br>"+
+"<b>Latitude</b><br>"+(profileData?.["Latitude"] || "-")+"<br>"+
 
-"Lon: "+(profileData?.["Longitude"] || profileData?.["LONGITUDE"] || "-")+"<br>"+
+"<b>Longitude</b><br>"+(profileData?.["Longitude"] || "-")+"<br><br>"+
 
-"Status: "+statusText;
+"<b>Status</b><br>"+statusText+"<br><br>"+
+
+"<b>Operation Start Date</b><br>"+
+formatDate(operationDate)+"<br><br>"+
+
+"<b>Last Maintenance Date</b><br>"+
+formatDate(maintenanceDate)+"<br><br>"+
+
+"<b>Running Time</b><br>"+
+runningDays(operationDate)+" days<br><br>"+
+
+"<b>Days Since Last Maintenance</b><br>"+
+runningDays(maintenanceDate)+" days";
   
-fetch("timeseries.csv?nocache="+Date.now())
+fetch("timeseries_all.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
