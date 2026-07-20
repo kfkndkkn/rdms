@@ -25,7 +25,7 @@ th,td{border:1px solid #ccc;padding:6px}
 th{background:#0b1e3f;color:#fff;position:sticky;top:0}
 input{margin-bottom:10px;padding:6px;width:250px}
 </style></head><body>
-<h2>Station Details</h2>
+<h2 style="display:inline-block">Station Details</h2><button onclick="exportExcel()" style="float:right;padding:6px 12px;background:#1d6f42;color:#fff;border:none;border-radius:5px;cursor:pointer">💾 Save as Excel</button>
 <input id="f" placeholder="Search..." onkeyup="const v=this.value.toLowerCase();document.querySelectorAll('tbody tr').forEach(r=>r.style.display=r.innerText.toLowerCase().includes(v)?'':'none');">
 <table><thead><tr>
 <th>Station</th><th>Latitude</th><th>Longitude</th><th>Address</th><th>Province</th><th>Status</th><th>Operation Start Date</th><th>Last Operation</th><th>Last Maintenance</th><th>Battery Replacement Date</th><th>Detector Running Time (days)</th><th>Battery Running Time (days)</th><th>Days Since Last Maintenance (days)</th>
@@ -50,6 +50,15 @@ let bat=br?Math.floor((now-br)/86400000):"";
 let mnt=lm?Math.floor((now-lm)/86400000):"";
 rows+=`<tr><td>${r.station||""}</td><td>${r.Latitude||""}</td><td>${r.Longitude||""}</td><td>${r.Address||""}</td><td>${r.Province||""}</td><td>${r.Status||""}</td><td>${r["Operation Start Date"]||""}</td><td>${r["Last Operation"]||""}</td><td>${r["Last Maintenance Date"]||""}</td><td>${r["Battery Replacement Date"]||""}</td><td>${det}</td><td>${bat}</td><td>${mnt}</td></tr>`;
 });
+
+function exportExcel(){
+var table=document.querySelector("table");
+var wb=XLSX.utils.table_to_book(table,{sheet:"Stations"});
+var d=new Date();
+var f="Station_Details_"+d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+".xlsx";
+XLSX.writeFile(wb,f);
+}
+
 const w=window.open("","StationDetails");
 w.document.write(html+rows+"</tbody></table></body></html>");
 w.document.close();
@@ -59,6 +68,7 @@ w.document.close();
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
 
