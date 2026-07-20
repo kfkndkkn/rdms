@@ -1650,27 +1650,29 @@ if(status==="online"){
 // META
 const startDate = profileData?.["Operation Start Date"] || "-";
 const lastMaintenance = profileData?.["Last Maintenance Date"] || "-";
-const lastOperation = profileData?.["Last Operation Date"] || "-";
+const lastOperation = profileData?.["Last Operation"] || "-";
 
 let runningDay = "-";
 
-try{
-
-    const start = new Date(startDate);
-
-    let end;
-
-    if(status==="online"){
-        end = new Date();
-    }else{
-        end = new Date(lastOperation);
+function parseCustomDate(s){
+    if(!s || s==="-" ) return null;
+    const m={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    const p=s.trim().split("-");
+    if(p.length===3){
+        let y=parseInt(p[2],10);
+        y += (y<70)?2000:1900;
+        return new Date(y,m[p[1]],parseInt(p[0],10));
     }
+    const d=new Date(s);
+    return isNaN(d.getTime())?null:d;
+}
 
-    const diff = end - start;
+const start=parseCustomDate(startDate);
+let end=(status==="online")?new Date():parseCustomDate(lastOperation);
 
-    runningDay = Math.floor(diff/(1000*60*60*24));
-
-}catch(e){}
+if(start && end){
+    runningDay=Math.floor((end-start)/86400000);
+}
 
 document.getElementById("tsMeta").innerHTML=
 
@@ -1688,7 +1690,7 @@ document.getElementById("tsMeta").innerHTML=
 
 "Operation Start Date : "+startDate+"<br>"+
 
-"Last Operation Date : "+lastOperation+"<br>"+
+"Last Operation : "+lastOperation+"<br>"+
 "Last Maintenance Date : "+lastMaintenance+"<br>"+
 
 "<b>Running Time : "+runningDay+" days</b>";
