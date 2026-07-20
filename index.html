@@ -2284,10 +2284,20 @@ document.getElementById("loginModal").style.display="none";
 
 function login(){
 
-alert("Login berhasil (sementara)");
+    const user = document.getElementById("username").value.trim();
+    const pass = document.getElementById("password").value;
 
-closeLogin();
+    if(user==="dkkn" && pass==="sos123"){
 
+        sessionStorage.setItem("login","true");
+        window.location.href="detail.html";
+
+    }else{
+
+        document.getElementById("loginError").style.display="block";
+        document.getElementById("password").value="";
+
+    }
 }
 function openLogin(){
 
