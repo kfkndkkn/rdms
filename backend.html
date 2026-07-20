@@ -793,12 +793,8 @@ var grid={};
 
 data.forEach(row=>{
 
-var profile = window.profileIndex[
-    normalizeName(row["NAMA UNIT"])
-];
-
-var lat = parseFloat(profile?.Latitude);
-var lon = parseFloat(profile?.Longitude);
+var lat = parseFloat(row.Latitude);
+var lon = parseFloat(row.Longitude);
 var dose=row["Gamma Dose Rate (nSv/h)"];
 
 if(isNaN(lat)||isNaN(lon)) return;
@@ -829,7 +825,7 @@ grid[key].doseSum+=doseNum;
 }
 
 grid[key].stations.push({
-name:row["NAMA UNIT"],
+name:row.station,
 dose:dose,
 time:row["LAST UPDATE (WIB)"]
 });
@@ -913,7 +909,7 @@ function loadCSV(){
 
 loadLatestTimeseries(()=>{
 
-fetch("output.csv?nocache="+Date.now())
+fetch("profile_backend.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
@@ -947,7 +943,7 @@ data=rawData;
 
 data.forEach(row=>{
 
-var stationName = row["NAMA UNIT"] ||
+var stationName = row.station ||
                   (row.stations ? row.stations[0].name : "");
 
 var profile = window.profileIndex[normalizeName(stationName)];
@@ -966,7 +962,7 @@ var pos = applyZoomOffset(stationName, lat, lon);
 
 lat = pos.lat;
 lon = pos.lon
-var key = normalizeName(row["NAMA UNIT"]);
+var key = normalizeName(row.station);
 var ts = window.latestTS[key];
 
 var dose = ts ? ts.dose : null;
@@ -1078,7 +1074,7 @@ if(row.count){
 // ===== ZOOM DEKAT (1 STATION) =====
 else{
 
-  var stationName = row["NAMA UNIT"];
+  var stationName = row.station;
   var key = normalizeName(stationName);
   var ts = window.latestTS[key];
 
@@ -1106,8 +1102,8 @@ if(!row.count || map.getZoom() >= 5){
   // 🔥 FIX NAMA (ANTI UNDEFINED)
   var labelName = "";
 
-  if(row["NAMA UNIT"]){
-    labelName = row["NAMA UNIT"];
+  if(row.station){
+    labelName = row.station;
   }else if(row.stations && row.stations.length > 0){
     labelName = row.stations[0].name;
   }else{
@@ -1142,6 +1138,14 @@ map.on("zoomend",loadCSV);
  function updateSidePanel(){
 
 loadLatestTimeseries(()=>{
+fetch("profile_backend.csv?nocache="+Date.now())
+.then(r=>r.text())
+.then(text=>{
+
+var rawData = Papa.parse(text,{
+    header:true,
+    skipEmptyLines:true
+}).data;
 var latestTime = null;
 
 Object.values(window.latestTS).forEach(v=>{
@@ -1215,8 +1219,9 @@ sevenDaysAgo.setDate(now.getDate() - 7);
 
 var grouped = {};
 // Daftar stasiun yang masih aktif di peta
-const activeStations = new Set(
-    Object.keys(window.stationIndex)
+const activeStations =
+new Set(
+Object.keys(window.profileIndex)
 );
 data.forEach(r=>{
 var t = new Date(r.time);
