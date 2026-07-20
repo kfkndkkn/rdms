@@ -1157,30 +1157,11 @@ document.getElementById("lastUpdate").innerHTML =
       timeZone:"Asia/Jakarta"
   }) + " WIB";
 }
-var data = [];
-
-Object.keys(window.stationIndex).forEach(key => {
-
-    var ts = window.latestTS[key];
-
-    if(!ts) return;
-
-    data.push({
-        station: ts.name,
-        dose: ts.dose,
-        time: ts.time
-    });
-
-});
-
-if(data.length===0) return;
-
-})
-.map(k => {
-    return {
-        station: window.latestTS[k].name,
-        dose: window.latestTS[k].dose
-    };
+var data = Object.keys(window.latestTS).map(k=>{
+return {
+station:window.latestTS[k].name,
+dose:window.latestTS[k].dose
+};
 });
 
 if(data.length===0) return;
