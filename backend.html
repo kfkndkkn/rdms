@@ -1157,11 +1157,24 @@ document.getElementById("lastUpdate").innerHTML =
       timeZone:"Asia/Jakarta"
   }) + " WIB";
 }
-var data = Object.keys(window.latestTS).map(k=>{
-return {
-station:window.latestTS[k].name,
-dose:window.latestTS[k].dose
-};
+var data = Object.keys(window.latestTS)
+.filter(k => {
+
+    // harus ada di output_all.csv
+    if(!window.stationIndex[k]) return false;
+
+    // harus Online di profile_backend.csv
+    var profile = window.profileIndex[k];
+    if(!profile) return false;
+
+    return (profile.Status || "").trim().toLowerCase() === "online";
+
+})
+.map(k => {
+    return {
+        station: window.latestTS[k].name,
+        dose: window.latestTS[k].dose
+    };
 });
 
 if(data.length===0) return;
