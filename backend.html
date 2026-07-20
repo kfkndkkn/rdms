@@ -981,72 +981,51 @@ color=getColor(dose);
 var hex;
 
 // ===== AGGREGATED GRID =====
+// ===== AGGREGATED GRID =====
 if(row.stations){
 
-var hasOOS = row.stations.some(s=>{
-var key = normalizeName(s.name);
-return !window.latestTS[key];
-});
+    // rata-rata hanya dari stasiun yang punya data timeseries
+    let values = [];
 
-var valid = row.stations.some(s=>{
-var key = normalizeName(s.name);
-return window.latestTS[key];
-});
+    row.stations.forEach(s=>{
+        const ts = window.latestTS[normalizeName(s.name)];
+        if(ts) values.push(ts.dose);
+    });
 
-if(!valid){
+    if(values.length === 0){
 
-    // tetap tampilkan simbol memakai data output_all.csv
-    hex = createHex(
-        lat,
-        lon,
-        radius,
-        getColor(parseFloat(row["Gamma Dose Rate (nSv/h)"])),
-        {
-            opacity:0.75,
-            stroke:"#222",
-            weight:1
-        }
-    );
-
-}
-hex=createHex(lat,lon,radius,"#8fb9e3",{
-opacity:0.6,
-stroke:"#4a90c2",
-weight:1
-});
-
-}else{
-
-hex=createHex(lat,lon,radius,color,{
-opacity:0.85,
-stroke:"#222",
-weight:1
-});
-
-}
-
-}else{
-
-    if(!ts){
-
-        // Tidak ada data di timeseries → simbol transparan
+        // semua stasiun tidak punya data -> transparan
         hex = createHex(lat,lon,radius,"#2b83ba",{
-            opacity:0.15,
-            stroke:"#4a90c2",
-            weight:1
-        });
-
-    }else if(dose==="Out of service"){
-
-        hex = createHex(lat,lon,radius,"#8fb9e3",{
-            opacity:0.55,
+            opacity:0.10,
             stroke:"#4a90c2",
             weight:1
         });
 
     }else{
 
-        hex = createHex(lat,lon,radius,color,{
+        const avg = values.reduce((a,b)=>a+b,0)/values.length;
+
+        hex = createHex(lat,lon,radius,getColor(avg),{
+            opacity:0.85,
+            stroke:"#222",
+            weight:1
+        });
+
+    }
+
+}else{
+
+    if(!ts){
+
+        hex = createHex(lat,lon,radius,"#2b83ba",{
+            opacity:0.10,
+            stroke:"#4a90c2",
+            weight:1
+        });
+
+    }else{
+
+        hex = createHex(lat,lon,radius,getColor(ts.dose),{
             opacity:0.85,
             stroke:"#222",
             weight:1
