@@ -11,7 +11,41 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js">
+
+function openStationDetails(){
+    alert(
+`Fitur View Details akan menampilkan tabel dengan kolom:
+Station
+Latitude
+Longitude
+Address
+Province
+Status
+Operation Start Date
+Last Operation
+Last Maintenance
+Battery Replacement Date
+Detector Running Time (days)
+Battery Running Time (days)
+Days Since Last Maintenance (days)
+
+Perhitungan:
+- Detector Running Time:
+  Online = Today - Operation Start Date
+  Offline/Maintenance = Last Operation - Operation Start Date
+
+- Battery Running Time:
+  Today - Battery Replacement Date
+
+- Days Since Last Maintenance:
+  Today - Last Maintenance Date
+
+Tahap berikutnya akan menampilkan tabel interaktif + Export CSV.`
+    );
+}
+
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -698,6 +732,7 @@ style="font-size:22px;font-weight:bold;color:#ff9800;">0</div>
 
 </div>
         <canvas id="statusDonutChart"></canvas>
+<div style="text-align:center;margin-top:12px"><button id="viewDetailsBtn" style="padding:8px 16px;border:none;border-radius:6px;cursor:pointer;background:#0b1e3f;color:#fff" onclick="openStationDetails()">View Details</button></div>
 
     </div>
 </div>
