@@ -952,20 +952,22 @@ var stationName = row["NAMA UNIT"] ||
 
 var profile = window.profileIndex[normalizeName(stationName)];
 
-var lat = row.lat;
-var lon = row.lon;
+var lat;
+var lon;
 
-// Jika bukan hasil agregasi (zoom dekat),
-// koordinat selalu dari profile_backend.csv
-if(!row.stations){
+if(row.stations){
+
+    // hasil agregasi tetap menggunakan centroid
+    lat = row.lat;
+    lon = row.lon;
+
+}else{
+
+    // posisi selalu mengikuti profile_backend.csv
     lat = parseFloat(profile?.Latitude);
     lon = parseFloat(profile?.Longitude);
+
 }
-
-var pos = applyZoomOffset(stationName, lat, lon);
-
-lat = pos.lat;
-lon = pos.lon
 var key = normalizeName(row["NAMA UNIT"]);
 var ts = window.latestTS[key];
 
