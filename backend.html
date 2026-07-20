@@ -1093,13 +1093,9 @@ var zoom=map.getZoom();
 
 var data;
 
-if(zoom<6){
-data=aggregateData(rawData,1);
-}else if(zoom<8){
-data=aggregateData(rawData,0.5);
-}else{
+// Selalu tampilkan semua stasiun individual
+// agar detektor online langsung terlihat sejak zoom awal
 data=rawData;
-}
 
 if(zoom>=8){
 
