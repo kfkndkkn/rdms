@@ -1690,7 +1690,7 @@ document.getElementById("tsMeta").innerHTML=
 
 "Operation Start Date : "+startDate+"<br>"+
 
-"Last Operation : "+lastOperation+"<br>"+
+"Last Operation : "+(status==="online" ? "Current / Today" : lastOperation)+"<br>"+
 "Last Maintenance Date : "+lastMaintenance+"<br>"+
 
 "<b>Running Time : "+runningDay+" days</b>";
