@@ -1120,53 +1120,47 @@ var hex;
 // ===== AGGREGATED GRID =====
 if(row.stations){
 
-var hasOOS = row.stations.some(s=>{
-var key = normalizeName(s.name);
-return !window.latestTS[key];
-});
+    let hasMaintenance = false;
+    let hasOffline = false;
+    let hasOnline = false;
 
-var valid = row.stations.some(s=>{
-var key = normalizeName(s.name);
-return window.latestTS[key];
-});
+    row.stations.forEach(s=>{
 
-if(!valid){
+        const profile = window.profileIndex[normalizeName(s.name)];
 
-hex=createHex(lat,lon,radius,"#8fb9e3",{
-opacity:0.6,
-stroke:"#4a90c2",
-weight:1
-});
+        if(!profile) return;
 
-}else{
+        const status = (profile.Status || "").toLowerCase();
 
-hex=createHex(lat,lon,radius,color,{
-opacity:0.85,
-stroke:"#222",
-weight:1
-});
+        if(status === "online")
+            hasOnline = true;
 
-}
+        if(status === "maintenance")
+            hasMaintenance = true;
 
-}else{
+        if(status === "offline")
+            hasOffline = true;
 
-if(dose==="Out of service"){
+    });
 
-hex=createHex(lat,lon,radius,"#8fb9e3",{
-opacity:0.55,
-stroke:"#4a90c2",
-weight:1
-});
+    let opacity = 0.85;
+    let stroke = "#222";
 
-}else{
+    if(hasMaintenance){
+        opacity = 0.45;
+        stroke = "#ff9800";
+    }
 
-hex=createHex(lat,lon,radius,color,{
-opacity:0.85,
-stroke:"#222",
-weight:1
-});
+    if(hasOffline){
+        opacity = 0.30;
+        stroke = "#d32f2f";
+    }
 
-}
+    hex = createHex(lat, lon, radius, color,{
+        opacity: opacity,
+        stroke: stroke,
+        weight: 1
+    });
 
 }
   
