@@ -1072,6 +1072,9 @@ fetch("output_all.csv?nocache="+Date.now())
 
 polygonLayer.clearLayers();
 labelLayer.clearLayers();
+onlineLayer.clearLayers();
+offlineLayer.clearLayers();
+maintenanceLayer.clearLayers();
 
 var radius=getRadius();
 
@@ -1255,10 +1258,18 @@ hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
   hex.on('click', function(){
   this.openPopup();
 });
-hex.addTo(polygonLayer);
-
 const profileTop = window.profileIndex[normalizeName(stationName)];
 const statusTop = (profileTop?.Status || "").toLowerCase();
+
+let targetLayer=onlineLayer;
+if(statusTop==="offline"){
+    targetLayer=offlineLayer;
+}else if(statusTop==="maintenance"){
+    targetLayer=maintenanceLayer;
+}
+
+hex.addTo(targetLayer);
+
 if(statusTop==="online"){
     hex.bringToFront();
 }
@@ -1287,7 +1298,13 @@ if(!row.count || map.getZoom() >= 5){
     })
   });
 
-  label.addTo(labelLayer);
+  if(statusTop==="offline"){
+    label.addTo(offlineLayer);
+}else if(statusTop==="maintenance"){
+    label.addTo(maintenanceLayer);
+}else{
+    label.addTo(onlineLayer);
+}
 }
 
 });
