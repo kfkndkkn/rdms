@@ -496,7 +496,7 @@ background:#d90000;
 }
 
 #statusDonutBox{
-    width:320px;
+    width:300px;
     background:white;
     border-radius:12px;
     padding:12px;
@@ -544,9 +544,10 @@ background:#d90000;
 
 #statusDonutChart{
     width:100% !important;
-    height:260px !important;
+    height:210px !important;
     display:block;
     margin:0 auto;
+    margin-top:-2px;
 }
 
 #openDonutBtn{
@@ -2334,60 +2335,51 @@ document.getElementById("maintenanceCount").textContent = maintenance;
             ],
 
             datasets:[{
-    data:[
-        online,
-        offline,
-        maintenance
-    ],
 
-    backgroundColor:[
-        "#00b050",
-        "#d32f2f",
-        "#ff9800"
-    ],
+                data:[
+                    online,
+                    offline,
+                    maintenance
+                ],
 
-    borderWidth:0,
-    radius:"98%",
-    hoverOffset:2
-}]
+                backgroundColor:[
+                    "#00b050",
+                    "#d32f2f",
+                    "#ffd600"
+                ],
+
+                borderWidth:2
+
+            }]
         },
 
-       options:{
+        options:{
 
-    responsive:true,
-    maintainAspectRatio:false,
+            responsive:true,
 
-    rotation:-90,
-    circumference:180,
+            cutout:"58%",
 
-    cutout:"45%",
+            rotation:-90,
 
-    layout:{
-        padding:{
-            top:0,
-            bottom:-20,
-            left:0,
-            right:0
-        }
-    },
+            circumference:180,
 
-    plugins:{
-        legend:{
-            position:"bottom",
-            labels:{
-                boxWidth:28,
-                padding:10
-            }
-        },
-        tooltip:{
-            callbacks:{
-                label:function(ctx){
-                    return ctx.label+" : "+ctx.raw+" Station";
+            plugins:{
+
+                legend:{
+                    position:"bottom"
+                },
+
+                tooltip:{
+                    callbacks:{
+                        label:function(ctx){
+                            return ctx.label+" : "+ctx.raw+" Station";
+                        }
+                    }
                 }
+
             }
+
         }
-    }
-}
 
     });
 
