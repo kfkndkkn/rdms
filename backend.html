@@ -652,7 +652,7 @@ function applyZoomOffset(name, lat, lon){
 }
 function loadProfile(){
 
-fetch("profile.csv?nocache="+Date.now())
+fetch("profile_backend.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
@@ -870,7 +870,7 @@ window.latestTS = {};
 
 function loadLatestTimeseries(callback){
 
-fetch("timeseries.csv?nocache="+Date.now())
+fetch("timeseries_all.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
@@ -943,8 +943,10 @@ data=rawData;
 
 data.forEach(row=>{
 
-var lat = row.lat || parseFloat(row["LATITUDE"]);
-var lon = row.lon || parseFloat(row["LONGITUDE"]);
+var profile = window.profileIndex[normalizeName(stationName)];
+
+var lat = row.lat || parseFloat(profile?.Latitude || row["LATITUDE"]);
+var lon = row.lon || parseFloat(profile?.Longitude || row["LONGITUDE"]);
 
 var stationName = row["NAMA UNIT"] ||
                   (row.stations ? row.stations[0].name : "");
@@ -1189,7 +1191,7 @@ updateStatusTicker();
 window.lastChartData = "";
 function drawAvgChart(){
 
-fetch("timeseries.csv?nocache="+Date.now())
+fetch("timeseries_all.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
@@ -1433,25 +1435,77 @@ img.src = "https://via.placeholder.com/250x150?text=No+Image";
 }
 
 // STATUS
-var statusText = stationData?.["Gamma Dose Rate (nSv/h)"] === "Out of service"
-? "<span class='status-oos'>Out of Service</span>"
-: "<span class='status-online'>Online</span>";
+let status = (profileData?.Status || "").toLowerCase();
+
+let statusText;
+
+if(status==="online"){
+
+    statusText="<span style='color:#00b050;font-weight:bold'>Online</span>";
+
+}else if(status==="maintenance"){
+
+    statusText="<span style='color:#ff9800;font-weight:bold'>Maintenance</span>";
+
+}else if(status==="offline"){
+
+    statusText="<span style='color:#d32f2f;font-weight:bold'>Offline</span>";
+
+}else{
+
+    statusText="<span style='color:#777'>Unknown</span>";
+
+}
 
 // META
-document.getElementById("tsMeta").innerHTML =
+const startDate = profileData?.["Operation Start Date"] || "-";
+const lastMaintenance = profileData?.["Last Maintenance Date"] || "-";
+
+let runningDay = "-";
+
+try{
+
+    const start = new Date(startDate);
+
+    let end;
+
+    if(status==="online"){
+
+        end = new Date();
+
+    }else{
+
+        end = new Date(lastMaintenance);
+
+    }
+
+    const diff = end - start;
+
+    runningDay = Math.floor(diff/(1000*60*60*24));
+
+}catch(e){}
+
+document.getElementById("tsMeta").innerHTML=
+
 "<b>"+station+"</b><br><br>"+
 
-"Address: "+(profileData?.["Address"] || profileData?.["ADDRESS"] || "-")+"<br>"+
+"Address : "+(profileData?.Address || "-")+"<br>"+
 
-"Province: "+(profileData?.["Province"] || profileData?.["PROVINCE"] || "-")+"<br>"+
+"Province : "+(profileData?.Province || "-")+"<br>"+
 
-"Lat: "+(profileData?.["Latitude"] || profileData?.["LATITUDE"] || "-")+"<br>"+
+"Latitude : "+(profileData?.Latitude || "-")+"<br>"+
 
-"Lon: "+(profileData?.["Longitude"] || profileData?.["LONGITUDE"] || "-")+"<br>"+
+"Longitude : "+(profileData?.Longitude || "-")+"<br>"+
 
-"Status: "+statusText;
+"Status : "+statusText+"<br>"+
+
+"Operation Start Date : "+startDate+"<br>"+
+
+"Last Maintenance Date : "+lastMaintenance+"<br>"+
+
+"Running Time : "+runningDay+" days";
   
-fetch("timeseries.csv?nocache="+Date.now())
+fetch("timeseries_all.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
