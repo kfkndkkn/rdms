@@ -921,7 +921,13 @@ polygonLayer.clearLayers();
 labelLayer.clearLayers();
 
 var radius=getRadius();
+// Index output.csv berdasarkan nama stasiun
+window.outputIndex = {};
 
+rawData.forEach(r=>{
+    const key = normalizeName(r["NAMA UNIT"]);
+    window.outputIndex[key] = r;
+});
 var rawData=Papa.parse(text,{
 header:true,
 skipEmptyLines:true
@@ -938,11 +944,36 @@ var zoom=map.getZoom();
 var data;
 
 if(zoom<6){
-data=aggregateData(rawData,1);
+
+    data = aggregateData(rawData,1);
+
 }else if(zoom<8){
-data=aggregateData(rawData,0.5);
+
+    data = aggregateData(rawData,0.5);
+
 }else{
-data=rawData;
+
+    // ==========================
+    // Zoom dekat -> semua station
+    // berasal dari profile_backend.csv
+    // ==========================
+
+    data = Object.values(window.profileIndex).map(profile=>{
+
+        const key = normalizeName(profile.station);
+
+        const output = window.outputIndex[key];
+
+        return {
+            "NAMA UNIT": profile.station,
+            lat: parseFloat(profile.Latitude),
+            lon: parseFloat(profile.Longitude),
+            profile: profile,
+            output: output
+        };
+
+    });
+
 }
 
 data.forEach(row=>{
