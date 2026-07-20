@@ -1088,6 +1088,21 @@ data=aggregateData(rawData,0.5);
 data=rawData;
 }
 
+if(zoom>=8){
+
+    data.sort((a,b)=>{
+
+        const sa=(window.profileIndex[normalizeName(a["NAMA UNIT"])]?.Status||"").toLowerCase();
+        const sb=(window.profileIndex[normalizeName(b["NAMA UNIT"])]?.Status||"").toLowerCase();
+
+        const order={offline:0,maintenance:1,online:2};
+
+        return (order[sa]||0)-(order[sb]||0);
+
+    });
+
+}
+
 data.forEach(row=>{
 
 var stationName = row["NAMA UNIT"] ||
@@ -1133,53 +1148,45 @@ color=getColor(dose);
 
 var hex;
 
-// ===== AGGREGATED GRID =====
+let opacity = 0.85;
+let stroke = "#222";
+let hasMaintenance=false;
+let hasOffline=false;
+
 if(row.stations){
 
-    let hasMaintenance = false;
-    let hasOffline = false;
-    let hasOnline = false;
-
     row.stations.forEach(s=>{
-
-        const profile = window.profileIndex[normalizeName(s.name)];
-
+        const profile=window.profileIndex[normalizeName(s.name)];
         if(!profile) return;
-
-        const status = (profile.Status || "").toLowerCase();
-
-        if(status === "online")
-            hasOnline = true;
-
-        if(status === "maintenance")
-            hasMaintenance = true;
-
-        if(status === "offline")
-            hasOffline = true;
-
+        const status=(profile.Status||"").toLowerCase();
+        if(status==="maintenance") hasMaintenance=true;
+        if(status==="offline") hasOffline=true;
     });
 
-    let opacity = 0.85;
-    let stroke = "#222";
+}else{
 
-    if(hasMaintenance){
-        opacity = 0.45;
-        stroke = "#ff9800";
-    }
+    const profile=window.profileIndex[normalizeName(stationName)];
+    const status=(profile?.Status||"").toLowerCase();
 
-    if(hasOffline){
-        opacity = 0.30;
-        stroke = "#d32f2f";
-    }
-
-    hex = createHex(lat, lon, radius, color,{
-        opacity: opacity,
-        stroke: stroke,
-        weight: 1
-    });
-
+    if(status==="maintenance") hasMaintenance=true;
+    if(status==="offline") hasOffline=true;
 }
-  
+
+if(hasMaintenance){
+    opacity=0.45;
+    stroke="#ff9800";
+}
+if(hasOffline){
+    opacity=0.30;
+    stroke="#d32f2f";
+}
+
+hex=createHex(lat,lon,radius,color,{
+    opacity:opacity,
+    stroke:stroke,
+    weight:1
+});
+
 var popupContent = "";
 
 // ===== ZOOM JAUH (AGGREGATED) =====
@@ -1231,6 +1238,12 @@ hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
   this.openPopup();
 });
 hex.addTo(polygonLayer);
+
+const profileTop = window.profileIndex[normalizeName(stationName)];
+const statusTop = (profileTop?.Status || "").toLowerCase();
+if(statusTop==="online"){
+    hex.bringToFront();
+}
 
 if(!row.count || map.getZoom() >= 5){
 
