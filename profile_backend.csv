@@ -1,41 +1,41 @@
-station,IMAGE_URL,Address,Province,Latitude,Longitude,Status,Operation Start Date,Last Maintenance Date
-BRIN KSE Achmad Baiquni Yogyakarta,https://iili.io/CwTbQKg.th.jpg,"Tambak Bayan, Caturtunggal, Kec. Depok, Kabupaten Sleman",DI Yogyakarta,-7.778108,110.41275,Online,20-Nov-25,21-Nov-25
-CTBT Jayapura,https://iili.io/FMzWKMB.jpg,"Jalan Drs. Krisna Sunarya No.26, Angkasapura, Kec. Jayapura Utara, Kota Jayapura",Papua,-2.51444,140.7038,Online,2-Nov-18,7-May-24
-CTBT Kappang,https://iili.io/FMzWBF1.jpg,"Stasiun seismik CTBT Kappang (KAPI),Labuaja, Kec. Cenrana, Kabupaten Maros",Sulawesi Selatan,-5.01419,119.7511,Maintenance,8-Nov-18,30-Apr-24
-CTBT Lembang,https://iili.io/FMzWcSn.jpg,"Jl. Peneropongan Bintang No.45, Lembang",Jawa Barat,-6.82636,107.6178,Maintenance,23-Nov-18,29-Apr-26
-CTBT NTT,https://iili.io/FMzWGt4.jpg,"Jl. Sonbai km.01 Bonen, Baumata Kupang",NTT,-10.1989,123.6701,Maintenance,7-Nov-18,7-May-24
-CTBT Sorong,https://iili.io/FMzWriB.jpg,"Jl. Danau Siwiki, No.1, Kampung Baru, KP 167, Sorong",Papua Barat,-0.8625,131.2589,Offline,7-Nov-18,30-Oct-24
-Istana Kepresidenan Bali,https://iili.io/FMzW9yb.jpg,"Jl. Dr. Ir. Soekarno, Manukaya, Kec. Tampaksiring, Kabupaten Gianyar",Bali,-8.41308,115.3139,Online,8-Oct-19,14-Nov-24
-Istana Kepresidenan Bogor,https://iili.io/FMzVmF9.jpg,"Jl. Ir. H. Juanda, RT.04/RW.01, Paledang, Kecamatan Bogor Tengah, Kota Bogor",Jawa Barat,-6.59792,106.7958,Maintenance,8-Oct-19,4-Jun-26
-Istana Kepresidenan Cipanas,https://iili.io/FMzW2ZQ.jpg,"Jl. Raya Cipanas No.105, Cipanas, Kec. Cipanas, Kabupaten Cianjur",Jawa Barat,-6.73208,107.0399,Maintenance,7-Oct-19,13-May-26
-Istana Kepresidenan Yogyakarta,https://iili.io/FGXliDF.jpg,"Jalan Ahmad Yani, Ngupasan, Kec. Gondomanan, Kota Yogyakarta",DI Yogyakarta,-7.80031,110.3631,Online,24-Sep-19,7-May-26
-Istana Negara Merdeka (Setneg),https://iili.io/FMzWvNj.jpg,"Jalan Medan Merdeka Utara, Jakarta Pusat",DKI Jakarta,-6.16889,106.8228,Maintenance,16-Nov-15,4-Oct-23
-Istana Negara Merdeka (Wantimpres),https://iili.io/FMzWUoQ.jpg,"Jl. Veteran III No.2, RT.2/RW.3, Gambir, Kecamatan Gambir, Kota Jakarta Pusat",DKI Jakarta,-6.16911,106.825,Maintenance,4-Oct-19,3-Nov-25
-KNB-1,https://iili.io/FMzWzAJ.jpg,"Jl. Tamansari No.71, Lb. Siliwangi, Kecamatan Coblong, Kota Bandung",Jawa Barat,-6.8878,107.6062,Offline,16-Nov-18,18-Jun-25
-KNS-1,https://iili.io/FMzWIwv.jpg,"Jl. Kw. Puspiptek No.30, Muncul, Kec. Setu, Kota Tangerang Selatan",Banten,-6.35178,106.664,Online,20-Dec-19,3-Nov-25
-KNS-2,https://iili.io/FMzWTtR.jpg,"Jl. Kw. Puspiptek No.30, Muncul, Kec. Setu, Kota Tangerang Selatan",Banten,-6.35278,106.662,Offline,20-Dec-19,12-Nov-24
-KNS-3,https://iili.io/FMzWRMN.jpg,"Jl. Kw. Puspiptek No.12, Muncul, Kec. Setu, Kota Tangerang Selatan",Banten,-6.35313,106.6636,Offline,20-Oct-18,4-Nov-25
-KNS-4,https://iili.io/FMzW5PI.jpg,"Jl. Kw. Puspiptek No.50, Muncul, Kec. Setu, Kota Tangerang Selatan",Banten,-6.35053,106.6617,Online,16-Dec-19,28-Jul-25
-KNY-1,https://iili.io/FMzWYFt.jpg,"Tambak Bayan, Caturtunggal, Kec. Depok, Kabupaten Sleman",DI Yogyakarta,-7.77811,110.4128,Offline,8-Dec-17,27-May-25
-Puspiptek-1,https://iili.io/FMzWwl9.jpg,"Jl. Kw. Puspiptek, Muncul, Kec. Setu, Kota Tangerang Selatan",Banten,-6.34581,106.6608,Maintenance,16-Nov-15,4-Nov-25
-Puspiptek-2,https://iili.io/FMzWNSe.jpg,"Jl. Kw. Puspiptek, Muncul, Kec. Setu, Kota Tangerang Selatan",Banten,-6.35414,106.6718,Maintenance,16-Nov-15,4-Nov-25
-St.Geof.Kls.I Ambon,https://iili.io/FMzVy8u.jpg,"Jl. A. I. S. Nasution No. 8, Kec. Sirimau, Kota Ambon",Maluku,-3.68717,128.1942,Maintenance,16-Aug-19,21-May-24
-St.Geof.Kls.I Padang Panjang,https://iili.io/FMzWVol.jpg,"Jl Meteorologi, Silaing Bawah, Padang Panjang",Sumatra Barat,-0.46612,100.3804,Offline,22-Aug-19,11-Oct-23
-St.Geof.Kls.I Tuntungan,https://iili.io/FMzXHlt.jpg,"Jalan Geofisika No.1, Tuntungan I, Kec. Pancur Batu, Kabupaten Deli Serdang",Sumatra Utara,3.50025,98.56528,Maintenance,29-Aug-19,23-Apr-26
-St.Geof.Kls.III Banjarnegara,https://iili.io/BLGgsII.th.jpg,"Jl. Raya Purbayasa, Purbayasa, Kec. Purbayasa, Kabupaten Banjarnegara",Jawa Tengah,-7.33322,109.7098,Online,11-Apr-24,23-Jul-25
-St.Klim. Manokwari,https://iili.io/FMzW1AG.jpg,"Anday, Distrik Manokwari, Kabupaten Manokwari",Papua Barat,-0.92813,134.0259,Offline,14-Aug-19,22-Jun-22
-St.Klim.Kls.II Malang,https://iili.io/FMzW09s.jpg,"Jl. Zentana No. 33, RT 55/ RW 08 Desa Ngijo Kecamatan Karangploso Kabupaten Malang",Jawa Timur,-7.90142,112.5979,Maintenance,22-Nov-21,31-Oct-24
-St.Klim.Kls.II Mempawah,https://iili.io/FMzWENf.jpg,"Jalan Raya Sei Nipah KM. 20.5, Jungkat, Sei Nipah, Kec. Jongkat, Kab. Mempawah",Kalimantan Barat,0.075778,109.1909,Maintenance,16-Oct-19,21-May-24
-St.Mteo.Kls.I.Supadio.Pontianak,https://iili.io/FMTsiGV.jpg,"Jl. Adi Sucipto Km 17 Bandara Supadio Pontianak, Kec. Sungai Raya, Kab. Kubu Raya",Kalimantan Barat,-0.14185,109.4026,Online,29-Aug-24,30-Aug-24
-St.Mteo.Kls I Pekanbaru,https://iili.io/FMzWXPS.jpg,"Bandar Udara Sultan Syarif Kasim II, Pekanbaru, Maharatu, Marpoyan Damai, Pekanbaru",Riau,0.459222,101.4473,Online,19-Oct-23,16-Apr-26
-St.Mteo.Kls.I Gorontalo,https://iili.io/FMzWFnV.jpg,"Stasiun Meteorologi Kelas I Komplek Bandar Udara Djalaluddin, Tolotio, Kec. Tibawa, Kabupaten Gorontalo",Sulawesi Utara,0.638444,122.8524,Online,5-Nov-19,7-Nov-25
-St.Mteo.Kls.I Pangkal Pinang,https://iili.io/FMzWWV2.jpg,Jl. Bandara Depati Amir Pangkalpinang,Kepulauan Bangka Belitung,-2.16156,106.137,Maintenance,27-Aug-19,5-Mar-24
-St.Mteo.Kls.III Bengkulu,https://iili.io/FMzVpae.jpg,"Jl. Depati Payung Negara, Komplek Bandar Udara Fatmawati Soekarno, Kel. Pekan Sabtu, Kec. Selebar, Kota Bengkulu",Bengkulu,-3.85822,102.3366,Online,27-Oct-22,25-Sep-25
-St.Mteo.Kls.III Cilacap,https://iili.io/FMzWJuj.jpg,"Jl. Gatot Subroto No.20, Tambaksari, Sidanegara, Kec. Cilacap Tengah, Kabupaten Cilacap",Jawa Tengah,-7.71875,109.015,Online,19-Oct-22,9-Apr-26
-St.Mteo.Kls.III Kerinci,https://iili.io/FMzWn8g.jpg,"Bandara Depati Parbo, Desa Angkasa Pura, Sebukar, Kec. Sitinjau Laut, Kabupaten Kerinci",Jambi,-2.09119,101.462,Offline,17-Nov-21,6-Nov-24
-St.Mteo.Kls.III Putussibau,https://iili.io/FMzWkAb.jpg,"Bandar Udara Pangsuma, Jalan Adisucipto, Kedamin Hulu, Kec. Putussibau Sel., Kabupaten Kapuas Hulu",Kalimantan Barat,0.838667,112.9349,Maintenance,18-Oct-19,23-Apr-24
-St.Mteo.Kls.III Sintang,https://iili.io/FMzWgVV.jpg,"Manter, Kec. Sungai Tebelian, Kabupaten Sintang",Kalimantan Barat,-0.04303,111.4594,Online,10-Nov-21,29-May-24
-St.Mteo.Kls.III Tana Toraja,https://iili.io/FMzW6KP.jpg,"Jalan Bandara, Simbuang, Kec. Mengkendek, Kabupaten Tana Toraja",Sulawesi Selatan,-3.04508,119.8187,Online,10-Nov-21,12-Dec-24
-St.Mteo.Kls.III Tanjung Pinang,https://iili.io/FMzWQRa.jpg,"Jl. Adi Sucipto Km 12,5 Bandara Kijang, Tanjung Pinang",Tanjungpinang,0.922694,104.5283,Online,20-Aug-19,14-Nov-25
-St.Mteo.Kls.III Tapanuli Tengah,https://iili.io/FMzWtDv.jpg,"Gn. Marijo, Kec. Pinangsori, Kabupaten Tapanuli Tengah",Sumatra Utara,1.553194,98.89733,Online,17-Nov-21,12-Dec-24
-St.Mteo.Kls.III Tarakan,https://iili.io/FMzWpiN.jpg,"Jl. Kamboja No.RT.43, Karang Anyar, Kec. Tarakan Bar., Kota Tarakan",Kalimantan Utara,3.313434,117.5815,Offline,25-Oct-19,26-Oct-23
+station,IMAGE_URL,Address,Province,Latitude,Longitude,Status,Operation Start Date,Last Maintenance Date,Last Operation,Battery Replacement Date
+St.Klim. Manokwari,https://iili.io/FMzW1AG.jpg,"Anday, Distrik Manokwari, Kabupaten Manokwari",Papua Barat,-0.92813,134.0259,Offline,14-Aug-19,22-Jun-22,15-Dec-21,21-Jun-22
+Istana Negara Merdeka (Setneg),https://iili.io/FMzWvNj.jpg,"Jalan Medan Merdeka Utara, Jakarta Pusat",DKI Jakarta,-6.16889,106.8228,Maintenance,16-Nov-15,4-Oct-23,8-Sep-24,4-Oct-23
+St.Geof.Kls.I Padang Panjang,https://iili.io/FMzWVol.jpg,"Jl Meteorologi, Silaing Bawah, Padang Panjang",Sumatra Barat,-0.46612,100.3804,Offline,22-Aug-19,11-Oct-23,17-Jun-22,11-Oct-23
+St.Mteo.Kls.III Tarakan,https://iili.io/FMzWpiN.jpg,"Jl. Kamboja No.RT.43, Karang Anyar, Kec. Tarakan Bar., Kota Tarakan",Kalimantan Utara,3.313434,117.5815,Offline,25-Oct-19,26-Oct-23,28-Nov-22,26-Oct-23
+St.Mteo.Kls.I Pangkal Pinang,https://iili.io/FMzWWV2.jpg,Jl. Bandara Depati Amir Pangkalpinang,Kepulauan Bangka Belitung,-2.16156,106.137,Maintenance,27-Aug-19,5-Mar-24,28-Jun-23,26-Jun-23
+St.Mteo.Kls.III Putussibau,https://iili.io/FMzWkAb.jpg,"Bandar Udara Pangsuma, Jalan Adisucipto, Kedamin Hulu, Kec. Putussibau Sel., Kabupaten Kapuas Hulu",Kalimantan Barat,0.838667,112.9349,Maintenance,18-Oct-19,23-Apr-24,12-Jan-25,19-Sep-23
+CTBT Kappang,https://iili.io/FMzWBF1.jpg,"Stasiun seismik CTBT Kappang (KAPI),Labuaja, Kec. Cenrana, Kabupaten Maros",Sulawesi Selatan,-5.01419,119.7511,Maintenance,8-Nov-18,30-Apr-24,28-Nov-23,29-Apr-24
+CTBT Jayapura,https://iili.io/FMzWKMB.jpg,"Jalan Drs. Krisna Sunarya No.26, Angkasapura, Kec. Jayapura Utara, Kota Jayapura",Papua,-2.51444,140.7038,Online,2-Nov-18,7-May-24,,9-Aug-22
+CTBT NTT,https://iili.io/FMzWGt4.jpg,"Jl. Sonbai km.01 Bonen, Baumata Kupang",NTT,-10.1989,123.6701,Maintenance,7-Nov-18,7-May-24,4-Nov-24,6-May-24
+St.Geof.Kls.I Ambon,https://iili.io/FMzVy8u.jpg,"Jl. A. I. S. Nasution No. 8, Kec. Sirimau, Kota Ambon",Maluku,-3.68717,128.1942,Maintenance,16-Aug-19,21-May-24,8-Feb-26,26-Jul-23
+St.Klim.Kls.II Mempawah,https://iili.io/FMzWENf.jpg,"Jalan Raya Sei Nipah KM. 20.5, Jungkat, Sei Nipah, Kec. Jongkat, Kab. Mempawah",Kalimantan Barat,0.075778,109.1909,Maintenance,16-Oct-19,21-May-24,28-Nov-24,10-Oct-23
+St.Mteo.Kls.III Sintang,https://iili.io/FMzWgVV.jpg,"Manter, Kec. Sungai Tebelian, Kabupaten Sintang",Kalimantan Barat,-0.04303,111.4594,Online,10-Nov-21,29-May-24,,7-Nov-23
+St.Mteo.Kls.I.Supadio.Pontianak,https://iili.io/FMTsiGV.jpg,"Jl. Adi Sucipto Km 17 Bandara Supadio Pontianak, Kec. Sungai Raya, Kab. Kubu Raya",Kalimantan Barat,-0.14185,109.4026,Online,29-Aug-24,30-Aug-24,,29-Aug-24
+CTBT Sorong,https://iili.io/FMzWriB.jpg,"Jl. Danau Siwiki, No.1, Kampung Baru, KP 167, Sorong",Papua Barat,-0.8625,131.2589,Offline,7-Nov-18,30-Oct-24,12-Apr-23,29-Oct-24
+St.Klim.Kls.II Malang,https://iili.io/FMzW09s.jpg,"Jl. Zentana No. 33, RT 55/ RW 08 Desa Ngijo Kecamatan Karangploso Kabupaten Malang",Jawa Timur,-7.90142,112.5979,Maintenance,22-Nov-21,31-Oct-24,29-Sep-24,30-Oct-24
+St.Mteo.Kls.III Kerinci,https://iili.io/FMzWn8g.jpg,"Bandara Depati Parbo, Desa Angkasa Pura, Sebukar, Kec. Sitinjau Laut, Kabupaten Kerinci",Jambi,-2.09119,101.462,Offline,17-Nov-21,6-Nov-24,21-Dec-23,5-Nov-24
+KNS-2,https://iili.io/FMzWTtR.jpg,"Jl. Kw. Puspiptek No.30, Muncul, Kec. Setu, Kota Tangerang Selatan",Banten,-6.35278,106.662,Offline,20-Dec-19,12-Nov-24,14-Aug-24,12-Nov-24
+Istana Kepresidenan Bali,https://iili.io/FMzW9yb.jpg,"Jl. Dr. Ir. Soekarno, Manukaya, Kec. Tampaksiring, Kabupaten Gianyar",Bali,-8.41308,115.3139,Online,8-Oct-19,14-Nov-24,,13-Nov-24
+St.Mteo.Kls.III Tana Toraja,https://iili.io/FMzW6KP.jpg,"Jalan Bandara, Simbuang, Kec. Mengkendek, Kabupaten Tana Toraja",Sulawesi Selatan,-3.04508,119.8187,Online,10-Nov-21,12-Dec-24,,10-Dec-24
+St.Mteo.Kls.III Tapanuli Tengah,https://iili.io/FMzWtDv.jpg,"Gn. Marijo, Kec. Pinangsori, Kabupaten Tapanuli Tengah",Sumatra Utara,1.553194,98.89733,Online,17-Nov-21,12-Dec-24,,12-Dec-24
+KNY-1,https://iili.io/FMzWYFt.jpg,"Tambak Bayan, Caturtunggal, Kec. Depok, Kabupaten Sleman",DI Yogyakarta,-7.77811,110.4128,Offline,8-Dec-17,27-May-25,15-Dec-21,21-Nov-23
+KNB-1,https://iili.io/FMzWzAJ.jpg,"Jl. Tamansari No.71, Lb. Siliwangi, Kecamatan Coblong, Kota Bandung",Jawa Barat,-6.8878,107.6062,Offline,16-Nov-18,18-Jun-25,3-Jun-23,11-Nov-24
+St.Geof.Kls.III Banjarnegara,https://iili.io/BLGgsII.th.jpg,"Jl. Raya Purbayasa, Purbayasa, Kec. Purbayasa, Kabupaten Banjarnegara",Jawa Tengah,-7.33322,109.7098,Online,11-Apr-24,23-Jul-25,,11-Apr-24
+KNS-4,https://iili.io/FMzW5PI.jpg,"Jl. Kw. Puspiptek No.50, Muncul, Kec. Setu, Kota Tangerang Selatan",Banten,-6.35053,106.6617,Online,16-Dec-19,28-Jul-25,,28-Jul-25
+St.Mteo.Kls.III Bengkulu,https://iili.io/FMzVpae.jpg,"Jl. Depati Payung Negara, Komplek Bandar Udara Fatmawati Soekarno, Kel. Pekan Sabtu, Kec. Selebar, Kota Bengkulu",Bengkulu,-3.85822,102.3366,Online,27-Oct-22,25-Sep-25,,27-Oct-22
+Istana Negara Merdeka (Wantimpres),https://iili.io/FMzWUoQ.jpg,"Jl. Veteran III No.2, RT.2/RW.3, Gambir, Kecamatan Gambir, Kota Jakarta Pusat",DKI Jakarta,-6.16911,106.825,Maintenance,4-Oct-19,3-Nov-25,12-Aug-24,23-Oct-25
+KNS-1,https://iili.io/FMzWIwv.jpg,"Jl. Kw. Puspiptek No.30, Muncul, Kec. Setu, Kota Tangerang Selatan",Banten,-6.35178,106.664,Online,20-Dec-19,3-Nov-25,,3-Nov-25
+KNS-3,https://iili.io/FMzWRMN.jpg,"Jl. Kw. Puspiptek No.12, Muncul, Kec. Setu, Kota Tangerang Selatan",Banten,-6.35313,106.6636,Offline,20-Oct-18,4-Nov-25,29-Jul-19,13-Nov-23
+Puspiptek-1,https://iili.io/FMzWwl9.jpg,"Jl. Kw. Puspiptek, Muncul, Kec. Setu, Kota Tangerang Selatan",Banten,-6.34581,106.6608,Maintenance,16-Nov-15,4-Nov-25,4-Nov-25,29-Sep-23
+Puspiptek-2,https://iili.io/FMzWNSe.jpg,"Jl. Kw. Puspiptek, Muncul, Kec. Setu, Kota Tangerang Selatan",Banten,-6.35414,106.6718,Maintenance,16-Nov-15,4-Nov-25,2-Apr-24,29-Sep-23
+St.Mteo.Kls.I Gorontalo,https://iili.io/FMzWFnV.jpg,"Stasiun Meteorologi Kelas I Komplek Bandar Udara Djalaluddin, Tolotio, Kec. Tibawa, Kabupaten Gorontalo",Sulawesi Utara,0.638444,122.8524,Online,5-Nov-19,7-Nov-25,,6-Nov-25
+St.Mteo.Kls.III Tanjung Pinang,https://iili.io/FMzWQRa.jpg,"Jl. Adi Sucipto Km 12,5 Bandara Kijang, Tanjung Pinang",Tanjungpinang,0.922694,104.5283,Online,20-Aug-19,14-Nov-25,,13-Nov-25
+BRIN KSE Achmad Baiquni Yogyakarta,https://iili.io/CwTbQKg.th.jpg,"Tambak Bayan, Caturtunggal, Kec. Depok, Kabupaten Sleman",DI Yogyakarta,-7.778108,110.41275,Online,20-Nov-25,21-Nov-25,,20-Nov-25
+St.Mteo.Kls.III Cilacap,https://iili.io/FMzWJuj.jpg,"Jl. Gatot Subroto No.20, Tambaksari, Sidanegara, Kec. Cilacap Tengah, Kabupaten Cilacap",Jawa Tengah,-7.71875,109.015,Online,19-Oct-22,9-Apr-26,,8-Apr-26
+St.Mteo.Kls I Pekanbaru,https://iili.io/FMzWXPS.jpg,"Bandar Udara Sultan Syarif Kasim II, Pekanbaru, Maharatu, Marpoyan Damai, Pekanbaru",Riau,0.459222,101.4473,Online,19-Oct-23,16-Apr-26,,15-Apr-26
+St.Geof.Kls.I Tuntungan,https://iili.io/FMzXHlt.jpg,"Jalan Geofisika No.1, Tuntungan I, Kec. Pancur Batu, Kabupaten Deli Serdang",Sumatra Utara,3.50025,98.56528,Maintenance,29-Aug-19,23-Apr-26,13-Dec-25,22-Apr-26
+CTBT Lembang,https://iili.io/FMzWcSn.jpg,"Jl. Peneropongan Bintang No.45, Lembang",Jawa Barat,-6.82636,107.6178,Maintenance,23-Nov-18,29-Apr-26,16-Jun-26,28-Apr-26
+Istana Kepresidenan Yogyakarta,https://iili.io/FGXliDF.jpg,"Jalan Ahmad Yani, Ngupasan, Kec. Gondomanan, Kota Yogyakarta",DI Yogyakarta,-7.80031,110.3631,Online,24-Sep-19,7-May-26,,20-Nov-24
+Istana Kepresidenan Cipanas,https://iili.io/FMzW2ZQ.jpg,"Jl. Raya Cipanas No.105, Cipanas, Kec. Cipanas, Kabupaten Cianjur",Jawa Barat,-6.73208,107.0399,Maintenance,7-Oct-19,13-May-26,25-Feb-26,5-Nov-24
+Istana Kepresidenan Bogor,https://iili.io/FMzVmF9.jpg,"Jl. Ir. H. Juanda, RT.04/RW.01, Paledang, Kecamatan Bogor Tengah, Kota Bogor",Jawa Barat,-6.59792,106.7958,Maintenance,8-Oct-19,4-Jun-26,28-May-26,27-May-26
