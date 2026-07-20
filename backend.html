@@ -60,7 +60,18 @@ XLSX.writeFile(wb,f);
 }
 
 const w=window.open("","StationDetails");
-w.document.write(html+rows+"</tbody></table></body></html>");
+w.document.write(html+rows+`</tbody></table>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"><\/script>
+<script>
+function exportExcel(){
+ const table=document.querySelector('table');
+ const wb=XLSX.utils.table_to_book(table,{sheet:'Stations'});
+ const d=new Date();
+ const f='Station_Details_'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.xlsx';
+ XLSX.writeFile(wb,f);
+}
+<\/script>
+</body></html>`);
 w.document.close();
 }
 
