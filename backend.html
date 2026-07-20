@@ -292,13 +292,14 @@ opacity:0.9;
 }
 
 #avgBarChart{
-height:180px !important; 
+height:calc(100vh - 430px) !important;
+min-height:220px; 
 }
 
 
 @media (min-width:1367px){
   #avgBarChart{
-    height:280px !important;  
+    height:calc(100vh - 430px) !important;  
   }
 }
 
@@ -362,10 +363,12 @@ margin-top:70px;
 
 /* SIDEBAR */
 #sidePanel{
-  width:300px;
+  width:19vw;
+  min-width:260px;
+  max-width:320px;
   background:linear-gradient(180deg,#173a6b,#1f5fa8);
   color:white;
-  padding:16px;
+  padding:12px;
 
   transition:0.3s;
   overflow-y:auto;
