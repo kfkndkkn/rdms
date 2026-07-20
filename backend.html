@@ -1649,6 +1649,674 @@ if(status==="online"){
 
 // META
 const startDate = profileData?.["Operation Start Date"] || "-";
+const lastOperation = profileData?.["Last Operation Date"] || "-";
+const lastMaintenance = profileData?.["Last Maintenance Date"] || "-";
+
+let runningDay = "-";
+
+try{
+
+    const start = new Date(startDate);
+
+    let end;
+
+    if(status==="online"){
+        end = new Date();
+    }else{
+        end = new Date(lastOperation);
+    }
+
+    if(!isNaN(start) && !isNaN(end)){
+        const diff = end - start;
+        runningDay = Math.floor(diff/(1000*60*60*24));
+    }
+
+}catch(e){}
+
+document.getElementById("tsMeta").innerHTML=
+
+"<b>"+station+"</b><br><br>"+
+
+"Address : "+(profileData?.Address || "-")+"<br>"+
+
+"Province : "+(profileData?.Province || "-")+"<br>"+
+
+"Latitude : "+(profileData?.Latitude || "-")+"<br>"+
+
+"Longitude : "+(profileData?.Longitude || "-")+"<br>"+
+
+"Status : "+statusText+"<br>"+
+
+"Operation Start Date : "+startDate+"<br>"+
+
+"Last Operation Date : "+lastOperation+"<br>"+
+
+"Last Maintenance Date : "+lastMaintenance+"<br>"+
+
+"<b>Running Time : "+runningDay+" days</b>";
+
+fetch("timeseries_all.csv?nocache="+Date.now())
+.then(r=>r.text())
+.then(text=>{
+
+var data = Papa.parse(text,{header:true}).data;
+
+var latest = {};
+
+data.forEach(r=>{
+
+var key = normalizeName(r.station);
+var t = new Date(r.time);
+var v = parseFloat(r.dose);
+
+if(isNaN(v)) return;
+
+if(!latest[key] || t > latest[key].time){
+latest[key] = {
+dose: v,
+time: t,
+timeStr: r.time,
+name: r.station   
+};
+}
+
+});
+
+window.latestTS = latest;
+
+if(callback) callback();
+
+});
+
+}
+// LOAD CSV
+function loadCSV(){
+
+loadLatestTimeseries(()=>{
+
+fetch("output_all.csv?nocache="+Date.now())
+.then(r=>r.text())
+.then(text=>{
+
+polygonLayer.clearLayers();
+labelLayer.clearLayers();
+onlineLayer.clearLayers();
+offlineLayer.clearLayers();
+maintenanceLayer.clearLayers();
+
+var radius=getRadius();
+
+var rawData=Papa.parse(text,{
+header:true,
+skipEmptyLines:true
+}).data;
+window.stationIndex = {};
+
+rawData.forEach(r=>{
+var key = normalizeName(r["NAMA UNIT"]);
+window.stationIndex[key] = r;
+});
+  
+var zoom=map.getZoom();
+
+var data;
+
+// Selalu tampilkan semua stasiun individual
+// agar detektor online langsung terlihat sejak zoom awal
+data=rawData;
+
+if(zoom>=8){
+
+    data.sort((a,b)=>{
+
+        const sa=(window.profileIndex[normalizeName(a["NAMA UNIT"])]?.Status||"").toLowerCase();
+        const sb=(window.profileIndex[normalizeName(b["NAMA UNIT"])]?.Status||"").toLowerCase();
+
+        const order={offline:0,maintenance:1,online:2};
+
+        return (order[sa]||0)-(order[sb]||0);
+
+    });
+
+}
+
+data.forEach(row=>{
+
+var stationName = row["NAMA UNIT"] ||
+                  (row.stations ? row.stations[0].name : "");
+
+var lat = row.lat;
+var lon = row.lon;
+
+// Zoom dekat gunakan koordinat dari output_all.csv
+if(!row.stations){
+  lat = parseFloat(row["LATITUDE"]);
+  lon = parseFloat(row["LONGITUDE"]);
+}
+
+var pos = applyZoomOffset(stationName, lat, lon);
+
+lat = pos.lat;
+lon = pos.lon
+var key = normalizeName(row["NAMA UNIT"]);
+var ts = window.latestTS[key];
+
+var dose = ts ? ts.dose : null;
+
+if(isNaN(lat)||isNaN(lon)) return;
+
+var color;
+
+if(row.stations){
+
+var hasOOS=row.stations.some(s=>s.dose==="Out of service");
+
+if(hasOOS){
+color="#2b83ba";
+}else{
+color=getColor(dose);
+}
+
+}else{
+
+color=getColor(dose);
+
+}
+
+var hex;
+
+let opacity = 0.85;
+let stroke = "#222";
+let hasMaintenance=false;
+let hasOffline=false;
+
+if(row.stations){
+
+    row.stations.forEach(s=>{
+        const profile=window.profileIndex[normalizeName(s.name)];
+        if(!profile) return;
+        const status=(profile.Status||"").toLowerCase();
+        if(status==="maintenance") hasMaintenance=true;
+        if(status==="offline") hasOffline=true;
+    });
+
+}else{
+
+    const profile=window.profileIndex[normalizeName(stationName)];
+    const status=(profile?.Status||"").toLowerCase();
+
+    if(status==="maintenance") hasMaintenance=true;
+    if(status==="offline") hasOffline=true;
+}
+
+const profileCurrent=window.profileIndex[normalizeName(stationName)];
+const statusCurrent=(profileCurrent?.Status||"").toLowerCase();
+const isTopOnline=(map.getZoom()>=8 && statusCurrent==="online");
+
+if(hasMaintenance){
+    opacity=isTopOnline?0.85:0.45;
+    stroke="#ff9800";
+}
+if(hasOffline){
+    opacity=isTopOnline?0.85:0.30;
+    stroke="#d32f2f";
+}
+
+if(isTopOnline){
+    opacity=0.85;
+}
+
+hex=createHex(lat,lon,radius,color,{
+    opacity:opacity,
+    stroke:stroke,
+    weight:1
+});
+
+var popupContent = "";
+
+// ===== ZOOM JAUH (AGGREGATED) =====
+if(row.count){
+
+  var listHTML = "<div style='max-height:180px;overflow-y:auto'>";
+
+  row.stations.forEach(s=>{
+
+    var key = normalizeName(s.name);
+    var ts = window.latestTS[key];
+
+    var doseText = ts ? ts.dose.toFixed(2)+" nSv/h" : "No data";
+    var timeText = ts ? ts.timeStr : "-";
+
+    listHTML +=
+    "<div style='border-bottom:1px solid #ddd;padding:6px 0'>"+
+    "<b>"+s.name+"</b><br>"+
+    "Dose: "+doseText+"<br>"+
+    "Update: "+timeText+"<br>"+
+    "<a href='#' onclick=\"openTS('"+s.name+"')\">View Time Series</a>"+
+    "</div>";
+
+  });
+
+  listHTML += "</div>";
+  popupContent = listHTML;
+}
+
+// ===== ZOOM DEKAT (1 STATION) =====
+else{
+
+  var stationName = row["NAMA UNIT"];
+  var key = normalizeName(stationName);
+  var ts = window.latestTS[key];
+
+  var doseText = ts ? ts.dose.toFixed(2)+" nSv/h" : "No data";
+  var timeText = ts ? ts.timeStr : "-";
+
+  popupContent =
+  "<b>"+stationName+"</b><br>"+
+  "Dose: "+doseText+"<br>"+
+  "Update: "+timeText+"<br>"+
+  "<a href='#' onclick=\"openTS('"+stationName+"')\">View Time Series</a>";
+}
+  
+hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
+  hex.on('click', function(){
+  this.openPopup();
+});
+const profileTop = window.profileIndex[normalizeName(stationName)];
+const statusTop = (profileTop?.Status || "").toLowerCase();
+
+let targetLayer=onlineLayer;
+if(statusTop==="offline"){
+    targetLayer=offlineLayer;
+}else if(statusTop==="maintenance"){
+    targetLayer=maintenanceLayer;
+}
+
+hex.addTo(targetLayer);
+
+if(statusTop==="online"){
+    hex.bringToFront();
+}
+
+if(!row.count || map.getZoom() >= 5){
+
+  var labelOffsetLat = lat + (radius/111111)*0.9;
+  var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
+
+  // 🔥 FIX NAMA (ANTI UNDEFINED)
+  var labelName = "";
+
+  if(row["NAMA UNIT"]){
+    labelName = row["NAMA UNIT"];
+  }else if(row.stations && row.stations.length > 0){
+    labelName = row.stations[0].name;
+  }else{
+    labelName = "-";
+  }
+
+  var label = L.marker([labelOffsetLat,labelOffsetLon],{
+    icon: L.divIcon({
+      className:'',
+      html:'<div class="unit-label">'+labelName+'</div>',
+      iconSize:null
+    })
+  });
+
+  if(statusTop==="offline"){
+    label.addTo(offlineLayer);
+}else if(statusTop==="maintenance"){
+    label.addTo(maintenanceLayer);
+}else{
+    label.addTo(onlineLayer);
+}
+}
+
+});
+
+});
+});
+}
+
+loadProfile();
+map.whenReady(function(){
+  loadCSV();
+});
+
+setInterval(loadCSV,30000);
+map.on("zoomend",loadCSV);
+
+ function updateSidePanel(){
+
+loadLatestTimeseries(()=>{
+var latestTime = null;
+
+Object.values(window.latestTS).forEach(v=>{
+  if(!latestTime || v.time > latestTime){
+    latestTime = v.time;
+  }
+});
+
+if(latestTime){
+document.getElementById("lastUpdate").innerHTML =
+  "Last Updated : " +
+  latestTime.toLocaleString("id-ID",{
+      day:"2-digit",
+      month:"2-digit",
+      year:"numeric",
+      hour:"2-digit",
+      minute:"2-digit",
+      second:"2-digit",
+      hour12:false,
+      timeZone:"Asia/Jakarta"
+  }) + " WIB";
+}
+// Ambil hanya stasiun yang timestamp-nya sama dengan Last Updated
+var data = Object.values(window.latestTS)
+.filter(r => r.time.getTime() === latestTime.getTime())
+.map(r => ({
+    station: r.name,
+    dose: r.dose
+}));
+
+if(data.length===0) return;
+
+// MAX
+var maxRow = data.reduce((a,b)=> a.dose > b.dose ? a : b);
+
+// MIN
+var minRow = data.reduce((a,b)=> a.dose < b.dose ? a : b);
+
+// SET UI
+document.getElementById("maxValue").innerHTML =
+maxRow.dose.toFixed(2);
+
+document.getElementById("maxStation").innerHTML =
+maxRow.station;
+
+document.getElementById("minValue").innerHTML =
+minRow.dose.toFixed(2);
+
+document.getElementById("minStation").innerHTML =
+minRow.station;
+
+drawAvgChart();
+
+updateStatusTicker();
+
+});
+
+}
+window.lastChartData = "";
+function drawAvgChart(){
+
+fetch("timeseries_all.csv?nocache="+Date.now())
+.then(r=>r.text())
+.then(text=>{
+
+var data = Papa.parse(text,{header:true}).data;
+
+// FILTER 7 HARI
+const now = new Date();
+const sevenDaysAgo = new Date();
+sevenDaysAgo.setDate(now.getDate() - 7);
+
+var grouped = {};
+// Daftar stasiun yang masih aktif di peta
+const activeStations = new Set(
+    Object.keys(window.stationIndex)
+);
+data.forEach(r=>{
+var t = new Date(r.time);
+var v = parseFloat(r.dose);
+
+if(t >= sevenDaysAgo && t <= now && !isNaN(v)){
+
+var key = normalizeName(r.station);
+
+// Lewati jika stasiun tidak ada di output.csv
+if(!activeStations.has(key)){
+    return;
+}
+
+if(!grouped[r.station]){
+    grouped[r.station] = [];
+}
+
+grouped[r.station].push(v);
+}
+});
+
+// HITUNG AVG
+var result = [];
+
+Object.keys(grouped).forEach(station=>{
+var arr = grouped[station];
+var avg = arr.reduce((a,b)=>a+b,0) / arr.length;
+
+result.push({name:station,avg:avg});
+});
+
+
+// 🔥 DETEKSI LEBAR LAYAR
+let screenWidth = window.innerWidth;
+
+// 🔥 RULE
+let topN = 5;
+if(screenWidth > 1366){
+  topN = 10;
+}
+console.log("WIDTH:", screenWidth, "TOP:", topN);
+// SORT
+result.sort((a,b)=>b.avg - a.avg);
+var top = result.slice(0, topN);
+
+var labels = top.map(r=>r.name);
+var values = top.map(r=>r.avg);
+
+
+var currentData = JSON.stringify({
+  values: values,
+  topN: topN  
+});
+
+if(window.lastChartData === currentData){
+  return;
+}
+window.lastChartData = currentData;
+
+
+
+if(!window.avgChart){
+
+window.avgChart = new Chart(document.getElementById("avgBarChart"),{
+type:'bar',
+data:{
+labels:labels,
+datasets:[{
+data:values,
+backgroundColor:'#2b83ba',
+
+
+barThickness: topN === 10 ? 8 : 12,
+categoryPercentage: topN === 10 ? 0.7 : 1.0,
+barPercentage: topN === 10 ? 0.8 : 1.0
+
+}]
+},
+options:{
+indexAxis:'y',
+responsive:true,
+maintainAspectRatio:false,
+animation:false, 
+
+plugins:{
+  legend:{display:false},
+
+  tooltip:{
+    enabled:true,
+
+    mode:'nearest',
+    intersect:true,   
+
+    position:'average', 
+
+    xAlign:'right',    
+    yAlign:'center',
+
+    callbacks:{
+      label:function(ctx){
+        return ctx.raw.toFixed(2) + " nSv/h";
+      }
+    }
+  }
+},
+
+layout:{
+padding:{left:10,right:10}
+},
+
+scales:{
+x:{
+beginAtZero:true,
+max:75,   
+title:{display:true,text:"nSv/h"}
+},
+y:{
+offset:true,
+ticks:{
+autoSkip:false,
+font:{size:10},
+padding:4,
+
+callback:function(value){
+
+let label = this.getLabelForValue(value);
+
+
+label = label
+.replace(/\./g, " ")   
+.replace(/\s+/g, " ")  
+.trim();
+
+let words = label.split(" ");
+
+
+if(words.length === 1 && label.length > 12){
+return [
+label.substring(0,12),
+label.substring(12)
+];
+}
+
+
+if(words.length >= 2){
+return [
+words.slice(0, Math.ceil(words.length/2)).join(" "),
+words.slice(Math.ceil(words.length/2)).join(" ")
+];
+}
+
+return label;
+}
+},
+grid:{display:false}
+}
+}
+}
+});
+
+}else{
+
+
+window.avgChart.data.labels = labels;
+window.avgChart.data.datasets[0].data = values;
+
+window.avgChart.update('none'); 
+
+}
+
+});
+}
+  
+// TIME SERIES
+
+var tsChart=null;
+var allLabels=[];
+var allValues=[];
+var filteredLabels=[];
+var filteredValues=[];
+var isFiltered = false;
+function openTS(station){
+isFiltered = false;
+var key = normalizeName(station);
+
+var stationData = window.stationIndex[key];
+var profileData = window.profileIndex[key];
+
+
+console.log("STATION:", station);
+console.log("KEY:", key);
+console.log("PROFILE INDEX:", window.profileIndex);
+console.log("PROFILE DATA:", profileData);
+  
+document.getElementById("tsModal").style.display="block";
+document.getElementById("tsTitle").innerHTML="Time Series - "+station;
+
+allLabels=[];
+allValues=[];
+
+if(tsChart){
+tsChart.destroy();
+tsChart=null;
+}
+
+document.getElementById("selectedTime").innerHTML="";
+document.getElementById("tsStats").innerHTML="";
+
+// IMAGE
+var img = document.getElementById("tsImage");
+
+var url = profileData?.["IMAGE_URL"];
+
+if(url){
+url = url.trim();
+img.src = url;
+
+img.onerror = function(){
+this.src = "https://via.placeholder.com/250x150?text=Image+Error";
+};
+
+}else{
+
+img.src = "https://via.placeholder.com/250x150?text=No+Image";
+
+}
+
+// STATUS
+let status = (profileData?.Status || "").toLowerCase();
+
+let statusText;
+
+if(status==="online"){
+
+    statusText="<span style='color:#00b050;font-weight:bold'>Online</span>";
+
+}else if(status==="maintenance"){
+
+    statusText="<span style='color:#ff9800;font-weight:bold'>Maintenance</span>";
+
+}else if(status==="offline"){
+
+    statusText="<span style='color:#d32f2f;font-weight:bold'>Offline</span>";
+
+}else{
+
+    statusText="<span style='color:#777'>Unknown</span>";
+
+}
+
+// META
+const startDate = profileData?.["Operation Start Date"] || "-";
 const lastMaintenance = profileData?.["Last Maintenance Date"] || "-";
 
 let runningDay = "-";
