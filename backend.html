@@ -793,8 +793,12 @@ var grid={};
 
 data.forEach(row=>{
 
-var lat=parseFloat(row["LATITUDE"]);
-var lon=parseFloat(row["LONGITUDE"]);
+var profile = window.profileIndex[
+    normalizeName(row["NAMA UNIT"])
+];
+
+var lat = parseFloat(profile?.Latitude);
+var lon = parseFloat(profile?.Longitude);
 var dose=row["Gamma Dose Rate (nSv/h)"];
 
 if(isNaN(lat)||isNaN(lon)) return;
@@ -943,13 +947,20 @@ data=rawData;
 
 data.forEach(row=>{
 
-var profile = window.profileIndex[normalizeName(stationName)];
-
-var lat = row.lat || parseFloat(profile?.Latitude || row["LATITUDE"]);
-var lon = row.lon || parseFloat(profile?.Longitude || row["LONGITUDE"]);
-
 var stationName = row["NAMA UNIT"] ||
                   (row.stations ? row.stations[0].name : "");
+
+var profile = window.profileIndex[normalizeName(stationName)];
+
+var lat = row.lat;
+var lon = row.lon;
+
+// Jika bukan hasil agregasi (zoom dekat),
+// koordinat selalu dari profile_backend.csv
+if(!row.stations){
+    lat = parseFloat(profile?.Latitude);
+    lon = parseFloat(profile?.Longitude);
+}
 
 var pos = applyZoomOffset(stationName, lat, lon);
 
