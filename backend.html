@@ -489,8 +489,9 @@ background:#d90000;
 #statusDonutModal{
     display:none;
     position:fixed;
-    top:90px;
-    right:20px;
+    top:140px;
+    left:20px;
+    right:auto;
     z-index:999999;
 }
 
@@ -507,13 +508,14 @@ background:#d90000;
 }
 
 .donutHeader{
+    background:#0b1e3f;
+    color:white;
 
     display:flex;
     justify-content:space-between;
-    align-items:center;
+    align-items:flex-start;
 
-    font-weight:bold;
-    margin-bottom:10px;
+    padding:12px 15px;
 }
 
 .donutHeader button{
@@ -536,10 +538,10 @@ background:#d90000;
 }
 
 #openDonutBtn{
-
     position:absolute;
     top:85px;
-    right:20px;
+    left:20px;
+    right:auto;
 
     z-index:99999;
 
@@ -556,7 +558,7 @@ background:#d90000;
     cursor:pointer;
 
     box-shadow:0 5px 15px rgba(0,0,0,.3);
-}  
+}
 </style>
 </head>
 
@@ -632,16 +634,54 @@ font-size:16px;
 <div id="statusDonutModal">
     <div id="statusDonutBox">
 
-        <div class="donutHeader">
-            <span>Station Status</span>
+      <div class="donutHeader">
 
-            <div>
-                <button onclick="refreshStatusDonut()">⟳</button>
-                <button onclick="closeStatusDonut()">✕</button>
-            </div>
+    <div>
 
+        <div style="font-size:16px;font-weight:bold;">
+            Status Operasional Detektor I-RDMS
         </div>
 
+        <div id="statusDonutTimestamp"
+             style="font-size:12px;margin-top:5px;">
+             Last Update : -
+        </div>
+
+    </div>
+
+    <div>
+        <button onclick="refreshStatusDonut()">⟳</button>
+        <button onclick="closeStatusDonut()">✕</button>
+    </div>
+
+</div>
+<div id="statusSummary"
+style="
+display:flex;
+justify-content:space-around;
+margin:15px 0;
+text-align:center;
+">
+
+<div>
+<div id="onlineCount"
+style="font-size:30px;font-weight:bold;color:#00b050;">0</div>
+<div>Online</div>
+</div>
+
+<div>
+<div id="offlineCount"
+style="font-size:30px;font-weight:bold;color:#d32f2f;">0</div>
+<div>Offline</div>
+</div>
+
+<div>
+<div id="maintenanceCount"
+style="font-size:30px;font-weight:bold;color:#ff9800;">0</div>
+<div>Maintenance</div>
+</div>
+
+</div>
         <canvas id="statusDonutChart"></canvas>
 
     </div>
@@ -2246,7 +2286,16 @@ fetch("profile_backend.csv?nocache="+Date.now())
             maintenance++;
 
     });
+// =============================
+// UPDATE SUMMARY
+// =============================
+document.getElementById("onlineCount").textContent = online;
+document.getElementById("offlineCount").textContent = offline;
+document.getElementById("maintenanceCount").textContent = maintenance;
 
+// Jika nanti sudah punya timestamp terbaru
+// document.getElementById("statusDonutTimestamp").textContent =
+//     "Last Update : " + latestTimestamp + " WIB";
     if(statusChart)
         statusChart.destroy();
 
