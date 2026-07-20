@@ -2078,36 +2078,51 @@ var panelVisible = false;
 
 function togglePanel(){
 
-  var panel = document.getElementById("sidePanel");
+    var panel = document.getElementById("sidePanel");
+    var ticker = document.getElementById("statusTicker");
+    var openBtn = document.getElementById("openDonutBtn");
+    var donutModal = document.getElementById("statusDonutModal");
 
-  var isOpen = !panel.classList.contains("collapsed");
+    var isOpen = !panel.classList.contains("collapsed");
 
-  panel.classList.toggle("collapsed");
-  const ticker = document.getElementById("statusTicker");
+    panel.classList.toggle("collapsed");
 
-if(panel.classList.contains("collapsed")){
-    ticker.style.left = "0px";
-}else{
-    ticker.style.left = panel.offsetWidth + "px";
-}
+    if(panel.classList.contains("collapsed")){
 
-  if(!isOpen){
-   
-    map.removeControl(legend);
-    moveLegendToSidebar();
-  }else{
- 
+        // Sidebar ditutup
+        ticker.style.left = "0px";
 
-    var existing = document.getElementById("legendInside");
-    if(existing) existing.remove();
+        // tampilkan tombol chart lagi
+        openBtn.style.display = "block";
 
-    legend.addTo(map);
-  }
+    }else{
 
-  setTimeout(()=>{
-    map.invalidateSize();
-  },300);
+        // Sidebar dibuka
+        ticker.style.left = panel.offsetWidth + "px";
 
+        // sembunyikan tombol open chart
+        openBtn.style.display = "none";
+
+        // jika chart sedang terbuka, tutup
+        donutModal.style.display = "none";
+    }
+
+    if(!isOpen){
+
+        map.removeControl(legend);
+        moveLegendToSidebar();
+
+    }else{
+
+        var existing = document.getElementById("legendInside");
+        if(existing) existing.remove();
+
+        legend.addTo(map);
+    }
+
+    setTimeout(()=>{
+        map.invalidateSize();
+    },300);
 }
 // LEGEND
 var legendVisible = true;
