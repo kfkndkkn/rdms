@@ -1157,12 +1157,13 @@ document.getElementById("lastUpdate").innerHTML =
       timeZone:"Asia/Jakarta"
   }) + " WIB";
 }
-var data = Object.keys(window.latestTS).map(k=>{
-return {
-station:window.latestTS[k].name,
-dose:window.latestTS[k].dose
-};
-});
+// Ambil hanya stasiun yang timestamp-nya sama dengan Last Updated
+var data = Object.values(window.latestTS)
+.filter(r => r.time.getTime() === latestTime.getTime())
+.map(r => ({
+    station: r.name,
+    dose: r.dose
+}));
 
 if(data.length===0) return;
 
