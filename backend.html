@@ -862,6 +862,13 @@ map.whenReady(function(){
 var polygonLayer=L.layerGroup().addTo(map);
 var labelLayer=L.layerGroup().addTo(map);
 
+// Status filter
+var statusFilters={online:true,offline:true,maintenance:true};
+var onlineLayer=L.layerGroup().addTo(map);
+var offlineLayer=L.layerGroup().addTo(map);
+var maintenanceLayer=L.layerGroup().addTo(map);
+
+
 // LAYER CONTROL
 
 L.control.layers(
@@ -875,6 +882,9 @@ L.control.layers(
 {
 "ESRI Labels":esriGrayLabel,
 "Station Polygons":polygonLayer,
+"Online":onlineLayer,
+"Offline":offlineLayer,
+"Maintenance":maintenanceLayer,
 "Station Labels":labelLayer
 }
 ).addTo(map);
