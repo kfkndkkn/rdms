@@ -773,8 +773,8 @@ background:#d90000;
     width:100% !important;
     height:auto !important;
     aspect-ratio:1 / 1;
-    max-width:145px;
-    margin:8px auto 4px;
+    max-width:180px;
+    margin:4px auto 2px;
 }
 
 #openDonutBtn{
@@ -2723,7 +2723,14 @@ document.getElementById("maintenanceCount").textContent = maintenance;
             plugins:{
 
                 legend:{
-                    position:"bottom"
+                    position:"bottom",
+                    labels:{
+                        boxWidth: 12,
+                        padding: 12,
+                        font:{
+                            size: 11
+                        }
+                    }
                 },
 
                 tooltip:{
