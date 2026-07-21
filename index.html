@@ -12,8 +12,74 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script>
+
+
+function openStationDetails(){
+const html=`<!DOCTYPE html><html><head><meta charset="utf-8">
+<title>Station Details</title>
+<style>
+body{font-family:Arial;margin:15px}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th,td{border:1px solid #ccc;padding:6px}
+th{background:#0b1e3f;color:#fff;position:sticky;top:0}
+input{margin-bottom:10px;padding:6px;width:250px}
+</style></head><body>
+<h2 style="display:inline-block">Station Details</h2><button onclick="exportExcel()" style="float:right;padding:6px 12px;background:#1d6f42;color:#fff;border:none;border-radius:5px;cursor:pointer">💾 Save as Excel</button>
+<input id="f" placeholder="Search..." onkeyup="const v=this.value.toLowerCase();document.querySelectorAll('tbody tr').forEach(r=>r.style.display=r.innerText.toLowerCase().includes(v)?'':'none');">
+<table><thead><tr>
+<th>Station</th><th>Latitude</th><th>Longitude</th><th>Address</th><th>Province</th><th>Status</th><th>Operation Start Date</th><th>Last Operation</th><th>Last Maintenance</th><th>Battery Replacement Date</th><th>Detector Running Time (days)</th><th>Battery Running Time (days)</th><th>Days Since Last Maintenance (days)</th>
+</tr></thead><tbody>`;
+function p(s){
+if(!s)return null;
+const m={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+let a=s.trim().split("-");
+if(a.length==3){let y=parseInt(a[2]);y+=(y<70)?2000:1900;return new Date(y,m[a[1]],parseInt(a[0]));}
+let d=new Date(s);return isNaN(d)?null:d;
+}
+let rows="";
+Object.values(window.profileIndex).forEach(r=>{
+let st=(r.Status||"").toLowerCase();
+let s=p(r["Operation Start Date"]);
+let lo=p(r["Last Operation"]);
+let lm=p(r["Last Maintenance Date"]);
+let br=p(r["Battery Replacement Date"]);
+let now=new Date();
+let det=(s&&((st=="online")?now:lo))?Math.floor((((st=="online")?now:lo)-s)/86400000):"";
+let bat=br?Math.floor((now-br)/86400000):"";
+let mnt=lm?Math.floor((now-lm)/86400000):"";
+rows+=`<tr><td>${r.station||""}</td><td>${r.Latitude||""}</td><td>${r.Longitude||""}</td><td>${r.Address||""}</td><td>${r.Province||""}</td><td>${r.Status||""}</td><td>${r["Operation Start Date"]||""}</td><td>${r["Last Operation"]||""}</td><td>${r["Last Maintenance Date"]||""}</td><td>${r["Battery Replacement Date"]||""}</td><td>${det}</td><td>${bat}</td><td>${mnt}</td></tr>`;
+});
+
+function exportExcel(){
+var table=document.querySelector("table");
+var wb=XLSX.utils.table_to_book(table,{sheet:"Stations"});
+var d=new Date();
+var f="Station_Details_"+d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+".xlsx";
+XLSX.writeFile(wb,f);
+}
+
+const w=window.open("","StationDetails");
+w.document.write(html+rows+`</tbody></table>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"><\/script>
+<script>
+function exportExcel(){
+ const table=document.querySelector('table');
+ const wb=XLSX.utils.table_to_book(table,{sheet:'Stations'});
+ const d=new Date();
+ const f='Station_Details_'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.xlsx';
+ XLSX.writeFile(wb,f);
+}
+<\/script>
+</body></html>`);
+w.document.close();
+}
+
+
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
 
@@ -27,18 +93,17 @@ overflow:hidden;
 }
 
 #header{
-    position:absolute;
-    top:0;
-    left:0;
-    right:0;
-    height:70px;
-    background:#0b1e3f;
-    display:flex;
-    align-items:center;
-    padding:0 20px;
-    box-sizing:border-box;
-    color:white;
-    z-index:9999;
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:70px;
+background:#0b1e3f;
+display:flex;
+align-items:center;
+padding:0 25px;
+color:white;
+z-index:9999;
 }
 
 #header img{
@@ -487,42 +552,94 @@ background:#ff8c00;
 .status-red{
 background:#d90000;
 }
-#loginModal{
-display:none;
-position:fixed;
-left:0;
-top:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,.55);
-z-index:9999999;
+#statusDonutModal{
+    display:none;
+    position:fixed;
+    top:140px;
+    left:20px;
+    right:auto;
+    z-index:999999;
 }
 
-#loginBox{
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    width:430px;
+#statusDonutBox{
+    width:340px;
     background:#fff;
-    border-radius:20px;
-    padding:35px;
-    box-shadow:0 15px 40px rgba(0,0,0,.35);
-    border-top:6px solid #0b1e3f;
+    border-radius:18px;
+    padding:18px;
+    box-sizing:border-box;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+.donutHeader{
+    position:relative;
+    background:#0b1e3f;
+    color:white;
+    padding:14px 16px;
+    border-radius:10px 10px 0 0;
+}
+.closeDonutBtn{
+    position:absolute;
+    top:10px;
+    right:12px;
+
+    width:28px;
+    height:28px;
+
+    border:none;
+    background:transparent;
+
+    color:#fff;
+    font-size:22px;
+    cursor:pointer;
+    line-height:1;
 }
 
-#loginBox input{
-width:100%;
-padding:10px;
-margin-top:8px;
-margin-bottom:15px;
-font-size:14px;
+.closeDonutBtn:hover{
+    opacity:.8;
+}
+.donutHeader button{
+
+    border:none;
+    background:#0b1e3f;
+    color:white;
+
+    width:30px;
+    height:30px;
+
+    border-radius:5px;
+    cursor:pointer;
 }
 
-#loginBox button{
-padding:8px 18px;
-cursor:pointer;
-}  
+#statusDonutChart{
+    display:block;
+    width:100% !important;
+    height:auto !important;
+    aspect-ratio:1 / 1;
+    max-width:250px;
+    margin:14px auto 8px;
+}
+
+#openDonutBtn{
+    position:absolute;
+    top:85px;
+    left:20px;
+    right:auto;
+
+    z-index:99999;
+
+    width:45px;
+    height:45px;
+
+    border:none;
+    border-radius:50%;
+
+    background:#0b1e3f;
+    color:white;
+
+    font-size:20px;
+    cursor:pointer;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.3);
+}
 </style>
 </head>
 
@@ -544,19 +661,12 @@ font-size:16px;
 </button>
 
 <img src="logo/logo-bapeten.png">
-<h2 style="
-flex:1;
-margin:0;
-font-size:28px;
-">
-Indonesia Radiation Data Monitoring System
-</h2>
+<h2>Indonesia Radiation Data Monitoring System</h2>
 
-<button
-id="loginBtn"
-onclick="openLogin()"
-style="
-background:#2b83ba;
+
+<button id="logoutBtn" onclick="window.location.href='index.html'" style="
+margin-left:auto;
+background:#c62828;
 color:white;
 border:none;
 padding:8px 18px;
@@ -564,9 +674,10 @@ border-radius:6px;
 cursor:pointer;
 font-size:14px;
 flex-shrink:0;">
-Login
+Logout
 </button>
-  
+
+
 </div>
 
 <div id="mainLayout">
@@ -615,71 +726,68 @@ Login
 <div id="statusTicker" class="status-green">
     <marquee id="tickerText" scrollamount="6"></marquee>
 </div>
-  <div id="loginModal">
+<!-- STATUS DONUT -->
+<div id="statusDonutModal">
+    <div id="statusDonutBox">
 
-<div id="loginBox">
+      <div class="donutHeader">
 
-<div style="text-align:center">
+    <div>
 
-<img src="logo/logo-bapeten.png"
-style="width:90px;margin-bottom:10px;">
+        <div style="font-size:16px;font-weight:bold;">
+            Status Operasional Detektor I-RDMS
+        </div>
 
-<h2 style="
-margin:5px 0;
-color:#0b1e3f;
-font-size:34px;">
-I-RDMS Login
-</h2>
+        <div id="statusDonutTimestamp"
+             style="font-size:12px;margin-top:5px;">
+        </div>
 
-<div style="
-color:#666;
-margin-bottom:25px;">
-Indonesia Radiation Data Monitoring System
+    </div>
+
+    <div>
+       <button class="closeDonutBtn" onclick="closeStatusDonut()">✕</button>
+    </div>
+
 </div>
-
-</div>
-
-<input
-id="username"
-placeholder="Username">
-
-<input
-id="password"
-type="password"
-placeholder="Password">
-
-<div
-id="loginError"
+<div id="statusSummary"
 style="
-display:none;
-color:#d00000;
-font-weight:bold;
-text-align:center;
-margin-bottom:15px;">
-Username atau Password salah
-</div>
-
-<div style="
 display:flex;
-justify-content:space-between;">
+justify-content:space-between;
+align-items:center;
+margin:12px 0 14px;
+padding:0 10px;
+text-align:center;
+">
 
-<button
-onclick="closeLogin()">
-Cancel
-</button>
+<div>
+<div id="onlineCount"
+style="font-size:22px;font-weight:bold;color:#00b050;">0</div>
+<div>Online</div>
+</div>
 
-<button
-onclick="login()">
-Login
-</button>
+<div>
+<div id="offlineCount"
+style="font-size:22px;font-weight:bold;color:#d32f2f;">0</div>
+<div>Offline</div>
+</div>
 
+<div>
+<div id="maintenanceCount"
+style="font-size:22px;font-weight:bold;color:#ff9800;">0</div>
+<div>Maintenance</div>
 </div>
 
 </div>
+        <canvas id="statusDonutChart"></canvas>
+<div style="text-align:center;margin-top:12px"><button id="viewDetailsBtn" style="padding:8px 16px;border:none;border-radius:6px;cursor:pointer;background:#0b1e3f;color:#fff" onclick="openStationDetails()">View Details</button></div>
 
+    </div>
 </div>
 
-</div>
+<button id="openDonutBtn"
+onclick="openStatusDonut()">
+📊
+</button> 
 <div id="tsModal">
 <div id="tsBox">
 
@@ -773,7 +881,7 @@ function applyZoomOffset(name, lat, lon){
 }
 function loadProfile(){
 
-fetch("profile.csv?nocache="+Date.now())
+fetch("profile_backend.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
@@ -836,6 +944,17 @@ map.whenReady(function(){
 var polygonLayer=L.layerGroup().addTo(map);
 var labelLayer=L.layerGroup().addTo(map);
 
+// Status filter
+var statusFilters={online:true,offline:true,maintenance:true};
+var onlineLayer=L.layerGroup().addTo(map);
+var offlineLayer=L.layerGroup().addTo(map);
+var maintenanceLayer=L.layerGroup().addTo(map);
+
+var onlineLabelLayer=L.layerGroup();
+var offlineLabelLayer=L.layerGroup();
+var maintenanceLabelLayer=L.layerGroup();
+
+
 // LAYER CONTROL
 
 L.control.layers(
@@ -849,9 +968,26 @@ L.control.layers(
 {
 "ESRI Labels":esriGrayLabel,
 "Station Polygons":polygonLayer,
+"Online":onlineLayer,
+"Offline":offlineLayer,
+"Maintenance":maintenanceLayer,
 "Station Labels":labelLayer
 }
 ).addTo(map);
+
+function syncLabelLayers(){
+    labelLayer.clearLayers();
+    if(map.hasLayer(onlineLayer)){
+        onlineLabelLayer.eachLayer(l=>labelLayer.addLayer(l));
+    }
+    if(map.hasLayer(offlineLayer)){
+        offlineLabelLayer.eachLayer(l=>labelLayer.addLayer(l));
+    }
+    if(map.hasLayer(maintenanceLayer)){
+        maintenanceLabelLayer.eachLayer(l=>labelLayer.addLayer(l));
+    }
+}
+map.on("overlayadd overlayremove",syncLabelLayers);
 
 // RADIUS
 
@@ -914,8 +1050,8 @@ var grid={};
 
 data.forEach(row=>{
 
-var lat=parseFloat(row["LATITUDE"]);
-var lon=parseFloat(row["LONGITUDE"]);
+var lat = parseFloat(row["LATITUDE"]);
+var lon = parseFloat(row["LONGITUDE"]);
 var dose=row["Gamma Dose Rate (nSv/h)"];
 
 if(isNaN(lat)||isNaN(lon)) return;
@@ -991,7 +1127,7 @@ window.latestTS = {};
 
 function loadLatestTimeseries(callback){
 
-fetch("timeseries.csv?nocache="+Date.now())
+fetch("timeseries_all.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
@@ -1030,12 +1166,18 @@ function loadCSV(){
 
 loadLatestTimeseries(()=>{
 
-fetch("output.csv?nocache="+Date.now())
+fetch("output_all.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
 polygonLayer.clearLayers();
 labelLayer.clearLayers();
+onlineLayer.clearLayers();
+offlineLayer.clearLayers();
+maintenanceLayer.clearLayers();
+onlineLabelLayer.clearLayers();
+offlineLabelLayer.clearLayers();
+maintenanceLabelLayer.clearLayers();
 
 var radius=getRadius();
 
@@ -1054,21 +1196,38 @@ var zoom=map.getZoom();
 
 var data;
 
-if(zoom<6){
-data=aggregateData(rawData,1);
-}else if(zoom<8){
-data=aggregateData(rawData,0.5);
-}else{
+// Selalu tampilkan semua stasiun individual
+// agar detektor online langsung terlihat sejak zoom awal
 data=rawData;
+
+if(zoom>=8){
+
+    data.sort((a,b)=>{
+
+        const sa=(window.profileIndex[normalizeName(a["NAMA UNIT"])]?.Status||"").toLowerCase();
+        const sb=(window.profileIndex[normalizeName(b["NAMA UNIT"])]?.Status||"").toLowerCase();
+
+        const order={offline:0,maintenance:1,online:2};
+
+        return (order[sa]||0)-(order[sb]||0);
+
+    });
+
 }
 
 data.forEach(row=>{
 
-var lat = row.lat || parseFloat(row["LATITUDE"]);
-var lon = row.lon || parseFloat(row["LONGITUDE"]);
-
 var stationName = row["NAMA UNIT"] ||
                   (row.stations ? row.stations[0].name : "");
+
+var lat = row.lat;
+var lon = row.lon;
+
+// Zoom dekat gunakan koordinat dari output_all.csv
+if(!row.stations){
+  lat = parseFloat(row["LATITUDE"]);
+  lon = parseFloat(row["LONGITUDE"]);
+}
 
 var pos = applyZoomOffset(stationName, lat, lon);
 
@@ -1101,59 +1260,53 @@ color=getColor(dose);
 
 var hex;
 
-// ===== AGGREGATED GRID =====
+let opacity = 0.85;
+let stroke = "#222";
+let hasMaintenance=false;
+let hasOffline=false;
+
 if(row.stations){
 
-var hasOOS = row.stations.some(s=>{
-var key = normalizeName(s.name);
-return !window.latestTS[key];
-});
-
-var valid = row.stations.some(s=>{
-var key = normalizeName(s.name);
-return window.latestTS[key];
-});
-
-if(!valid){
-
-hex=createHex(lat,lon,radius,"#8fb9e3",{
-opacity:0.6,
-stroke:"#4a90c2",
-weight:1
-});
+    row.stations.forEach(s=>{
+        const profile=window.profileIndex[normalizeName(s.name)];
+        if(!profile) return;
+        const status=(profile.Status||"").toLowerCase();
+        if(status==="maintenance") hasMaintenance=true;
+        if(status==="offline") hasOffline=true;
+    });
 
 }else{
+
+    const profile=window.profileIndex[normalizeName(stationName)];
+    const status=(profile?.Status||"").toLowerCase();
+
+    if(status==="maintenance") hasMaintenance=true;
+    if(status==="offline") hasOffline=true;
+}
+
+const profileCurrent=window.profileIndex[normalizeName(stationName)];
+const statusCurrent=(profileCurrent?.Status||"").toLowerCase();
+const isTopOnline=(map.getZoom()>=8 && statusCurrent==="online");
+
+if(hasMaintenance){
+    opacity=isTopOnline?0.85:0.45;
+    stroke="#ff9800";
+}
+if(hasOffline){
+    opacity=isTopOnline?0.85:0.30;
+    stroke="#d32f2f";
+}
+
+if(isTopOnline){
+    opacity=0.85;
+}
 
 hex=createHex(lat,lon,radius,color,{
-opacity:0.85,
-stroke:"#222",
-weight:1
+    opacity:opacity,
+    stroke:stroke,
+    weight:1
 });
 
-}
-
-}else{
-
-if(dose==="Out of service"){
-
-hex=createHex(lat,lon,radius,"#8fb9e3",{
-opacity:0.55,
-stroke:"#4a90c2",
-weight:1
-});
-
-}else{
-
-hex=createHex(lat,lon,radius,color,{
-opacity:0.85,
-stroke:"#222",
-weight:1
-});
-
-}
-
-}
-  
 var popupContent = "";
 
 // ===== ZOOM JAUH (AGGREGATED) =====
@@ -1204,7 +1357,21 @@ hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
   hex.on('click', function(){
   this.openPopup();
 });
-hex.addTo(polygonLayer);
+const profileTop = window.profileIndex[normalizeName(stationName)];
+const statusTop = (profileTop?.Status || "").toLowerCase();
+
+let targetLayer=onlineLayer;
+if(statusTop==="offline"){
+    targetLayer=offlineLayer;
+}else if(statusTop==="maintenance"){
+    targetLayer=maintenanceLayer;
+}
+
+hex.addTo(targetLayer);
+
+if(statusTop==="online"){
+    hex.bringToFront();
+}
 
 if(!row.count || map.getZoom() >= 5){
 
@@ -1230,11 +1397,19 @@ if(!row.count || map.getZoom() >= 5){
     })
   });
 
-  label.addTo(labelLayer);
+  // Label mengikuti layer status
+  if(statusTop==="offline"){
+      label.addTo(offlineLabelLayer);
+  }else if(statusTop==="maintenance"){
+      label.addTo(maintenanceLabelLayer);
+  }else{
+      label.addTo(onlineLabelLayer);
+  }
 }
 
 });
 
+syncLabelLayers();
 });
 });
 }
@@ -1272,12 +1447,13 @@ document.getElementById("lastUpdate").innerHTML =
       timeZone:"Asia/Jakarta"
   }) + " WIB";
 }
-var data = Object.keys(window.latestTS).map(k=>{
-return {
-station:window.latestTS[k].name,
-dose:window.latestTS[k].dose
-};
-});
+// Ambil hanya stasiun yang timestamp-nya sama dengan Last Updated
+var data = Object.values(window.latestTS)
+.filter(r => r.time.getTime() === latestTime.getTime())
+.map(r => ({
+    station: r.name,
+    dose: r.dose
+}));
 
 if(data.length===0) return;
 
@@ -1310,7 +1486,7 @@ updateStatusTicker();
 window.lastChartData = "";
 function drawAvgChart(){
 
-fetch("timeseries.csv?nocache="+Date.now())
+fetch("timeseries_all.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
@@ -1507,29 +1683,6 @@ var allValues=[];
 var filteredLabels=[];
 var filteredValues=[];
 var isFiltered = false;
-function login(){
-
-    const user =
-    document.getElementById("username").value.trim();
-
-    const pass =
-    document.getElementById("password").value;
-
-    if(user==="dkkn" && pass==="sos123"){
-
-        sessionStorage.setItem("login","true");
-
-        window.location.href="backend.html";
-
-    }else{
-
-        document.getElementById("loginError").style.display="block";
-
-        document.getElementById("password").value="";
-
-    }
-
-}
 function openTS(station){
 isFiltered = false;
 var key = normalizeName(station);
@@ -1577,25 +1730,77 @@ img.src = "https://via.placeholder.com/250x150?text=No+Image";
 }
 
 // STATUS
-var statusText = stationData?.["Gamma Dose Rate (nSv/h)"] === "Out of service"
-? "<span class='status-oos'>Out of Service</span>"
-: "<span class='status-online'>Online</span>";
+let status = (profileData?.Status || "").toLowerCase();
+
+let statusText;
+
+if(status==="online"){
+
+    statusText="<span style='color:#00b050;font-weight:bold'>Online</span>";
+
+}else if(status==="maintenance"){
+
+    statusText="<span style='color:#ff9800;font-weight:bold'>Maintenance</span>";
+
+}else if(status==="offline"){
+
+    statusText="<span style='color:#d32f2f;font-weight:bold'>Offline</span>";
+
+}else{
+
+    statusText="<span style='color:#777'>Unknown</span>";
+
+}
 
 // META
-document.getElementById("tsMeta").innerHTML =
+const startDate = profileData?.["Operation Start Date"] || "-";
+const lastMaintenance = profileData?.["Last Maintenance Date"] || "-";
+const lastOperation = profileData?.["Last Operation"] || "-";
+
+let runningDay = "-";
+
+function parseCustomDate(s){
+    if(!s || s==="-" ) return null;
+    const m={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    const p=s.trim().split("-");
+    if(p.length===3){
+        let y=parseInt(p[2],10);
+        y += (y<70)?2000:1900;
+        return new Date(y,m[p[1]],parseInt(p[0],10));
+    }
+    const d=new Date(s);
+    return isNaN(d.getTime())?null:d;
+}
+
+const start=parseCustomDate(startDate);
+let end=(status==="online")?new Date():parseCustomDate(lastOperation);
+
+if(start && end){
+    runningDay=Math.floor((end-start)/86400000);
+}
+
+document.getElementById("tsMeta").innerHTML=
+
 "<b>"+station+"</b><br><br>"+
 
-"Address: "+(profileData?.["Address"] || profileData?.["ADDRESS"] || "-")+"<br>"+
+"Address : "+(profileData?.Address || "-")+"<br>"+
 
-"Province: "+(profileData?.["Province"] || profileData?.["PROVINCE"] || "-")+"<br>"+
+"Province : "+(profileData?.Province || "-")+"<br>"+
 
-"Lat: "+(profileData?.["Latitude"] || profileData?.["LATITUDE"] || "-")+"<br>"+
+"Latitude : "+(profileData?.Latitude || "-")+"<br>"+
 
-"Lon: "+(profileData?.["Longitude"] || profileData?.["LONGITUDE"] || "-")+"<br>"+
+"Longitude : "+(profileData?.Longitude || "-")+"<br>"+
 
-"Status: "+statusText;
+"Status : "+statusText+"<br>"+
+
+"Operation Start Date : "+startDate+"<br>"+
+
+"Last Operation : "+(status==="online" ? "Current / Today" : lastOperation)+"<br>"+
+"Last Maintenance Date : "+lastMaintenance+"<br>"+
+
+"<b>Running Time : "+runningDay+" days</b>";
   
-fetch("timeseries.csv?nocache="+Date.now())
+fetch("timeseries_all.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
@@ -2012,40 +2217,70 @@ document.getElementById("dateTo").value = slicedLabels[slicedLabels.length-1];
 function closeTS(){
 document.getElementById("tsModal").style.display="none";
 }
+  let statusChart=null;
+
+function openStatusDonut(){
+
+    document.getElementById("statusDonutModal").style.display="block";
+
+    refreshStatusDonut();
+
+}
+
+function closeStatusDonut(){
+
+    document.getElementById("statusDonutModal").style.display="none";
+
+}
 var panelVisible = false; 
 
 function togglePanel(){
 
-  var panel = document.getElementById("sidePanel");
+    var panel = document.getElementById("sidePanel");
+    var ticker = document.getElementById("statusTicker");
+    var openBtn = document.getElementById("openDonutBtn");
+    var donutModal = document.getElementById("statusDonutModal");
 
-  var isOpen = !panel.classList.contains("collapsed");
+    var isOpen = !panel.classList.contains("collapsed");
 
-  panel.classList.toggle("collapsed");
-  const ticker = document.getElementById("statusTicker");
+    panel.classList.toggle("collapsed");
 
-if(panel.classList.contains("collapsed")){
-    ticker.style.left = "0px";
-}else{
-    ticker.style.left = panel.offsetWidth + "px";
-}
+    if(panel.classList.contains("collapsed")){
 
-  if(!isOpen){
-   
-    map.removeControl(legend);
-    moveLegendToSidebar();
-  }else{
- 
+        // Sidebar ditutup
+        ticker.style.left = "0px";
 
-    var existing = document.getElementById("legendInside");
-    if(existing) existing.remove();
+        // tampilkan tombol chart lagi
+        openBtn.style.display = "block";
 
-    legend.addTo(map);
-  }
+    }else{
 
-  setTimeout(()=>{
-    map.invalidateSize();
-  },300);
+        // Sidebar dibuka
+        ticker.style.left = panel.offsetWidth + "px";
 
+        // sembunyikan tombol open chart
+        openBtn.style.display = "none";
+
+        // jika chart sedang terbuka, tutup
+        donutModal.style.display = "none";
+    }
+
+    if(!isOpen){
+
+        map.removeControl(legend);
+        moveLegendToSidebar();
+
+    }else{
+
+        var existing = document.getElementById("legendInside");
+        if(existing) existing.remove();
+
+        legend.addTo(map);
+    }
+
+    setTimeout(()=>{
+        map.invalidateSize();
+    },300);
 }
 // LEGEND
 var legendVisible = true;
@@ -2193,6 +2428,116 @@ function adjustLegendTooltip(){
   }
 
 }
+  function refreshStatusDonut(){
+
+fetch("profile_backend.csv?nocache="+Date.now())
+
+.then(r=>r.text())
+
+.then(text=>{
+
+    let rows = Papa.parse(text,{
+        header:true,
+        skipEmptyLines:true
+    }).data;
+
+    let online=0;
+    let offline=0;
+    let maintenance=0;
+
+    rows.forEach(r=>{
+
+        let s=(r.Status||"").trim().toLowerCase();
+
+        if(s==="online")
+            online++;
+
+        else if(s==="offline")
+            offline++;
+
+        else if(s==="maintenance")
+            maintenance++;
+
+    });
+// =============================
+// UPDATE SUMMARY
+// =============================
+document.getElementById("onlineCount").textContent = online;
+document.getElementById("offlineCount").textContent = offline;
+document.getElementById("maintenanceCount").textContent = maintenance;
+
+// Jika nanti sudah punya timestamp terbaru
+// document.getElementById("statusDonutTimestamp").textContent =
+//     "Last Update : " + latestTimestamp + " WIB";
+    if(statusChart)
+        statusChart.destroy();
+
+    statusChart=new Chart(
+        document.getElementById("statusDonutChart"),
+        {
+
+        type:"doughnut",
+
+        data:{
+
+            labels:[
+                "Online",
+                "Offline",
+                "Maintenance"
+            ],
+
+            datasets:[{
+
+                data:[
+                    online,
+                    offline,
+                    maintenance
+                ],
+
+                backgroundColor:[
+                    "#00b050",
+                    "#d32f2f",
+                    "#ffd600"
+                ],
+
+                borderWidth:2
+
+            }]
+        },
+
+        options:{
+
+            responsive:true,
+
+            cutout:"58%",
+
+            rotation:-90,
+
+            circumference:180,
+
+            plugins:{
+
+                legend:{
+                    position:"bottom"
+                },
+
+                tooltip:{
+                    callbacks:{
+                        label:function(ctx){
+                            return ctx.label+" : "+ctx.raw+" Station";
+                        }
+                    }
+                }
+
+            }
+
+        }
+
+    });
+
+});
+
+}
   function updateStatusTicker(){
 
 let maxDose = -1;
@@ -2270,52 +2615,15 @@ document.getElementById("tickerText").innerHTML = msg;
 
 }
 
-function openLogin(){
+setInterval(function(){
 
-document.getElementById("loginModal").style.display="block";
+    if(document.getElementById("statusDonutModal").style.display==="block"){
 
-}
-
-function closeLogin(){
-
-document.getElementById("loginModal").style.display="none";
-
-}
-
-function login(){
-
-    const user = document.getElementById("username").value.trim();
-    const pass = document.getElementById("password").value;
-
-    if(user==="dkkn" && pass==="sos123"){
-
-        sessionStorage.setItem("login","true");
-        window.location.href="backend.html";
-
-    }else{
-
-        document.getElementById("loginError").style.display="block";
-        document.getElementById("password").value="";
+        refreshStatusDonut();
 
     }
-}
-function openLogin(){
 
-    document.getElementById("loginError").style.display="none";
-
-    document.getElementById("username").value="";
-
-    document.getElementById("password").value="";
-
-    document.getElementById("loginModal").style.display="block";
-
-}
-
-function closeLogin(){
-
-    document.getElementById("loginModal").style.display="none";
-
-}
+},30000);
 </script>
 
 
