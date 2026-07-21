@@ -59,7 +59,7 @@ function openStatisticSummaryReport(){
     <h2 style="display:inline-block">Statistic Summary Report</h2><button onclick="exportExcel()" style="float:right;padding:6px 12px;background:#1d6f42;color:#fff;border:none;border-radius:5px;cursor:pointer">💾 Save as Excel</button>
     <input id="f" placeholder="Search..." onkeyup="const v=this.value.toLowerCase();document.querySelectorAll('tbody tr').forEach(r=>r.style.display=r.innerText.toLowerCase().includes(v)?'':'none');">
     <table><thead><tr>
-    <th>Station</th><th>Total Records</th><th>Average Dose (nSv/h)</th><th>Min Dose (nSv/h)</th><th>Max Dose (nSv/h)</th><th>Last Update</th>
+    <th>Station</th><th>Latest Value (nSv/h)</th><th>Maximum Value (nSv/h)</th><th>Minimum Value (nSv/h)</th><th>Average Value (nSv/h)</th><th>Deviation</th>
     </tr></thead><tbody>`;
 
     let rows="";
@@ -85,6 +85,25 @@ function openStatisticSummaryReport(){
     w.document.close();
   });
 }
+
+
+
+/*
+========================================================================
+TODO - STATISTIC SUMMARY REPORT (MODIFICATION REQUIRED)
+
+1. Add From Date and To Date picker at the top of the report.
+2. Filter data from timeseries_all.csv based on selected date/range.
+3. Calculate for each station:
+   - Latest Value
+   - Maximum Value
+   - Minimum Value
+   - Average Value
+   - Standard Deviation
+4. Replace Total Records and Last Update with the columns above.
+5. Keep Search, Export Excel and Print features.
+========================================================================
+*/
 
 function openStationDetails(){
 const html=`<!DOCTYPE html><html><head><meta charset="utf-8">
