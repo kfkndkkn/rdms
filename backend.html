@@ -18,31 +18,72 @@
 
 
 function openStatisticSummaryReport(){
-const html=`<!DOCTYPE html><html><head><meta charset="utf-8">
-<title>Statistic Summary Report</title>
-<style>
-body{font-family:Arial;margin:15px}
-table{border-collapse:collapse;width:100%;font-size:12px}
-th,td{border:1px solid #ccc;padding:6px}
-th{background:#0b1e3f;color:#fff;position:sticky;top:0}
-input{padding:6px;margin-right:8px}
-button{padding:6px 12px;margin-left:4px}
-</style></head><body>
-<h2 style="display:inline-block">Statistic Summary Report</h2>
-<button onclick="exportExcel()" style="float:right;background:#1d6f42;color:#fff;border:none;border-radius:5px">💾 Save as Excel</button>
-<button onclick="window.print()" style="float:right;margin-right:6px">🖨 Print</button>
-<div style="margin:12px 0">
-From <input type="date"> To <input type="date">
-<button>Generate</button>
-</div>
-<input id="f" placeholder="Search..." onkeyup="const v=this.value.toLowerCase();document.querySelectorAll('tbody tr').forEach(r=>r.style.display=r.innerText.toLowerCase().includes(v)?'':'none');">
-<table><thead><tr><th>Station</th><th>Latest</th><th>Maximum</th><th>Minimum</th><th>Average</th><th>Std. Dev.</th></tr></thead><tbody></tbody></table>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"><\/script>
-<script>
-function exportExcel(){const wb=XLSX.utils.table_to_book(document.querySelector('table'),{sheet:'Statistic Summary'});XLSX.writeFile(wb,'Statistic_Summary_Report.xlsx');}
-<\/script></body></html>`;
-const w=window.open("","StatisticSummaryReport");
-w.document.write(html);w.document.close();
+  fetch("timeseries_all.csv?nocache="+Date.now())
+  .then(r=>r.text())
+  .then(text=>{
+    const data = Papa.parse(text,{header:true, skipEmptyLines:true}).data;
+
+    let stats = {};
+    data.forEach(r=>{
+      let st = r.station;
+      if(!st) return;
+      let v = parseFloat(r.dose);
+      if(isNaN(v)) return;
+      let t = r.time;
+
+      if(!stats[st]){
+        stats[st] = {
+          count: 0,
+          sum: 0,
+          min: v,
+          max: v,
+          lastTime: t
+        };
+      }
+      stats[st].count++;
+      stats[st].sum += v;
+      if(v < stats[st].min) stats[st].min = v;
+      if(v > stats[st].max) stats[st].max = v;
+      if(t > stats[st].lastTime) stats[st].lastTime = t;
+    });
+
+    const html=`<!DOCTYPE html><html><head><meta charset="utf-8">
+    <title>Statistic Summary Report</title>
+    <style>
+    body{font-family:Arial;margin:15px}
+    table{border-collapse:collapse;width:100%;font-size:12px}
+    th,td{border:1px solid #ccc;padding:6px}
+    th{background:#0b1e3f;color:#fff;position:sticky;top:0}
+    input{margin-bottom:10px;padding:6px;width:250px}
+    </style></head><body>
+    <h2 style="display:inline-block">Statistic Summary Report</h2><button onclick="exportExcel()" style="float:right;padding:6px 12px;background:#1d6f42;color:#fff;border:none;border-radius:5px;cursor:pointer">💾 Save as Excel</button>
+    <input id="f" placeholder="Search..." onkeyup="const v=this.value.toLowerCase();document.querySelectorAll('tbody tr').forEach(r=>r.style.display=r.innerText.toLowerCase().includes(v)?'':'none');">
+    <table><thead><tr>
+    <th>Station</th><th>Total Records</th><th>Average Dose (nSv/h)</th><th>Min Dose (nSv/h)</th><th>Max Dose (nSv/h)</th><th>Last Update</th>
+    </tr></thead><tbody>`;
+
+    let rows="";
+    Object.keys(stats).sort().forEach(st=>{
+      let s = stats[st];
+      let avg = s.sum / s.count;
+      rows+=`<tr><td>${st}</td><td>${s.count}</td><td>${avg.toFixed(2)}</td><td>${s.min.toFixed(2)}</td><td>${s.max.toFixed(2)}</td><td>${s.lastTime}</td></tr>`;
+    });
+
+    const w=window.open("","StatisticSummaryReport");
+    w.document.write(html+rows+`</tbody></table>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"><\/script>
+    <script>
+    function exportExcel(){
+     const table=document.querySelector('table');
+     const wb=XLSX.utils.table_to_book(table,{sheet:'Summary'});
+     const d=new Date();
+     const f='Statistic_Summary_Report_'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.xlsx';
+     XLSX.writeFile(wb,f);
+    }
+    <\/script>
+    </body></html>`);
+    w.document.close();
+  });
 }
 
 function openStationDetails(){
