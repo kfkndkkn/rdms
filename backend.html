@@ -935,6 +935,10 @@ var onlineLayer=L.layerGroup().addTo(map);
 var offlineLayer=L.layerGroup().addTo(map);
 var maintenanceLayer=L.layerGroup().addTo(map);
 
+var onlineLabelLayer=L.layerGroup();
+var offlineLabelLayer=L.layerGroup();
+var maintenanceLabelLayer=L.layerGroup();
+
 
 // LAYER CONTROL
 
@@ -955,6 +959,20 @@ L.control.layers(
 "Station Labels":labelLayer
 }
 ).addTo(map);
+
+function syncLabelLayers(){
+    labelLayer.clearLayers();
+    if(map.hasLayer(onlineLayer)){
+        onlineLabelLayer.eachLayer(l=>labelLayer.addLayer(l));
+    }
+    if(map.hasLayer(offlineLayer)){
+        offlineLabelLayer.eachLayer(l=>labelLayer.addLayer(l));
+    }
+    if(map.hasLayer(maintenanceLayer)){
+        maintenanceLabelLayer.eachLayer(l=>labelLayer.addLayer(l));
+    }
+}
+map.on("overlayadd overlayremove",syncLabelLayers);
 
 // RADIUS
 
@@ -1361,12 +1379,19 @@ if(!row.count || map.getZoom() >= 5){
     })
   });
 
-  // Label harus masuk ke labelLayer agar Layer Control 'Station Labels' berfungsi
-  label.addTo(labelLayer);
+  // Label mengikuti layer status
+  if(statusTop==="offline"){
+      label.addTo(offlineLabelLayer);
+  }else if(statusTop==="maintenance"){
+      label.addTo(maintenanceLabelLayer);
+  }else{
+      label.addTo(onlineLabelLayer);
+  }
 }
 
 });
 
+syncLabelLayers();
 });
 });
 }
