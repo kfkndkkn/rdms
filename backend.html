@@ -956,6 +956,23 @@ var onlineLayer=L.layerGroup().addTo(map);
 var offlineLayer=L.layerGroup().addTo(map);
 var maintenanceLayer=L.layerGroup().addTo(map);
 
+function syncStationLabels(){
+    labelLayer.clearLayers();
+    if(!map.hasLayer(labelLayer)) return;
+    [onlineLayer,offlineLayer,maintenanceLayer].forEach(function(grp){
+        if(!map.hasLayer(grp)) return;
+        grp.eachLayer(function(l){
+            if(l instanceof L.Marker && l.options.icon){
+                labelLayer.addLayer(l);
+            }
+        });
+    });
+}
+map.on('overlayadd overlayremove',function(e){
+    if(e.layer===onlineLayer||e.layer===offlineLayer||e.layer===maintenanceLayer||e.layer===labelLayer){
+        syncStationLabels();
+    }
+});
 
 
 
@@ -979,6 +996,23 @@ L.control.layers(
 }
 ).addTo(map);
 
+function syncStationLabels(){
+    labelLayer.clearLayers();
+    if(!map.hasLayer(labelLayer)) return;
+    [onlineLayer,offlineLayer,maintenanceLayer].forEach(function(grp){
+        if(!map.hasLayer(grp)) return;
+        grp.eachLayer(function(l){
+            if(l instanceof L.Marker && l.options.icon){
+                labelLayer.addLayer(l);
+            }
+        });
+    });
+}
+map.on('overlayadd overlayremove',function(e){
+    if(e.layer===onlineLayer||e.layer===offlineLayer||e.layer===maintenanceLayer||e.layer===labelLayer){
+        syncStationLabels();
+    }
+});
 
 
 // RADIUS
@@ -1408,18 +1442,14 @@ if(!row.count || map.getZoom() >= 5){
     })
   });
 
-  // Label mengikuti layer status
-  if(statusTop==="offline"){
-      offlineLayer.addLayer(label);
-  }else if(statusTop==="maintenance"){
-      maintenanceLayer.addLayer(label);
-  }else{
-      onlineLayer.addLayer(label);
-  }
+  // Label selalu ke labelLayer, visibilitas mengikuti filter
+  label.statusTop=statusTop;
+  labelLayer.addLayer(label);
 }
 
 });
 
+syncStationLabels();
 
 });
 });
