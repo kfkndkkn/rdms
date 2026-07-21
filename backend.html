@@ -612,10 +612,9 @@ background:#d90000;
 #statusDonutChart{
     display:block;
     width:100% !important;
-    height:auto !important;
-    aspect-ratio:1 / 1;
-    max-width:145px;
-    margin:8px auto 4px;
+    height:185px !important;
+    max-width:280px;
+    margin:8px auto 0;
 }
 
 #openDonutBtn{
@@ -784,7 +783,7 @@ style="font-size:16px;font-weight:bold;color:#ff9800;">0</div>
 
 </div>
         <canvas id="statusDonutChart"></canvas>
-<div style="text-align:center;margin-top:12px"><button id="viewDetailsBtn" style="padding:7px 14px;border:none;border-radius:6px;cursor:pointer;background:#0b1e3f;color:#fff;font-size:13px" onclick="openStationDetails()">View Details</button></div>
+<div style="text-align:center;margin-top:18px"><button id="viewDetailsBtn" style="padding:7px 14px;border:none;border-radius:6px;cursor:pointer;background:#0b1e3f;color:#fff;font-size:13px" onclick="openStationDetails()">View Details</button></div>
 
     </div>
 </div>
@@ -2561,7 +2560,14 @@ document.getElementById("maintenanceCount").textContent = maintenance;
             plugins:{
 
                 legend:{
-                    position:"bottom"
+                    position:"bottom",
+                    align:"center",
+                    labels:{
+                        boxWidth:14,
+                        boxHeight:14,
+                        padding:18,
+                        usePointStyle:false
+                    }
                 },
 
                 tooltip:{
