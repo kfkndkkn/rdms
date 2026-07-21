@@ -1186,11 +1186,11 @@ var zoom=map.getZoom();
 
 var data;
 
-// Selalu tampilkan semua stasiun individual
-// agar detektor online langsung terlihat sejak zoom awal
-data=rawData;
-
-if(zoom>=8){
+// Zoom jauh gunakan agregasi, zoom dekat tampilkan seluruh stasiun
+if(zoom<8){
+    data=aggregateData(rawData,0.25);
+}else{
+    data=rawData;
 
     data.sort((a,b)=>{
 
@@ -1202,7 +1202,6 @@ if(zoom>=8){
         return (order[sa]||0)-(order[sb]||0);
 
     });
-
 }
 
 data.forEach(row=>{
