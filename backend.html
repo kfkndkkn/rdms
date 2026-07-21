@@ -959,11 +959,13 @@ var maintenanceLayer=L.layerGroup().addTo(map);
 function syncStationLabels(){
     labelLayer.clearLayers();
     if(!map.hasLayer(labelLayer)) return;
+
     [onlineLayer,offlineLayer,maintenanceLayer].forEach(function(grp){
         if(!map.hasLayer(grp)) return;
+
         grp.eachLayer(function(l){
-            if(l instanceof L.Marker && l.options.icon){
-                labelLayer.addLayer(l);
+            if(l.stationLabel){
+                labelLayer.addLayer(l.stationLabel);
             }
         });
     });
@@ -999,11 +1001,13 @@ L.control.layers(
 function syncStationLabels(){
     labelLayer.clearLayers();
     if(!map.hasLayer(labelLayer)) return;
+
     [onlineLayer,offlineLayer,maintenanceLayer].forEach(function(grp){
         if(!map.hasLayer(grp)) return;
+
         grp.eachLayer(function(l){
-            if(l instanceof L.Marker && l.options.icon){
-                labelLayer.addLayer(l);
+            if(l.stationLabel){
+                labelLayer.addLayer(l.stationLabel);
             }
         });
     });
@@ -1442,9 +1446,8 @@ if(!row.count || map.getZoom() >= 5){
     })
   });
 
-  // Label selalu ke labelLayer, visibilitas mengikuti filter
-  label.statusTop=statusTop;
-  labelLayer.addLayer(label);
+  // Simpan label pada hexagon, jangan langsung tampilkan
+  hex.stationLabel = label;
 }
 
 });
