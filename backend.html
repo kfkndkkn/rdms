@@ -101,7 +101,8 @@ height:70px;
 background:#0b1e3f;
 display:flex;
 align-items:center;
-padding:0 25px;
+padding:0 20px;
+box-sizing:border-box;
 color:white;
 z-index:9999;
 }
@@ -661,7 +662,27 @@ font-size:16px;
 </button>
 
 <img src="logo/logo-bapeten.png">
-<h2>Indonesia Radiation Data Monitoring System</h2>
+<h2 style="
+flex:1;
+margin:0;
+font-size:28px;">
+Indonesia Radiation Data Monitoring System
+</h2>
+
+
+<button id="logoutBtn" onclick="window.location.href='index.html'" style="
+margin-left:auto;
+background:#c62828;
+color:white;
+border:none;
+padding:8px 18px;
+border-radius:6px;
+cursor:pointer;
+font-size:14px;
+flex-shrink:0;">
+Logout
+</button>
+
 
 </div>
 
