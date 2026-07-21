@@ -323,7 +323,7 @@ transition:transform 0.3s ease;
 
 @media (min-width:1600px){
   #sidePanel{
-    width:320px; 
+    width:285px; 
   }
 }
   
@@ -432,7 +432,7 @@ margin-top:70px;
   width:285px;
   background:linear-gradient(180deg,#173a6b,#1f5fa8);
   color:white;
-  padding:14px;
+  padding:10px 10px 8px;
 
   transition:0.3s;
   overflow-y:auto;
@@ -614,8 +614,8 @@ background:#d90000;
     width:100% !important;
     height:auto !important;
     aspect-ratio:1 / 1;
-    max-width:185px;
-    margin:10px auto 8px;
+    max-width:210px;
+    margin:6px auto 4px;
 }
 
 #openDonutBtn{
@@ -783,7 +783,12 @@ style="font-size:28px;font-weight:bold;color:#ff9800;">0</div>
 </div>
 
 </div>
-        <canvas id="statusDonutChart"></canvas><button id="viewDetailsBtn" style="padding:7px 14px;border:none;border-radius:6px;cursor:pointer;background:#0b1e3f;color:#fff;font-size:13px" onclick="openStationDetails()">View Details</button></div>
+        <canvas id="statusDonutChart"></canvas>
+<div style="display:flex;justify-content:center;gap:14px;align-items:center;font-size:12px;margin:2px 0 8px;">
+<span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#00b050;margin-right:4px;"></span>Online</span>
+<span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#d32f2f;margin-right:4px;"></span>Offline</span>
+<span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ff9800;margin-right:4px;"></span>Maintenance</span>
+</div><button id="viewDetailsBtn" style="padding:7px 14px;border:none;border-radius:6px;cursor:pointer;background:#0b1e3f;color:#fff;font-size:13px" onclick="openStationDetails()">View Details</button></div>
 
     </div>
 </div>
