@@ -1361,13 +1361,8 @@ if(!row.count || map.getZoom() >= 5){
     })
   });
 
-  if(statusTop==="offline"){
-    label.addTo(offlineLayer);
-}else if(statusTop==="maintenance"){
-    label.addTo(maintenanceLayer);
-}else{
-    label.addTo(onlineLayer);
-}
+  // Label harus masuk ke labelLayer agar Layer Control 'Station Labels' berfungsi
+  label.addTo(labelLayer);
 }
 
 });
