@@ -1186,11 +1186,11 @@ var zoom=map.getZoom();
 
 var data;
 
-// Zoom jauh gunakan agregasi, zoom dekat tampilkan seluruh stasiun
-if(zoom<8){
-    data=aggregateData(rawData,0.25);
-}else{
-    data=rawData;
+// Selalu tampilkan semua stasiun individual
+// agar detektor online langsung terlihat sejak zoom awal
+data=rawData;
+
+if(zoom>=8){
 
     data.sort((a,b)=>{
 
@@ -1202,6 +1202,7 @@ if(zoom<8){
         return (order[sa]||0)-(order[sb]||0);
 
     });
+
 }
 
 data.forEach(row=>{
@@ -1346,14 +1347,35 @@ hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
   hex.on('click', function(){
   this.openPopup();
 });
-const profileTop = window.profileIndex[normalizeName(stationName)];
-const statusTop = (profileTop?.Status || "").toLowerCase();
-
 let targetLayer=onlineLayer;
-if(statusTop==="offline"){
-    targetLayer=offlineLayer;
-}else if(statusTop==="maintenance"){
-    targetLayer=maintenanceLayer;
+let statusTop="online";
+
+if(row.stations){
+    let hasOnline=false, hasMaintenance2=false, hasOffline2=false;
+    row.stations.forEach(s=>{
+        const st=(window.profileIndex[normalizeName(s.name)]?.Status||"").toLowerCase();
+        if(st==="online") hasOnline=true;
+        else if(st==="maintenance") hasMaintenance2=true;
+        else if(st==="offline") hasOffline2=true;
+    });
+    if(hasOnline){
+        statusTop="online";
+        targetLayer=onlineLayer;
+    }else if(hasMaintenance2){
+        statusTop="maintenance";
+        targetLayer=maintenanceLayer;
+    }else{
+        statusTop="offline";
+        targetLayer=offlineLayer;
+    }
+}else{
+    const profileTop = window.profileIndex[normalizeName(stationName)];
+    statusTop = (profileTop?.Status || "").toLowerCase();
+    if(statusTop==="offline"){
+        targetLayer=offlineLayer;
+    }else if(statusTop==="maintenance"){
+        targetLayer=maintenanceLayer;
+    }
 }
 
 hex.addTo(targetLayer);
