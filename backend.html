@@ -1235,18 +1235,21 @@ return "#ff2b2b";
 
 // AGGREGATION GRID
 
-function aggregateData(data, gridSize){
+function aggregateData(data,gridSize){
+
 var grid={};
+
 data.forEach(row=>{
-var lat = parseFloat(row["LATITUDE"] || row["lat"]);
-var lon = parseFloat(row["LONGITUDE"] || row["lon"]);
-var name = row["NAMA UNIT"] || row["station"] || "";
-var dose = row["<div style='font-size:11px'>Gamma Dose Rate (nSv/h)</div>"] || row["dose"];
+
+var lat = parseFloat(row["LATITUDE"]);
+var lon = parseFloat(row["LONGITUDE"]);
+var dose=row["<div style='font-size:11px'>Gamma Dose Rate (nSv/h)</div>"];
 
 if(isNaN(lat)||isNaN(lon)) return;
 
 var gx=Math.floor(lat/gridSize);
 var gy=Math.floor(lon/gridSize);
+
 var key=gx+"_"+gy;
 
 if(!grid[key]){
@@ -1264,30 +1267,37 @@ grid[key].lonSum+=lon;
 grid[key].count++;
 
 var doseNum=parseFloat(dose);
+
 if(!isNaN(doseNum)){
 grid[key].doseSum+=doseNum;
 }
 
 grid[key].stations.push({
-name:name,
+name:row["NAMA UNIT"],
 dose:dose,
-time:row["LAST UPDATE (WIB)"] || row["time"]
+time:row["LAST UPDATE (WIB)"]
 });
+
 });
 
 var result=[];
+
 Object.values(grid).forEach(g=>{
+
 var sum = 0;
 var count = 0;
+
 g.stations.forEach(s=>{
 var key = normalizeName(s.name);
 var ts = window.latestTS[key];
+
 if(ts){
 sum += ts.dose;
 count++;
 }
 });
-var avgDose = count > 0 ? sum / count : (g.count > 0 ? g.doseSum / g.count : null);
+
+var avgDose = count > 0 ? sum / count : null;
 
 result.push({
 lat:g.latSum/g.count,
@@ -1296,8 +1306,11 @@ dose:avgDose,
 count:g.count,
 stations:g.stations
 });
+
 });
+
 return result;
+
 }
 
 
@@ -1369,21 +1382,26 @@ window.stationIndex[key] = r;
 });
   
 var zoom=map.getZoom();
+
 var data;
 
-// Terapkan agregasi saat zoom jauh (< 8), dan pisahkan individual saat zoom dekat (>= 8)
-if(zoom < 8){
-    var gridSize = zoom < 6 ? 1.5 : 0.75;
-    data = aggregateData(rawData, gridSize);
-} else {
-    data = rawData;
-    data.sort((a,b)=>{
-        const sa=(window.profileIndex[normalizeName(a["NAMA UNIT"])]?.Status||"").toLowerCase();
-        const sb=(window.profileIndex[normalizeName(b["NAMA UNIT"])]?.Status||"").toLowerCase();
-        const order={offline:0,maintenance:1,online:2};
-        return (order[sa]||0)-(order[sb]||0);
-    });
-}
+// Selalu tampilkan semua stasiun individual
+// agar detektor online langsung terlihat sejak zoom awal
+data=rawData;
+
+// 🔥 PERBAIKAN URUTAN (SORTING) AGAR STASIUN ONLINE DITAMPILKAN PALING DEPAN
+data.sort((a,b)=>{
+    const nameA = a["NAMA UNIT"] || (a.stations ? a.stations[0].name : "");
+    const nameB = b["NAMA UNIT"] || (b.stations ? b.stations[0].name : "");
+    
+    const sa = (window.profileIndex[normalizeName(nameA)]?.Status || "").toLowerCase();
+    const sb = (window.profileIndex[normalizeName(nameB)]?.Status || "").toLowerCase();
+
+    // Urutan prioritas: offline/maintenance ditaruh duluan (di bawah), online ditaruh belakangan (paling atas)
+    const order = { offline: 0, maintenance: 1, online: 2 };
+
+    return (order[sa] ?? 0) - (order[sb] ?? 0);
+});
 
 data.forEach(row=>{
 
@@ -1393,6 +1411,7 @@ var stationName = row["NAMA UNIT"] ||
 var lat = row.lat;
 var lon = row.lon;
 
+// Zoom dekat gunakan koordinat dari output_all.csv
 if(!row.stations){
   lat = parseFloat(row["LATITUDE"]);
   lon = parseFloat(row["LONGITUDE"]);
@@ -1402,24 +1421,29 @@ var pos = applyZoomOffset(stationName, lat, lon);
 
 lat = pos.lat;
 lon = pos.lon
-var key = normalizeName(row["NAMA UNIT"] || (row.stations && row.stations[0] ? row.stations[0].name : ""));
+var key = normalizeName(row["NAMA UNIT"]);
 var ts = window.latestTS[key];
 
-var dose = row.dose !== undefined ? row.dose : (ts ? ts.dose : null);
+var dose = ts ? ts.dose : null;
 
 if(isNaN(lat)||isNaN(lon)) return;
 
 var color;
 
 if(row.stations){
+
 var hasOOS=row.stations.some(s=>s.dose==="Out of service");
+
 if(hasOOS){
 color="#2b83ba";
 }else{
 color=getColor(dose);
 }
+
 }else{
+
 color=getColor(dose);
+
 }
 
 var hex;
@@ -1430,6 +1454,7 @@ let hasMaintenance=false;
 let hasOffline=false;
 
 if(row.stations){
+
     row.stations.forEach(s=>{
         const profile=window.profileIndex[normalizeName(s.name)];
         if(!profile) return;
@@ -1437,7 +1462,9 @@ if(row.stations){
         if(status==="maintenance") hasMaintenance=true;
         if(status==="offline") hasOffline=true;
     });
+
 }else{
+
     const profile=window.profileIndex[normalizeName(stationName)];
     const status=(profile?.Status||"").toLowerCase();
 
@@ -1472,10 +1499,14 @@ var popupContent = "";
 
 // ===== ZOOM JAUH (AGGREGATED) =====
 if(row.count){
-  var listHTML = "<div style='max-height:180px;overflow-y:auto'><b>Aggregated Stations ("+row.count+")</b><br><br>";
+
+  var listHTML = "<div style='max-height:180px;overflow-y:auto'>";
+
   row.stations.forEach(s=>{
+
     var key = normalizeName(s.name);
     var ts = window.latestTS[key];
+
     var doseText = ts ? ts.dose.toFixed(2)+" nSv/h" : "No data";
     var timeText = ts ? ts.timeStr : "-";
 
@@ -1486,13 +1517,16 @@ if(row.count){
     "Update: "+timeText+"<br>"+
     "<a href='#' onclick=\"openTS('"+s.name+"')\">View Time Series</a>"+
     "</div>";
+
   });
+
   listHTML += "</div>";
   popupContent = listHTML;
 }
 
 // ===== ZOOM DEKAT (1 STATION) =====
 else{
+
   var stationName = row["NAMA UNIT"];
   var key = normalizeName(stationName);
   var ts = window.latestTS[key];
@@ -1508,10 +1542,9 @@ else{
 }
   
 hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
-hex.on('click', function(){
+  hex.on('click', function(){
   this.openPopup();
 });
-
 let targetLayer=onlineLayer;
 let statusTop="online";
 
@@ -1550,14 +1583,17 @@ if(statusTop==="online"){
 }
 
 if(!row.count || map.getZoom() >= 5){
+
   var labelOffsetLat = lat + (radius/111111)*0.9;
   var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
 
+  // 🔥 FIX NAMA (ANTI UNDEFINED)
   var labelName = "";
+
   if(row["NAMA UNIT"]){
     labelName = row["NAMA UNIT"];
   }else if(row.stations && row.stations.length > 0){
-    labelName = row.stations.length > 1 ? row.stations[0].name + " (" + row.stations.length + ")" : row.stations[0].name;
+    labelName = row.stations[0].name;
   }else{
     labelName = "-";
   }
@@ -1570,6 +1606,7 @@ if(!row.count || map.getZoom() >= 5){
     })
   });
 
+  // Simpan label pada hexagon, jangan langsung tampilkan
   hex.stationLabel = label;
 }
 
@@ -1614,6 +1651,7 @@ document.getElementById("lastUpdate").innerHTML =
       timeZone:"Asia/Jakarta"
   }) + " WIB";
 }
+// Ambil hanya stasiun yang timestamp-nya sama dengan Last Updated
 var data = Object.values(window.latestTS)
 .filter(r => r.time.getTime() === latestTime.getTime())
 .map(r => ({
@@ -1623,15 +1661,27 @@ var data = Object.values(window.latestTS)
 
 if(data.length===0) return;
 
+// MAX
 var maxRow = data.reduce((a,b)=> a.dose > b.dose ? a : b);
+
+// MIN
 var minRow = data.reduce((a,b)=> a.dose < b.dose ? a : b);
 
-document.getElementById("maxValue").innerHTML = maxRow.dose.toFixed(2);
-document.getElementById("maxStation").innerHTML = maxRow.station;
-document.getElementById("minValue").innerHTML = minRow.dose.toFixed(2);
-document.getElementById("minStation").innerHTML = minRow.station;
+// SET UI
+document.getElementById("maxValue").innerHTML =
+maxRow.dose.toFixed(2);
+
+document.getElementById("maxStation").innerHTML =
+maxRow.station;
+
+document.getElementById("minValue").innerHTML =
+minRow.dose.toFixed(2);
+
+document.getElementById("minStation").innerHTML =
+minRow.station;
 
 drawAvgChart();
+
 updateStatusTicker();
 
 });
@@ -1646,11 +1696,13 @@ fetch("timeseries_all.csv?nocache="+Date.now())
 
 var data = Papa.parse(text,{header:true}).data;
 
+// FILTER 7 HARI
 const now = new Date();
 const sevenDaysAgo = new Date();
 sevenDaysAgo.setDate(now.getDate() - 7);
 
 var grouped = {};
+// Daftar stasiun yang masih aktif di peta
 const activeStations = new Set(
     Object.keys(window.stationIndex)
 );
@@ -1659,35 +1711,49 @@ var t = new Date(r.time);
 var v = parseFloat(r.dose);
 
 if(t >= sevenDaysAgo && t <= now && !isNaN(v)){
+
 var key = normalizeName(r.station);
+
+// Lewati jika stasiun tidak ada di output.csv
 if(!activeStations.has(key)){
     return;
 }
+
 if(!grouped[r.station]){
     grouped[r.station] = [];
 }
+
 grouped[r.station].push(v);
 }
 });
 
+// HITUNG AVG
 var result = [];
+
 Object.keys(grouped).forEach(station=>{
 var arr = grouped[station];
 var avg = arr.reduce((a,b)=>a+b,0) / arr.length;
+
 result.push({name:station,avg:avg});
 });
 
+
+// 🔥 DETEKSI LEBAR LAYAR
 let screenWidth = window.innerWidth;
+
+// 🔥 RULE
 let topN = 5;
 if(screenWidth > 1366){
   topN = 10;
 }
-
+console.log("WIDTH:", screenWidth, "TOP:", topN);
+// SORT
 result.sort((a,b)=>b.avg - a.avg);
 var top = result.slice(0, topN);
 
 var labels = top.map(r=>r.name);
 var values = top.map(r=>r.avg);
+
 
 var currentData = JSON.stringify({
   values: values,
@@ -1699,7 +1765,10 @@ if(window.lastChartData === currentData){
 }
 window.lastChartData = currentData;
 
+
+
 if(!window.avgChart){
+
 window.avgChart = new Chart(document.getElementById("avgBarChart"),{
 type:'bar',
 data:{
@@ -1707,9 +1776,12 @@ labels:labels,
 datasets:[{
 data:values,
 backgroundColor:'#2b83ba',
+
+
 barThickness: topN === 10 ? 8 : 12,
 categoryPercentage: topN === 10 ? 0.7 : 1.0,
 barPercentage: topN === 10 ? 0.8 : 1.0
+
 }]
 },
 options:{
@@ -1717,15 +1789,21 @@ indexAxis:'y',
 responsive:true,
 maintainAspectRatio:false,
 animation:false, 
+
 plugins:{
   legend:{display:false},
+
   tooltip:{
     enabled:true,
+
     mode:'nearest',
     intersect:true,   
+
     position:'average', 
+
     xAlign:'right',    
     yAlign:'center',
+
     callbacks:{
       label:function(ctx){
         return ctx.raw.toFixed(2) + " nSv/h";
@@ -1733,9 +1811,11 @@ plugins:{
     }
   }
 },
+
 layout:{
 padding:{left:10,right:10}
 },
+
 scales:{
 x:{
 beginAtZero:true,
@@ -1748,19 +1828,35 @@ ticks:{
 autoSkip:false,
 font:{size:10},
 padding:4,
+
 callback:function(value){
+
 let label = this.getLabelForValue(value);
-label = label.replace(/\./g, " ").replace(/\s+/g, " ").trim();
+
+
+label = label
+.replace(/\./g, " ")   
+.replace(/\s+/g, " ")  
+.trim();
+
 let words = label.split(" ");
+
+
 if(words.length === 1 && label.length > 12){
-return [label.substring(0,12), label.substring(12)];
+return [
+label.substring(0,12),
+label.substring(12)
+];
 }
+
+
 if(words.length >= 2){
 return [
 words.slice(0, Math.ceil(words.length/2)).join(" "),
 words.slice(Math.ceil(words.length/2)).join(" ")
 ];
 }
+
 return label;
 }
 },
@@ -1769,27 +1865,40 @@ grid:{display:false}
 }
 }
 });
+
 }else{
+
+
 window.avgChart.data.labels = labels;
 window.avgChart.data.datasets[0].data = values;
+
 window.avgChart.update('none'); 
+
 }
 
 });
 }
   
+// TIME SERIES
+
 var tsChart=null;
 var allLabels=[];
 var allValues=[];
 var filteredLabels=[];
 var filteredValues=[];
 var isFiltered = false;
-
 function openTS(station){
 isFiltered = false;
 var key = normalizeName(station);
+
 var stationData = window.stationIndex[key];
 var profileData = window.profileIndex[key];
+
+
+console.log("STATION:", station);
+console.log("KEY:", key);
+console.log("PROFILE INDEX:", window.profileIndex);
+console.log("PROFILE DATA:", profileData);
   
 document.getElementById("tsModal").style.display="block";
 document.getElementById("tsTitle").innerHTML="Time Series - "+station;
@@ -1805,31 +1914,49 @@ tsChart=null;
 document.getElementById("selectedTime").innerHTML="";
 document.getElementById("tsStats").innerHTML="";
 
+// IMAGE
 var img = document.getElementById("tsImage");
+
 var url = profileData?.["IMAGE_URL"];
 
 if(url){
 url = url.trim();
 img.src = url;
+
 img.onerror = function(){
 this.src = "https://via.placeholder.com/250x150?text=Image+Error";
 };
+
 }else{
+
 img.src = "https://via.placeholder.com/250x150?text=No+Image";
+
 }
 
+// STATUS
 let status = (profileData?.Status || "").toLowerCase();
+
 let statusText;
+
 if(status==="online"){
+
     statusText="<span style='color:#00b050;font-weight:bold'>Online</span>";
+
 }else if(status==="maintenance"){
+
     statusText="<span style='color:#ff9800;font-weight:bold'>Maintenance</span>";
+
 }else if(status==="offline"){
+
     statusText="<span style='color:#d32f2f;font-weight:bold'>Offline</span>";
+
 }else{
+
     statusText="<span style='color:#777'>Unknown</span>";
+
 }
 
+// META
 const startDate = profileData?.["Operation Start Date"] || "-";
 const lastMaintenance = profileData?.["Last Maintenance Date"] || "-";
 const lastOperation = profileData?.["Last Operation"] || "-";
@@ -1857,15 +1984,24 @@ if(start && end){
 }
 
 document.getElementById("tsMeta").innerHTML=
+
 "<b>"+station+"</b><br><br>"+
+
 "Address : "+(profileData?.Address || "-")+"<br>"+
+
 "Province : "+(profileData?.Province || "-")+"<br>"+
+
 "Latitude : "+(profileData?.Latitude || "-")+"<br>"+
+
 "Longitude : "+(profileData?.Longitude || "-")+"<br>"+
+
 "Status : "+statusText+"<br>"+
+
 "Operation Start Date : "+startDate+"<br>"+
+
 "Last Operation : "+(status==="online" ? "Current / Today" : lastOperation)+"<br>"+
 "Last Maintenance Date : "+lastMaintenance+"<br>"+
+
 "<b>Running Time : "+runningDay+" days</b>";
   
 fetch("timeseries_all.csv?nocache="+Date.now())
@@ -1873,41 +2009,54 @@ fetch("timeseries_all.csv?nocache="+Date.now())
 .then(text=>{
 
 var data=Papa.parse(text,{header:true}).data;
+
 const now = new Date();
 const oneMonthAgo = new Date();
 oneMonthAgo.setMonth(now.getMonth() - 1);
 
 var dailyGroup = {};
+
 data.forEach(r=>{
+
 if(normalizeName(r.station) === normalizeName(station)){
+
 var t = new Date(r.time);
 var v = parseFloat(r.dose);
 
 if(t >= oneMonthAgo && t <= now && !isNaN(v)){
+
+// 🔥 GROUP PER HARI
 var dayKey = t.toISOString().split("T")[0];
+
 if(!dailyGroup[dayKey]){
 dailyGroup[dayKey] = [];
 }
+
 dailyGroup[dayKey].push(v);
 }
 }
 });
 
+// 🔥 HITUNG RATA2 HARIAN
 allLabels = [];
 allValues = [];
 
 Object.keys(dailyGroup).sort().forEach(day=>{
+
 var arr = dailyGroup[day];
 var avg = arr.reduce((a,b)=>a+b,0) / arr.length;
+
+// label jadi tanggal saja
 allLabels.push(day);
 allValues.push(avg);
+
 });
 
 if(allValues.length===0){
 document.getElementById("tsStats").innerHTML="No data available";
 return;
 }
-
+// ===== DATE PICKER INIT =====
 var fromInput = document.getElementById("dateFrom");
 var toInput = document.getElementById("dateTo");
 
@@ -1916,9 +2065,11 @@ if(allLabels.length > 0){
   toInput.value = allLabels[allLabels.length-1].replace(" ", "T");
 }
 
+// EVENT
 fromInput.onchange = applyDateFilter;
 toInput.onchange = applyDateFilter;
 var slider=document.getElementById("timeSlider");
+
 var lastIndex=allValues.length-1;
 
 slider.min=0;
@@ -1935,20 +2086,25 @@ updateChartUnified(parseInt(this.value));
 });
 
 }
-
+function snapToNearest(dateStr){
+  return dateStr;
+}
 function applyDateFilter(){
+
   var fromVal = document.getElementById("dateFrom").value;
   var toVal = document.getElementById("dateTo").value;
+
   if(!fromVal || !toVal) return;
 
-  var fromDate = new Date(fromVal);
-  var toDate = new Date(toVal);
+var fromDate = new Date(fromVal);
+var toDate = new Date(toVal);
 
   filteredLabels = [];
   filteredValues = [];
 
   for(let i=0;i<allLabels.length;i++){
     let t = new Date(allLabels[i]);
+
     if(t >= fromDate && t <= toDate){
       filteredLabels.push(allLabels[i]);
       filteredValues.push(allValues[i]);
@@ -1956,9 +2112,11 @@ function applyDateFilter(){
   }
 
   if(filteredValues.length === 0) return;
+
   isFiltered = true;
 
   var slider = document.getElementById("timeSlider");
+
   slider.min = 0;
   slider.max = filteredValues.length - 1;
   slider.value = filteredValues.length - 1;
@@ -1969,9 +2127,169 @@ function applyDateFilter(){
 
   updateChartUnified(slider.value);
 }
+function updateChart(index){
 
+var labels=allLabels.slice(0,index+1);
+var values=allValues.slice(0,index+1);
+
+var startTime=labels[0];
+var endTime=labels[labels.length-1];
+
+document.getElementById("selectedTime").innerHTML=
+"Selected Time : "+startTime+" – "+endTime;
+
+var sum=values.reduce((a,b)=>a+b,0);
+var avg=sum/values.length;
+var min=Math.min(...values);
+var max=Math.max(...values);
+
+var ymin=min-(max-min)*0.2;
+var ymax=max+(max-min)*0.2;
+
+if(ymin<0) ymin=0;
+
+if(tsChart) tsChart.destroy();
+
+tsChart=new Chart(document.getElementById("tsChart"),{
+
+type:'line',
+
+data:{
+labels:allLabels,
+datasets:[{
+data:allValues,
+borderColor:'#2b83ba',
+backgroundColor:'rgba(43,131,186,0.15)',
+tension:0.25,
+pointRadius:2,
+fill:true
+}]
+},
+
+options:{
+responsive:true,
+maintainAspectRatio:false, 
+
+layout:{
+padding:{
+right:0
+}
+},
+
+plugins:{
+legend:{display:false},
+tooltip:{
+callbacks:{
+title:function(items){
+return items[0].label; 
+}
+}
+}
+},
+
+scales:{
+x:{
+type:'category',
+
+min:0,
+max:index,
+
+offset:false, 
+
+ticks:{
+autoSkip:false,
+maxRotation:0,
+minRotation:0,
+
+callback:function(value, i){
+
+const mid = Math.floor(index / 2);
+
+if(i === 0 || i === mid || i === index){
+return labels[i];
+}
+
+return "";
+}
+},
+
+grid:{display:false}
+},
+y:{
+min:ymin,
+max:ymax,
+title:{display:true,text:"nSv/h"},
+grid:{color:"rgba(0,0,0,0.08)"} 
+}
+}
+}
+
+});
+
+document.getElementById("tsStats").innerHTML=
+"<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
+"<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
+"<b>Max:</b> "+max.toFixed(2)+" nSv/h";
+
+  
+document.getElementById("dateFrom").value = labels[0].replace(" ", "T");
+document.getElementById("dateTo").value = labels[labels.length-1].replace(" ", "T");
+}
+function updateChartFiltered(index){
+
+  var labels = filteredLabels.slice(0,index+1);
+  var values = filteredValues.slice(0,index+1);
+
+  var startTime = labels[0];
+  var endTime = labels[labels.length-1];
+
+  document.getElementById("selectedTime").innerHTML =
+  "Selected Time : "+startTime+" – "+endTime;
+
+  var sum = values.reduce((a,b)=>a+b,0);
+  var avg = sum/values.length;
+  var min = Math.min(...values);
+  var max = Math.max(...values);
+
+  var ymin = min-(max-min)*0.2;
+  var ymax = max+(max-min)*0.2;
+  if(ymin<0) ymin=0;
+
+  if(tsChart) tsChart.destroy();
+
+  tsChart = new Chart(document.getElementById("tsChart"),{
+    type:'line',
+    data:{
+      labels: filteredLabels,
+      datasets:[{
+        data: filteredValues,
+        borderColor:'#2b83ba',
+        backgroundColor:'rgba(43,131,186,0.15)',
+        tension:0.25,
+        pointRadius:2,
+        fill:true
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{min:0,max:index},
+        y:{min:ymin,max:ymax}
+      }
+    }
+  });
+
+  document.getElementById("tsStats").innerHTML =
+  "<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
+  "<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
+  "<b>Max:</b> "+max.toFixed(2)+" nSv/h";
+}
 function updateChartUnified(index){
+
   var labels, values;
+
   if(isFiltered){
     labels = filteredLabels;
     values = filteredValues;
@@ -1984,6 +2302,7 @@ function updateChartUnified(index){
 
   var slicedLabels = labels.slice(0,index+1);
   var slicedValues = values.slice(0,index+1);
+
   if(slicedLabels.length === 0) return;
 
   var startTime = slicedLabels[0];
@@ -1997,26 +2316,35 @@ function updateChartUnified(index){
   var min = Math.min(...slicedValues);
   var max = Math.max(...slicedValues);
 
-  var range = max - min;
-  var minRange = 50;
-  let ymin, ymax;
 
-  if(range < minRange){
-    var mid = (max + min) / 2;
-    ymin = mid - minRange;
-    ymax = mid + minRange;
-  }else{
-    var padding = range * 1.0; 
-    ymin = min - padding;
-    ymax = max + padding;
-  }
+var range = max - min;
 
-  if(ymin < 0) ymin = 0;
+
+var minRange = 50;
+
+
+if(range < minRange){
+  var mid = (max + min) / 2;
+  ymin = mid - minRange;
+  ymax = mid + minRange;
+}else{
+  var padding = range * 1.0; 
+  ymin = min - padding;
+  ymax = max + padding;
+}
+
+// safety
+if(ymin < 0) ymin = 0;
+
+if(ymin < 0) ymin = 0;
+  if(ymin<0) ymin=0;
 
   if(tsChart) tsChart.destroy();
 
   tsChart = new Chart(document.getElementById("tsChart"),{
+
     type:'line',
+
     data:{
       labels: labels,
       datasets:[{
@@ -2028,9 +2356,11 @@ function updateChartUnified(index){
         fill:true
       }]
     },
+
     options:{
       responsive:true,
       maintainAspectRatio:false,
+
       plugins:{
         legend:{display:false},
         tooltip:{
@@ -2041,26 +2371,32 @@ function updateChartUnified(index){
           }
         }
       },
+
       scales:{
         x:{
           type:'category',
           min:0,
           max:index,
           offset:false,
+
           ticks:{
             autoSkip:false,
             maxRotation:0,
             minRotation:0,
+
             callback:function(value, i){
               const mid = Math.floor(index / 2);
+
               if(i === 0 || i === mid || i === index){
                 return labels[i];
               }
               return "";
             }
           },
+
           grid:{display:false}
         },
+
         y:{
           min:ymin,
           max:ymax,
@@ -2069,6 +2405,7 @@ function updateChartUnified(index){
         }
       }
     }
+
   });
 
   document.getElementById("tsStats").innerHTML =
@@ -2076,51 +2413,72 @@ function updateChartUnified(index){
   "<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
   "<b>Max:</b> "+max.toFixed(2)+" nSv/h";
 
+document.getElementById("dateFrom").value = slicedLabels[0];
+document.getElementById("dateTo").value = slicedLabels[slicedLabels.length-1];
   document.getElementById("dateFrom").value = slicedLabels[0].replace(" ", "T");
   document.getElementById("dateTo").value = slicedLabels[slicedLabels.length-1].replace(" ", "T");
 }
-
 function closeTS(){
 document.getElementById("tsModal").style.display="none";
 }
-
-let statusChart=null;
+  let statusChart=null;
 
 function openStatusDonut(){
+
     document.getElementById("statusDonutModal").style.display="block";
+
     refreshStatusDonut();
+
 }
 
 function closeStatusDonut(){
-    document.getElementById("statusDonutModal").style.display="none";
-}
 
+    document.getElementById("statusDonutModal").style.display="none";
+
+}
 var panelVisible = false; 
 
 function togglePanel(){
+
     var panel = document.getElementById("sidePanel");
     var ticker = document.getElementById("statusTicker");
     var openBtn = document.getElementById("openDonutBtn");
     var donutModal = document.getElementById("statusDonutModal");
 
     var isOpen = !panel.classList.contains("collapsed");
+
     panel.classList.toggle("collapsed");
 
     if(panel.classList.contains("collapsed")){
+
+        // Sidebar ditutup
         ticker.style.left = "0px";
+
+        // tampilkan tombol chart lagi
         openBtn.style.display = "block";
+
     }else{
+
+        // Sidebar dibuka
         ticker.style.left = panel.offsetWidth + "px";
+
+        // sembunyikan tombol open chart
         openBtn.style.display = "none";
+
+        // jika chart sedang terbuka, tutup
         donutModal.style.display = "none";
     }
 
     if(!isOpen){
+
         map.removeControl(legend);
         moveLegendToSidebar();
+
     }else{
+
         var existing = document.getElementById("legendInside");
         if(existing) existing.remove();
+
         legend.addTo(map);
     }
 
@@ -2128,41 +2486,116 @@ function togglePanel(){
         map.invalidateSize();
     },300);
 }
-
+// LEGEND
 var legendVisible = true;
 var legend = L.control({position:"bottomleft"});
 
 legend.onAdd = function(){
+
 var div = L.DomUtil.create("div","legend");
+
 div.innerHTML = `
+
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
   <b>IAEA Operational Intervention Levels</b>
-  <div id="infoIcon" style="cursor:pointer;background:#0b1e3f;color:white;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;">i</div>
+
+  <div id="infoIcon" style="
+    
+    cursor:pointer;
+    background:#0b1e3f;
+    color:white;
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    font-weight:bold;
+  ">i</div>
 </div>
-<div id="legendTooltip" style="display:none;position:fixed;bottom:140px;left:10px;width:240px;background:white;border-radius:8px;padding:8px;box-shadow:0 4px 12px rgba(0,0,0,0.25);font-size:12px;z-index:100000;pointer-events:auto;transform: translateZ(9999px);">
+
+<div id="legendTooltip" style="
+display:none;
+position:fixed;
+bottom:140px;
+left:10px;
+
+width:240px;
+background:white;
+border-radius:8px;
+padding:8px;
+box-shadow:0 4px 12px rgba(0,0,0,0.25);
+font-size:12px;
+
+z-index:100000;
+pointer-events:auto;
+
+
+transform: translateZ(9999px);
+">
+
 <b>Keterangan:</b><br>
-<div style="margin-bottom:3px;"><span style="color:#2b83ba;font-weight:bold;">■ Biru</span><br>Laju dosis dibawah OILs</div>
-<div style="margin-bottom:6px;"><span style="color:#ffe600;font-weight:bold;">■ Kuning</span><br>OILs kontaminasi s.d OILs relokasi</div>
-<div style="margin-bottom:6px;"><span style="color:#ff9b00;font-weight:bold;">■ Orange</span><br>OILs relokasi s.d OILs evakuasi</div>
-<div><span style="color:#ff2b2b;font-weight:bold;">■ Merah</span><br>OILs evakuasi</div>
+<div style="margin-bottom:3px;">
+<span style="color:#2b83ba;font-weight:bold;">■ Biru</span><br>
+Laju dosis dibawah OILs
+</div>
+
+<div style="margin-bottom:6px;">
+<span style="color:#ffe600;font-weight:bold;">■ Kuning</span><br>
+OILs kontaminasi s.d OILs relokasi
+</div>
+
+<div style="margin-bottom:6px;">
+<span style="color:#ff9b00;font-weight:bold;">■ Orange</span><br>
+OILs relokasi s.d OILs evakuasi
+</div>
+
+<div>
+<span style="color:#ff2b2b;font-weight:bold;">■ Merah</span><br>
+OILs evakuasi
+</div>
+
+
 <hr style="border:none;border-top:1px solid #ddd;margin:8px 0;">
-<div style="font-size:11px;line-height:1.4;"><b>Operational Intervention Level (OIL) : </b><br>Nilai ambang laju dosis radiasi untuk menentukan tindakan proteksi darurat.</div>
+
+
+<div style="font-size:11px;line-height:1.4;">
+<b>Operational Intervention Level (OIL) : </b><br>
+Nilai ambang laju dosis radiasi untuk menentukan tindakan proteksi darurat.
 </div>
-<div style="width:260px;height:14px;background:linear-gradient(to right,#2b83ba,#ffe600,#ff9b00,#ff2b2b);margin-bottom:6px;border:1px solid #999;"></div>
+
+</div>
+
+<div style="width:260px;height:14px;
+background:linear-gradient(to right,#2b83ba,#ffe600,#ff9b00,#ff2b2b);
+margin-bottom:6px;border:1px solid #999;"></div>
+
 <div style="display:flex;justify-content:space-between;width:260px;font-size:11px;">
-<span>0</span><span>1.000</span><span>100.000</span><span>1.000.000</span>
+<span>0</span>
+<span>1.000</span>
+<span>100.000</span>
+<span>1.000.000</span>
 </div>
-<div style="font-size:11px;margin-top:4px;">Gamma Dose Rate (nSv/h)</div>
+
+<div style="font-size:11px;margin-top:4px;">
+Gamma Dose Rate (nSv/h)
+</div>
+
 `;
 
 setTimeout(()=>{
+
 var icon = div.querySelector("#infoIcon");
 var tooltip = div.querySelector("#legendTooltip");
+
 if(icon && tooltip){
 icon.onmouseenter = ()=> tooltip.style.display="block";
 icon.onmouseleave = ()=> tooltip.style.display="none";
 }
+
 },50);
+
 return div;
 };
 
@@ -2170,22 +2603,43 @@ legend.addTo(map);
 window.addEventListener("resize", ()=>{
   drawAvgChart();
 });
+  function moveLegendToSidebar(){
 
-function moveLegendToSidebar(){
   var panel = document.getElementById("sidePanel");
+
   if(!panel.querySelector("#legendInside")){
+
     var legendDiv = legend.onAdd(map);
     legendDiv.id = "legendInside";
+
+    // 🔥 hapus tooltip biar clean
     var tooltip = legendDiv.querySelector("#legendTooltip");
     if(tooltip) tooltip.remove();
+
     panel.appendChild(legendDiv);
   }
-}
 
-function refreshStatusDonut(){
+}
+function adjustLegendTooltip(){
+
+  var tooltip = document.getElementById("legendTooltip");
+  if(!tooltip) return;
+
+  if(panelVisible){
+    tooltip.style.left = "300px"; 
+  }else{
+    tooltip.style.left = "80px"; 
+  }
+
+}
+  function refreshStatusDonut(){
+
 fetch("profile_backend.csv?nocache="+Date.now())
+
 .then(r=>r.text())
+
 .then(text=>{
+
     let rows = Papa.parse(text,{
         header:true,
         skipEmptyLines:true
@@ -2196,41 +2650,89 @@ fetch("profile_backend.csv?nocache="+Date.now())
     let maintenance=0;
 
     rows.forEach(r=>{
+
         let s=(r.Status||"").trim().toLowerCase();
-        if(s==="online") online++;
-        else if(s==="offline") offline++;
-        else if(s==="maintenance") maintenance++;
+
+        if(s==="online")
+            online++;
+
+        else if(s==="offline")
+            offline++;
+
+        else if(s==="maintenance")
+            maintenance++;
+
     });
+// =============================
+// UPDATE SUMMARY
+// =============================
+document.getElementById("onlineCount").textContent = online;
+document.getElementById("offlineCount").textContent = offline;
+document.getElementById("maintenanceCount").textContent = maintenance;
 
-    document.getElementById("onlineCount").textContent = online;
-    document.getElementById("offlineCount").textContent = offline;
-    document.getElementById("maintenanceCount").textContent = maintenance;
-
-    if(statusChart) statusChart.destroy();
+// Jika nanti sudah punya timestamp terbaru
+// document.getElementById("statusDonutTimestamp").textContent =
+//     "Last Update : " + latestTimestamp + " WIB";
+    if(statusChart)
+        statusChart.destroy();
 
     statusChart=new Chart(
         document.getElementById("statusDonutChart"),
         {
+
         type:"doughnut",
+
         data:{
-            labels:["Online","Offline","Maintenance"],
+
+            labels:[
+                "Online",
+                "Offline",
+                "Maintenance"
+            ],
+
             datasets:[{
-                data:[online,offline,maintenance],
-                backgroundColor:["#00b050","#d32f2f","#ffd600"],
+
+                data:[
+                    online,
+                    offline,
+                    maintenance
+                ],
+
+                backgroundColor:[
+                    "#00b050",
+                    "#d32f2f",
+                    "#ffd600"
+                ],
+
                 borderWidth:2
+
             }]
         },
+
         options:{
+
             responsive:true,
+
             cutout:"58%",
+
             rotation:-90,
+
             circumference:180,
+
             plugins:{
+
                 legend:{
                     position:"bottom",
                     align:"center",
-                    labels:{boxWidth:10,padding:10,font:{size:11}}
+                    labels:{
+                        boxWidth: 10,
+                        padding: 10,
+                        font:{
+                            size: 11
+                        }
+                    }
                 },
+
                 tooltip:{
                     callbacks:{
                         label:function(ctx){
@@ -2238,23 +2740,31 @@ fetch("profile_backend.csv?nocache="+Date.now())
                         }
                     }
                 }
-            }
-        }
-    });
-});
-}
 
-function updateStatusTicker(){
+            }
+
+        }
+
+    });
+
+});
+
+}
+  function updateStatusTicker(){
+
 let maxDose = -1;
 let latestTime = null;
 
 Object.values(window.latestTS).forEach(v=>{
+
     if(v.dose > maxDose){
         maxDose = v.dose;
     }
+
     if(!latestTime || v.time > latestTime){
         latestTime = v.time;
     }
+
 });
 
 if(maxDose < 0) return;
@@ -2263,23 +2773,32 @@ let css="";
 let status="";
 
 if(maxDose < 1000){
+
     css="status-green";
     status="Radioaktivitas lingkungan di wilayah NKRI dalam kategori AMAN dan SELAMAT";
+
 }
 else if(maxDose < 100000){
+
     css="status-yellow";
     status="Radioaktivitas lingkungan di wilayah NKRI dalam kategori SIAGA";
+
 }
 else if(maxDose < 1000000){
+
     css="status-orange";
     status="Radioaktivitas lingkungan di wilayah NKRI dalam kategori WASPADA";
+
 }
 else{
+
     css="status-red";
     status="Radioaktivitas lingkungan di wilayah NKRI dalam kategori BAHAYA";
+
 }
 
 let waktu="-";
+
 if(latestTime){
    waktu = latestTime.toLocaleString("id-ID",{
     day:"2-digit",
@@ -2305,14 +2824,21 @@ const msg =
 [${waktu}] ${status}`;
 
 document.getElementById("tickerText").innerHTML = msg;
+
 }
 
 setInterval(function(){
+
     if(document.getElementById("statusDonutModal").style.display==="block"){
+
         refreshStatusDonut();
+
     }
+
 },30000);
 </script>
+
+
 
 </body>
 </html>
