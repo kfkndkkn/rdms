@@ -1377,35 +1377,13 @@ if(zoom < 8){
     data = aggregateData(rawData, gridSize);
 } else {
     data = rawData;
+    data.sort((a,b)=>{
+        const sa=(window.profileIndex[normalizeName(a["NAMA UNIT"])]?.Status||"").toLowerCase();
+        const sb=(window.profileIndex[normalizeName(b["NAMA UNIT"])]?.Status||"").toLowerCase();
+        const order={offline:0,maintenance:1,online:2};
+        return (order[sa]||0)-(order[sb]||0);
+    });
 }
-
-// Urutkan data agar stasiun/agregasi offline & maintenance digambar terlebih dahulu,
-// sedangkan yang memiliki stasiun online digambar terakhir (paling depan & solid)
-data.sort((a,b)=>{
-    const getStatusFlags = (item) => {
-        if(item.stations){
-            let hasO = false, hasM = false, hasF = false;
-            item.stations.forEach(s=>{
-                const st = (window.profileIndex[normalizeName(s.name)]?.Status||"").toLowerCase();
-                if(st === "online") hasO = true;
-                if(st === "maintenance") hasM = true;
-                if(st === "offline") hasF = true;
-            });
-            return {hasO, hasM, hasF};
-        } else {
-            const st = (window.profileIndex[normalizeName(item["NAMA UNIT"])]?.Status||"").toLowerCase();
-            return {
-                hasO: st === "online",
-                hasM: st === "maintenance",
-                hasF: st === "offline"
-            };
-        }
-    };
-    const sa = getStatusFlags(a);
-    const sb = getStatusFlags(b);
-    const score = (s) => s.hasO ? 2 : (s.hasM ? 1 : 0);
-    return score(sa) - score(sb);
-});
 
 data.forEach(row=>{
 
@@ -1446,38 +1424,42 @@ color=getColor(dose);
 
 var hex;
 
-let statusFlags = (function(){
-    if(row.stations){
-        let hasO = false, hasM = false, hasF = false;
-        row.stations.forEach(s=>{
-            const st = (window.profileIndex[normalizeName(s.name)]?.Status||"").toLowerCase();
-            if(st === "online") hasO = true;
-            if(st === "maintenance") hasM = true;
-            if(st === "offline") hasF = true;
-        });
-        return {hasO, hasM, hasF};
-    } else {
-        const st = (window.profileIndex[normalizeName(stationName)]?.Status||"").toLowerCase();
-        return {
-            hasO: st === "online",
-            hasM: st === "maintenance",
-            hasF: st === "offline"
-        };
-    }
-})();
-
 let opacity = 0.85;
 let stroke = "#222";
+let hasMaintenance=false;
+let hasOffline=false;
 
-if(statusFlags.hasO){
-    opacity = 0.85;
-    stroke = "#222";
-} else if(statusFlags.hasM){
-    opacity = 0.45;
-    stroke = "#ff9800";
-} else if(statusFlags.hasF){
-    opacity = 0.30;
-    stroke = "#d32f2f";
+if(row.stations){
+    row.stations.forEach(s=>{
+        const profile=window.profileIndex[normalizeName(s.name)];
+        if(!profile) return;
+        const status=(profile.Status||"").toLowerCase();
+        if(status==="maintenance") hasMaintenance=true;
+        if(status==="offline") hasOffline=true;
+    });
+}else{
+    const profile=window.profileIndex[normalizeName(stationName)];
+    const status=(profile?.Status||"").toLowerCase();
+
+    if(status==="maintenance") hasMaintenance=true;
+    if(status==="offline") hasOffline=true;
+}
+
+const profileCurrent=window.profileIndex[normalizeName(stationName)];
+const statusCurrent=(profileCurrent?.Status||"").toLowerCase();
+const isTopOnline=(map.getZoom()>=8 && statusCurrent==="online");
+
+if(hasMaintenance){
+    opacity=isTopOnline?0.85:0.45;
+    stroke="#ff9800";
+}
+if(hasOffline){
+    opacity=isTopOnline?0.85:0.30;
+    stroke="#d32f2f";
+}
+
+if(isTopOnline){
+    opacity=0.85;
 }
 
 hex=createHex(lat,lon,radius,color,{
@@ -1530,22 +1512,42 @@ hex.on('click', function(){
   this.openPopup();
 });
 
-let targetLayer = onlineLayer;
-let statusTop = "online";
+let targetLayer=onlineLayer;
+let statusTop="online";
 
-if(statusFlags.hasO){
-    statusTop = "online";
-    targetLayer = onlineLayer;
-} else if(statusFlags.hasM){
-    statusTop = "maintenance";
-    targetLayer = maintenanceLayer;
-} else if(statusFlags.hasF){
-    statusTop = "offline";
-    targetLayer = offlineLayer;
+if(row.stations){
+    let hasOnline=false, hasMaintenance2=false, hasOffline2=false;
+    row.stations.forEach(s=>{
+        const st=(window.profileIndex[normalizeName(s.name)]?.Status||"").toLowerCase();
+        if(st==="online") hasOnline=true;
+        else if(st==="maintenance") hasMaintenance2=true;
+        else if(st==="offline") hasOffline2=true;
+    });
+    if(hasOnline){
+        statusTop="online";
+        targetLayer=onlineLayer;
+    }else if(hasMaintenance2){
+        statusTop="maintenance";
+        targetLayer=maintenanceLayer;
+    }else{
+        statusTop="offline";
+        targetLayer=offlineLayer;
+    }
+}else{
+    const profileTop = window.profileIndex[normalizeName(stationName)];
+    statusTop = (profileTop?.Status || "").toLowerCase();
+    if(statusTop==="offline"){
+        targetLayer=offlineLayer;
+    }else if(statusTop==="maintenance"){
+        targetLayer=maintenanceLayer;
+    }
 }
 
 hex.addTo(targetLayer);
-hex.bringToFront();
+
+if(statusTop==="online"){
+    hex.bringToFront();
+}
 
 if(!row.count || map.getZoom() >= 5){
   var labelOffsetLat = lat + (radius/111111)*0.9;
