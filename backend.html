@@ -980,8 +980,15 @@ style="width:98%;border-radius:8px;margin-bottom:10px;border:1px solid rgba(0,0,
 
 <div style="flex:3;position:relative">
 
-<!-- DATE PICKER (OUTSIDE CHART) -->
+<!-- DATE PICKER & GRANULARITY BAR -->
 <div id="datePickerBar">
+  <div class="date-group">
+    <label>Granularity</label>
+    <div style="display:flex;gap:4px;margin-top:2px;">
+      <button id="btnDaily" onclick="setGranularity('daily')" style="padding:6px 10px;background:#2b83ba;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:bold;font-size:11px;">Per Hari</button>
+      <button id="btnHourly" onclick="setGranularity('hourly')" style="padding:6px 10px;background:#e0e0e0;color:#333;border:none;border-radius:4px;cursor:pointer;font-weight:bold;font-size:11px;">Per Jam</button>
+    </div>
+  </div>
   <div class="date-group">
     <label>From</label>
    <input type="date" id="dateFrom">
@@ -1289,7 +1296,6 @@ count++;
 });
 var avgDose = count > 0 ? sum / count : (g.count > 0 ? g.doseSum / g.count : null);
 
-// Urutkan stations agar stasiun dengan status online/solid berada di urutan teratas (index 0)[cite: 4]
 g.stations.sort((a,b)=>{
     const statA = (window.profileIndex[normalizeName(a.name)]?.Status || "").toLowerCase();
     const statB = (window.profileIndex[normalizeName(b.name)]?.Status || "").toLowerCase();
@@ -1379,7 +1385,6 @@ window.stationIndex[key] = r;
 var zoom=map.getZoom();
 var data;
 
-// Terapkan agregasi saat zoom jauh (< 8) dan urutkan agar status online/solid tampil di depan, serta pisahkan individual saat zoom dekat (>= 8)
 if(zoom < 8){
     var gridSize = zoom < 6 ? 1.5 : 0.75;
     data = aggregateData(rawData, gridSize);
@@ -1496,7 +1501,6 @@ hex=createHex(lat,lon,radius,color,{
 
 var popupContent = "";
 
-// ===== ZOOM JAUH (AGGREGATED) =====
 if(row.count){
   var listHTML = "<div style='max-height:180px;overflow-y:auto'><b>Aggregated Stations ("+row.count+")</b><br><br>";
   row.stations.forEach(s=>{
@@ -1517,7 +1521,6 @@ if(row.count){
   popupContent = listHTML;
 }
 
-// ===== ZOOM DEKAT (1 STATION) =====
 else{
   var stationName = row["NAMA UNIT"];
   var key = normalizeName(stationName);
@@ -1811,8 +1814,17 @@ var filteredLabels=[];
 var filteredValues=[];
 var isFiltered = false;
 
+// Variabel Pendukung Granularitas
+var currentStationRawData = [];
+var currentGranularity = 'daily';
+var dailyLabels = [];
+var dailyValues = [];
+var hourlyLabels = [];
+var hourlyValues = [];
+
 function openTS(station){
 isFiltered = false;
+currentGranularity = 'daily';
 var key = normalizeName(station);
 var stationData = window.stationIndex[key];
 var profileData = window.profileIndex[key];
@@ -1898,68 +1910,139 @@ fetch("timeseries_all.csv?nocache="+Date.now())
 .then(r=>r.text())
 .then(text=>{
 
-var data=Papa.parse(text,{header:true}).data;
+var data=Papa.parse(text,{header:true, skipEmptyLines:true}).data;
 const now = new Date();
 const oneMonthAgo = new Date();
 oneMonthAgo.setMonth(now.getMonth() - 1);
 
-var dailyGroup = {};
-data.forEach(r=>{
-if(normalizeName(r.station) === normalizeName(station)){
+currentStationRawData = data.filter(r=>{
+if(normalizeName(r.station) !== normalizeName(station)) return false;
 var t = new Date(r.time);
 var v = parseFloat(r.dose);
-
-if(t >= oneMonthAgo && t <= now && !isNaN(v)){
-var dayKey = t.toISOString().split("T")[0];
-if(!dailyGroup[dayKey]){
-dailyGroup[dayKey] = [];
-}
-dailyGroup[dayKey].push(v);
-}
-}
+return t >= oneMonthAgo && t <= now && !isNaN(v);
 });
 
-allLabels = [];
-allValues = [];
-
-Object.keys(dailyGroup).sort().forEach(day=>{
-var arr = dailyGroup[day];
-var avg = arr.reduce((a,b)=>a+b,0) / arr.length;
-allLabels.push(day);
-allValues.push(avg);
-});
-
-if(allValues.length===0){
-document.getElementById("tsStats").innerHTML="No data available";
-return;
-}
-
-var fromInput = document.getElementById("dateFrom");
-var toInput = document.getElementById("dateTo");
-
-if(allLabels.length > 0){
-  fromInput.value = allLabels[0].replace(" ", "T");
-  toInput.value = allLabels[allLabels.length-1].replace(" ", "T");
-}
-
-fromInput.onchange = applyDateFilter;
-toInput.onchange = applyDateFilter;
-var slider=document.getElementById("timeSlider");
-var lastIndex=allValues.length-1;
-
-slider.min=0;
-slider.max=lastIndex;
-slider.step=1;
-slider.value=lastIndex;
-
-updateChartUnified(lastIndex);
-
-slider.oninput=function(){
-updateChartUnified(parseInt(this.value));
-};
+processTimeSeriesData();
 
 });
 
+}
+
+function processTimeSeriesData(){
+  dailyLabels = [];
+  dailyValues = [];
+  hourlyLabels = [];
+  hourlyValues = [];
+
+  var dailyGroup = {};
+
+  currentStationRawData.forEach(r=>{
+    var t = new Date(r.time);
+    var v = parseFloat(r.dose);
+
+    // Hourly granularity
+    hourlyLabels.push(r.time);
+    hourlyValues.push(v);
+
+    // Daily grouping
+    var dayKey = t.toISOString().split("T")[0];
+    if(!dailyGroup[dayKey]){
+      dailyGroup[dayKey] = [];
+    }
+    dailyGroup[dayKey].push(v);
+  });
+
+  Object.keys(dailyGroup).sort().forEach(day=>{
+    var arr = dailyGroup[day];
+    var avg = arr.reduce((a,b)=>a+b,0) / arr.length;
+    dailyLabels.push(day);
+    dailyValues.push(avg);
+  });
+
+  if(currentGranularity === 'daily'){
+    allLabels = dailyLabels;
+    allValues = dailyValues;
+  } else {
+    allLabels = hourlyLabels;
+    allValues = hourlyValues;
+  }
+
+  if(allValues.length===0){
+    document.getElementById("tsStats").innerHTML="No data available";
+    if(tsChart){ tsChart.destroy(); tsChart = null; }
+    return;
+  }
+
+  var fromInput = document.getElementById("dateFrom");
+  var toInput = document.getElementById("dateTo");
+
+  if(allLabels.length > 0){
+    fromInput.value = allLabels[0].split(" ")[0];
+    toInput.value = allLabels[allLabels.length-1].split(" ")[0];
+  }
+
+  fromInput.onchange = applyDateFilter;
+  toInput.onchange = applyDateFilter;
+
+  var slider=document.getElementById("timeSlider");
+  var lastIndex=allValues.length-1;
+
+  slider.min=0;
+  slider.max=lastIndex;
+  slider.step=1;
+  slider.value=lastIndex;
+
+  isFiltered = false;
+  updateChartUnified(lastIndex);
+  updateGranularityButtons();
+}
+
+function setGranularity(gran){
+  currentGranularity = gran;
+  isFiltered = false;
+
+  if(currentGranularity === 'daily'){
+    allLabels = dailyLabels;
+    allValues = dailyValues;
+  } else {
+    allLabels = hourlyLabels;
+    allValues = hourlyValues;
+  }
+
+  if(allValues.length === 0) return;
+
+  var slider = document.getElementById("timeSlider");
+  var lastIndex = allValues.length - 1;
+
+  slider.min = 0;
+  slider.max = lastIndex;
+  slider.value = lastIndex;
+
+  if(allLabels.length > 0){
+    document.getElementById("dateFrom").value = allLabels[0].split(" ")[0];
+    document.getElementById("dateTo").value = allLabels[allLabels.length-1].split(" ")[0];
+  }
+
+  updateChartUnified(lastIndex);
+  updateGranularityButtons();
+}
+
+function updateGranularityButtons(){
+  var btnDaily = document.getElementById("btnDaily");
+  var btnHourly = document.getElementById("btnHourly");
+  if(!btnDaily || !btnHourly) return;
+
+  if(currentGranularity === 'daily'){
+    btnDaily.style.background = "#2b83ba";
+    btnDaily.style.color = "#fff";
+    btnHourly.style.background = "#e0e0e0";
+    btnHourly.style.color = "#333";
+  } else {
+    btnHourly.style.background = "#2b83ba";
+    btnHourly.style.color = "#fff";
+    btnDaily.style.background = "#e0e0e0";
+    btnDaily.style.color = "#333";
+  }
 }
 
 function applyDateFilter(){
@@ -1969,15 +2052,19 @@ function applyDateFilter(){
 
   var fromDate = new Date(fromVal);
   var toDate = new Date(toVal);
+  toDate.setHours(23, 59, 59, 999);
+
+  let sourceLabels = (currentGranularity === 'daily') ? dailyLabels : hourlyLabels;
+  let sourceValues = (currentGranularity === 'daily') ? dailyValues : hourlyValues;
 
   filteredLabels = [];
   filteredValues = [];
 
-  for(let i=0;i<allLabels.length;i++){
-    let t = new Date(allLabels[i]);
+  for(let i=0;i<sourceLabels.length;i++){
+    let t = new Date(sourceLabels[i]);
     if(t >= fromDate && t <= toDate){
-      filteredLabels.push(allLabels[i]);
-      filteredValues.push(allValues[i]);
+      filteredLabels.push(sourceLabels[i]);
+      filteredValues.push(sourceValues[i]);
     }
   }
 
@@ -2102,8 +2189,8 @@ function updateChartUnified(index){
   "<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
   "<b>Max:</b> "+max.toFixed(2)+" nSv/h";
 
-  document.getElementById("dateFrom").value = slicedLabels[0].replace(" ", "T");
-  document.getElementById("dateTo").value = slicedLabels[slicedLabels.length-1].replace(" ", "T");
+  document.getElementById("dateFrom").value = slicedLabels[0].split(" ")[0];
+  document.getElementById("dateTo").value = slicedLabels[slicedLabels.length-1].split(" ")[0];
 }
 
 function closeTS(){
