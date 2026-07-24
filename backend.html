@@ -1113,9 +1113,9 @@ var labelLayer=L.layerGroup().addTo(map);
 
 // Status filter
 var statusFilters={online:true,offline:true,maintenance:true};
-var onlineLayer=L.layerGroup().addTo(map);
 var offlineLayer=L.layerGroup().addTo(map);
 var maintenanceLayer=L.layerGroup().addTo(map);
+var onlineLayer=L.layerGroup().addTo(map);
 
 function syncStationLabels(){
     labelLayer.clearLayers();
@@ -1371,10 +1371,22 @@ window.stationIndex[key] = r;
 var zoom=map.getZoom();
 var data;
 
-// Terapkan agregasi saat zoom jauh (< 8), dan pisahkan individual saat zoom dekat (>= 8)
+// Terapkan agregasi saat zoom jauh (< 8) dan urutkan agar status online/solid tampil di depan, serta pisahkan individual saat zoom dekat (>= 8)
 if(zoom < 8){
     var gridSize = zoom < 6 ? 1.5 : 0.75;
     data = aggregateData(rawData, gridSize);
+    data.sort((a,b)=>{
+        const getOrder = (r) => {
+            if(!r.stations) return 0;
+            let hasOnline = r.stations.some(s=>(window.profileIndex[normalizeName(s.name)]?.Status||"").toLowerCase()==="online");
+            let hasMaint = r.stations.some(s=>(window.profileIndex[normalizeName(s.name)]?.Status||"").toLowerCase()==="maintenance");
+            let hasOff = r.stations.some(s=>(window.profileIndex[normalizeName(s.name)]?.Status||"").toLowerCase()==="offline");
+            if(hasOnline) return 2;
+            if(hasMaint) return 1;
+            return 0;
+        };
+        return getOrder(a) - getOrder(b);
+    });
 } else {
     data = rawData;
     data.sort((a,b)=>{
