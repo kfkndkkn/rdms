@@ -1289,6 +1289,14 @@ count++;
 });
 var avgDose = count > 0 ? sum / count : (g.count > 0 ? g.doseSum / g.count : null);
 
+// Urutkan stations agar stasiun dengan status online/solid berada di urutan teratas (index 0)[cite: 4]
+g.stations.sort((a,b)=>{
+    const statA = (window.profileIndex[normalizeName(a.name)]?.Status || "").toLowerCase();
+    const statB = (window.profileIndex[normalizeName(b.name)]?.Status || "").toLowerCase();
+    const order = { offline: 0, maintenance: 1, online: 2 };
+    return (order[statB] || 0) - (order[statA] || 0);
+});
+
 result.push({
 lat:g.latSum/g.count,
 lon:g.lonSum/g.count,
