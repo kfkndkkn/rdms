@@ -1442,13 +1442,19 @@ let hasMaintenance=false;
 let hasOffline=false;
 
 if(row.stations){
+    let hasOnline = false;
     row.stations.forEach(s=>{
         const profile=window.profileIndex[normalizeName(s.name)];
         if(!profile) return;
         const status=(profile.Status||"").toLowerCase();
+        if(status==="online") hasOnline=true;
         if(status==="maintenance") hasMaintenance=true;
         if(status==="offline") hasOffline=true;
     });
+    if(hasOnline){
+        hasOffline = false;
+        hasMaintenance = false;
+    }
 }else{
     const profile=window.profileIndex[normalizeName(stationName)];
     const status=(profile?.Status||"").toLowerCase();
