@@ -1,0 +1,32 @@
+name: Sync CSV to Supabase
+
+on:
+  push:
+    branches:
+      - main  # Ganti dengan 'master' jika branch utama Anda master
+    paths:
+      - 'timeseries_all.csv'
+  workflow_dispatch:
+
+jobs:
+  sync-to-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          # Baris 'cache: "pip"' sudah dihapus di sini agar tidak error
+
+      - name: Install dependencies
+        run: |
+          pip install pandas supabase
+
+      - name: Run Supabase Sync Script
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python sync_to_supabase.py
