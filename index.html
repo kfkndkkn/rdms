@@ -1,2324 +1,1252 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<meta charset="utf-8">
-
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-
-<title>Indonesia Radiation Data Monitoring System</title>
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-
-html,body{
-margin:0;
-padding:0;
-font-family:Arial;
-
-height:100%;        
-overflow:hidden;    
-}
-
-#header{
-    position:absolute;
-    top:0;
-    left:0;
-    right:0;
-    height:70px;
-    background:#0b1e3f;
-    display:flex;
-    align-items:center;
-    padding:0 20px;
-    box-sizing:border-box;
-    color:white;
-    z-index:9999;
-}
-
-#header img{
-height:42px;
-margin-right:15px;
-}
-
-#map{
-width:100%;
-height:100%;
-}
-
-.unit-label{
-background:rgba(255,255,255,0.85);
-border-radius:6px;
-padding:3px 6px;
-font-size:11px;
-font-weight:bold;
-color:#111;
-border:1px solid rgba(0,0,0,0.25);
-box-shadow:0 1px 3px rgba(0,0,0,0.3);
-white-space:nowrap;
-}
-
-.legend{
-background:white;
-padding:12px;
-font-size:12px;
-box-shadow:0 2px 6px rgba(0,0,0,0.3);
-}
-
-.leaflet-popup-content{
-font-size:14px;
-}
-
-@media (max-width:768px){
-.leaflet-popup-content{
-font-size:18px;
-}
-}
-
-/* TIME SERIES */
-
-#tsModal{
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.6);
-z-index:99999;
-}
-
-#tsBox{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:white;
-width:90%;
-max-width:900px;
-border-radius:10px;
-overflow:hidden;
-}
-
-#tsHeader{
-background:#0b1e3f;
-color:white;
-padding:12px 16px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-font-weight:bold;
-}
-
-#tsContent{
-padding:20px;
-}
-
-#timeSlider{
-width:100%;
-margin-top:10px;
-}
-
-#selectedTime{
-margin-top:6px;
-font-size:12px;
-color:#444;
-}
-
-#tsStats{
-margin-top:10px;
-font-size:14px;
-}
-/* STATUS KHUSUS TS MODAL */
-#tsModal .status-online{
-color:#00b050;
-font-weight:bold;
-}
-
-#tsModal .status-oos{
-color:#000;
-font-weight:bold;
-}
-#tsContent{
-min-height:420px;
-align-items:stretch;
-}
-
-#tsChart{
-width:100% !important;
-height:100% !important;
-}
-
-
-#tsContent > div:last-child{
-display:flex;
-flex-direction:column;
-}
-
-#tsContent > div:first-child{
-overflow-y:auto;
-}
-
-#tsMeta{
-border:1px solid rgba(120,120,120,0.4);
-padding:12px 14px;
-border-radius:10px;
-
-box-shadow:0 4px 12px rgba(0,0,0,0.15);
-line-height:1.6;
-}
-/* ===== RATA KIRI & KANAN ===== */
-
-#tsContent{
-display:flex;
-gap:20px;
-align-items:stretch; 
-}
-
-/* LEFT tetap */
-#tsContent > div:first-child{
-width:260px;
-display:flex;
-flex-direction:column;
-}
-
-/* RIGHT PANEL FULL HEIGHT */
-#tsContent > div:last-child{
-flex:1;
-display:flex;
-flex-direction:column;
-}
-
-/* CHART FLEX FULL */
-#tsContent{
-display:flex;
-gap:20px;
-align-items:stretch;
-min-height:420px;
-}
-
-/* LEFT */
-#tsContent > div:first-child{
-width:260px;
-display:flex;
-flex-direction:column;
-}
-
-/* RIGHT */
-#tsContent > div:last-child{
-flex:1;
-display:flex;
-flex-direction:column;
-}
-
-/* CHART AREA */
-#tsContent > div:last-child > div:first-child{
-flex:3;   
-position:relative;
-}
-
-/* SLIDER + INFO */
-#timeSlider,
-#selectedTime,
-#tsStats{
-flex-shrink:0;
-}
-
-/* CANVAS FULL */
-#tsChart{
-width:100% !important;
-height:100% !important;
-}
-
-
-
-background:linear-gradient(180deg,#173a6b,#1f5fa8);
-padding:14px;
-color:white;
-z-index:9999;
-border-radius:10px;
-
-margin-bottom:140px;
-
-transform:translateX(-110%);
-transition:transform 0.3s ease;
-}
-@media (min-width:1367px){
-  #sidePanel{
-    max-height: calc(100vh - 120px); 
-    overflow-y: auto;               
-  }
-}
-
-@media (min-width:1600px){
-  #sidePanel{
-    width:320px; 
-  }
-}
-  
-.panel-box{
-background:#f4f7fb;
-box-shadow:0 2px 6px rgba(0,0,0,0.15);
-color:#222;
-padding:8px;
-margin-bottom:10px;
-border-radius:6px;
-text-align:center;
-}
-
-.panel-box.highlight{
-background:#2b6cb0;
-color:white;
-}
-
-.title{
-font-size:13px;
-font-weight:bold;
-margin-bottom:5px;
-}
-
-.big{
-font-size:28px;
-font-weight:bold;
-}
-
-.sub{
-font-size:12px;
-opacity:0.9;
-}
-
-#avgBarChart{
-height:180px !important; 
-}
-
-
-@media (min-width:1367px){
-  #avgBarChart{
-    height:280px !important;  
-  }
-}
-
-.legend-highlight {
-  outline: 3px solid #000;
-  transform: scale(1.05);
-  transition: 0.2s;
-}
-/* DATE PICKER BAR */
-#datePickerBar{
-display:flex;
-justify-content:flex-end;
-gap:12px;
-
-margin-bottom:10px;
-padding:10px 12px;
-
-background:#f4f7fb;
-border-radius:10px;
-
-box-shadow:0 2px 6px rgba(0,0,0,0.1);
-}
-
-/* GROUP */
-.date-group{
-display:flex;
-flex-direction:column;
-font-size:11px;
-color:#555;
-}
-
-/* INPUT STYLE MODERN */
-#datePickerBar input{
-border:1px solid #ccc;
-border-radius:8px;
-padding:6px 8px;
-
-font-size:12px;
-font-family:'Segoe UI', sans-serif;
-
-transition:0.2s;
-}
-
-/* HOVER */
-#datePickerBar input:hover{
-border-color:#2b83ba;
-}
-
-/* FOCUS */
-#datePickerBar input:focus{
-outline:none;
-border-color:#2b83ba;
-box-shadow:0 0 4px rgba(43,131,186,0.4);
-}
-/* MAIN FLEX LAYOUT */
-#mainLayout{
-display:flex;
-height:calc(100vh - 70px); /* 🔥 FIX UTAMA */
-margin-top:70px;
-}
-
-/* SIDEBAR */
-#sidePanel{
-  width:300px;
-  background:linear-gradient(180deg,#173a6b,#1f5fa8);
-  color:white;
-  padding:16px;
-
-  transition:0.3s;
-  overflow-y:auto;
-
-
-  box-shadow: 
-    2px 0 8px rgba(0,0,0,0.15),
-    8px 0 24px rgba(0,0,0,0.2);
-
-
-  border-right:1px solid rgba(255,255,255,0.08);
-  transform: translateX(0);
-}
-
-/* COLLAPSE */
-#sidePanel.collapsed{
-width:0;
-padding:0;
-overflow:hidden;
-  transform: translateX(-100%);
-  box-shadow:none; 
-}
-
-/* MAIN CONTENT */
-#mainContent{
-flex:1;
-transition:0.3s;
-}
-
-#legendInside{
-margin-top:12px;
- min-width:0;
-width:100%;              
-box-sizing:border-box;   
-background:white;
-color:#000;
-
-border-radius:8px;
-padding:10px;
-
-box-shadow:0 2px 6px rgba(0,0,0,0.2);
-}
-.summary-box{
-  background:linear-gradient(135deg,#ffffff,#eaf2ff);
-  border-left:5px solid #2b83ba;
-  text-align:left;
-  padding:12px;
-}
-
-.summary-title{
-  font-size:16px;
-  font-weight:bold;
-  color:#0b1e3f;
-  margin-bottom:4px;
-}
-
-.summary-sub{
-  font-size:12px;
-  color:#444;
-}
-
-.leaflet-control {
-  z-index: 1000 !important;
-}
-
-.legend {
-  z-index: 2000 !important;
-  position: relative;
-}
-/* Naikkan legend agar tidak tertutup ticker */
-.leaflet-bottom.leaflet-left{
-    bottom:40px !important;
-}
-
-.leaflet-bottom.leaflet-right{
-    bottom:40px !important;
-}
-/* ===========================
-RUNNING STATUS BAR
-=========================== */
-
-#statusTicker{
-position:fixed;
-bottom:0;
-left:0;
-width:100%;
-height:36px;
-display:flex;
-align-items:center;
-overflow:hidden;
-font-size:15px;
-font-weight:bold;
-color:#fff;
-z-index:999999;
-box-shadow:0 -2px 8px rgba(0,0,0,.3);
-
-transition:left .3s;
-}
-
-#statusTicker marquee{
-width:100%;
-padding-left:10px;
-}
-
-.status-green{
-background:#0b8f3c;
-}
-
-.status-yellow{
-background:#ffe600;
-color:#000;
-}
-
-.status-orange{
-background:#ff8c00;
-}
-
-.status-red{
-background:#d90000;
-}
-#loginModal{
-display:none;
-position:fixed;
-left:0;
-top:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,.55);
-z-index:9999999;
-}
-
-#loginBox{
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    width:430px;
-    background:#fff;
-    border-radius:20px;
-    padding:35px;
-    box-shadow:0 15px 40px rgba(0,0,0,.35);
-    border-top:6px solid #0b1e3f;
-}
-
-#loginBox input{
-width:100%;
-padding:10px;
-margin-top:8px;
-margin-bottom:15px;
-font-size:14px;
-}
-
-#loginBox button{
-padding:8px 18px;
-cursor:pointer;
-}  
-</style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <title>Indonesia Radiation Data Monitoring System (I-RDMS)</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Leaflet CSS & FontAwesome Icons -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        #map { 
+            width: 100%; 
+            height: 100%; 
+            z-index: 1; 
+        }
+
+        /* Marker & Hexagon Styling */
+        .unit-label {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #0f172a;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            white-space: nowrap;
+        }
+
+        /* Catchy Hexagon Styling */
+        .hex-catchy {
+            filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.5));
+            cursor: pointer;
+            transition: all 0.25s ease-in-out;
+        }
+        .hex-catchy:hover {
+            stroke: #ffffff !important;
+            stroke-width: 3px !important;
+            fill-opacity: 1 !important;
+            filter: drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8)) drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.6));
+        }
+
+        .leaflet-popup-content-wrapper {
+            padding: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+        .leaflet-popup-content {
+            margin: 0;
+            line-height: 1.5;
+            font-size: 13px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        .north-compass-box {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 8px;
+            padding: 6px 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+        }
+
+        .sidebar-smooth {
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* RUNNING STATUS TICKER */
+        #statusTicker {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            z-index: 9999;
+            box-shadow: 0 -2px 10px rgba(0,0,0,.2);
+            transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #statusTicker marquee {
+            width: 100%;
+            padding-left: 10px;
+        }
+
+        .status-green { background: #059669; }
+        .status-yellow { background: #eab308; color: #0f172a; }
+        .status-orange { background: #ea580c; }
+        .status-red { background: #dc2626; }
+
+        /* STATUS TS MODAL */
+        .status-online { color: #059669; font-weight: bold; }
+        .status-oos { color: #64748b; font-weight: bold; }
+
+        .leaflet-bottom.leaflet-left, .leaflet-bottom.leaflet-right {
+            bottom: 42px !important;
+        }
+
+        /* Legend Styling */
+        .legend {
+            background: white;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            border: 1px solid #e2e8f0;
+        }
+    </style>
 </head>
+<body class="bg-slate-100 flex flex-col h-full w-full overflow-hidden text-slate-800">
 
-<body>
+    <!-- Header Navigation (Putih) -->
+    <header class="h-16 bg-white border-b border-slate-200 text-slate-800 flex items-center justify-between px-4 z-[9999] shadow-sm flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <button onclick="toggleSidebar()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2.5 rounded-lg transition-colors border border-slate-200" title="Toggle Sidebar">
+                <i class="fa-solid fa-bars text-lg text-amber-500"></i>
+            </button>
+            <img src="logo/logo-bapeten.png" alt="Logo BAPETEN" class="h-9 w-auto">
+            <div>
+                <h1 class="font-bold text-sm sm:text-lg tracking-wide text-slate-900 leading-tight">Indonesia Radiation Data Monitoring System</h1>
+                <p class="text-[10px] text-slate-500 font-medium hidden sm:block">Direktorat Keteknikan dan Kesiapsiagaan Nuklir — BAPETEN</p>
+            </div>
+        </div>
 
-<div id="header">
+        <button id="loginBtn" onclick="openLogin()" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold px-4 py-2 rounded-lg text-xs transition-all flex items-center gap-2 shadow-md">
+            <i class="fa-solid fa-right-to-bracket"></i> Login
+        </button>
+    </header>
 
-<button onclick="togglePanel()" style="
-margin-right:15px;
-background:#173a6b;
-color:white;
-border:none;
-padding:8px 12px;
-border-radius:6px;
-cursor:pointer;
-font-size:16px;
-">
-☰
-</button>
+    <!-- Main Workspace -->
+    <div class="flex-1 flex relative overflow-hidden h-full w-full">
 
-<img src="logo/logo-bapeten.png">
-<h2 style="
-flex:1;
-margin:0;
-font-size:28px;
-">
-Indonesia Radiation Data Monitoring System
-</h2>
+        <!-- Sidebar Floating Panel (Default Tertutup: -translate-x-full) -->
+        <aside id="sidePanel" class="absolute top-0 left-0 h-[calc(100%-36px)] w-80 sm:w-96 bg-white z-[1000] shadow-2xl flex flex-col border-r border-slate-200 sidebar-smooth transform -translate-x-full">
+            <div class="w-full flex flex-col h-full">
+                <!-- Sidebar Header -->
+                <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 flex-shrink-0">
+                    <h2 class="font-bold text-slate-800 text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-amber-500"></i> Statistik & Monitoring
+                    </h2>
+                    <button onclick="toggleSidebar()" class="text-slate-400 hover:text-slate-600 transition-colors p-1.5 rounded-lg hover:bg-slate-200">
+                        <i class="fa-solid fa-chevron-left text-lg"></i>
+                    </button>
+                </div>
 
-<button
-id="loginBtn"
-onclick="openLogin()"
-style="
-background:#2b83ba;
-color:white;
-border:none;
-padding:8px 18px;
-border-radius:6px;
-cursor:pointer;
-font-size:14px;
-flex-shrink:0;">
-Login
-</button>
-  
-</div>
+                <!-- Last Update Summary Card -->
+                <div class="p-4 bg-gradient-to-br from-slate-900 to-slate-800 text-white flex-shrink-0">
+                    <div class="text-[11px] font-semibold uppercase tracking-wider text-amber-400 mb-1">Status Pembaruan</div>
+                    <div id="lastUpdate" class="text-xs text-slate-300 font-medium">Last Updated : -</div>
+                </div>
 
-<div id="mainLayout">
+                <!-- Scrollable Content -->
+                <div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
+                    <!-- Max & Min Dose Cards (Atas-Bawah: grid-cols-1) -->
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl shadow-sm text-center">
+                            <div class="text-[11px] font-bold text-amber-800 uppercase mb-1">Max Dose Rate</div>
+                            <div id="maxValue" class="text-xl font-black text-amber-600">-</div>
+                            <div id="maxStation" class="text-[11px] text-amber-700 font-medium truncate mt-1">-</div>
+                        </div>
 
-  <!-- SIDEBAR -->
-  <div id="sidePanel" class="collapsed">
-<div class="panel-box summary-box">
-  <div class="summary-title">Statistic Summary</div>
-  <div id="lastUpdate" class="summary-sub">Last Updated : -</div>
-</div>
-    <div class="panel-box highlight">
-      <div class="title">Maximum Dose Rate (nSv/h)</div>
-      <div id="maxValue" class="big">-</div>
-      <div id="maxStation" class="sub">-</div>
+                        <div class="bg-sky-50 border border-sky-200 p-3 rounded-xl shadow-sm text-center">
+                            <div class="text-[11px] font-bold text-sky-800 uppercase mb-1">Min Dose Rate</div>
+                            <div id="minValue" class="text-xl font-black text-sky-600">-</div>
+                            <div id="minStation" class="text-[11px] text-sky-700 font-medium truncate mt-1">-</div>
+                        </div>
+                    </div>
+
+                    <!-- 7 Days Average Chart (Rekap Rata-Rata) -->
+                    <div class="bg-white border border-slate-200 p-3.5 rounded-xl shadow-sm">
+                        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-bar text-sky-600"></i> Rata-Rata Dosis 7 Hari (nSv/h)
+                        </h3>
+                        <div class="h-52 w-full relative">
+                            <canvas id="avgBarChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Search Filter for Stations -->
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">Cari Stasiun Pemantau</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                            <input type="text" id="search-input" onkeyup="filterStationList()" placeholder="Ketik nama stasiun..." class="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Station List -->
+                    <div>
+                        <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex justify-between items-center">
+                            <span>Daftar Stasiun</span>
+                            <span id="stationCountBadge" class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[10px]">0 Stasiun</span>
+                        </div>
+                        <div id="sidebarStationList" class="space-y-1.5 divide-y divide-slate-100"></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Map Canvas Area -->
+        <main class="w-full h-full relative bg-slate-100 overflow-hidden">
+            <!-- Tombol Buka Panel Default Tampil -->
+            
+
+            <div id="map"></div>
+        </main>
     </div>
 
-    <div class="panel-box highlight">
-      <div class="title">Minimum Dose Rate (nSv/h)</div>
-      <div id="minValue" class="big">-</div>
-      <div id="minStation" class="sub">-</div>
+    <!-- Running Status Ticker Bar -->
+    <div id="statusTicker" class="status-green">
+        <marquee id="tickerText" scrollamount="6"></marquee>
     </div>
 
-    <div class="panel-box">
-      <div class="title">Average Dose Rate in Last 7 Days (nSv/h)</div>
-      <canvas id="avgBarChart"></canvas>
+    <!-- Login Modal -->
+    <div id="loginModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[999999] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 border-t-8 border-slate-900 relative">
+            <div class="text-center mb-6">
+                <img src="logo/logo-bapeten.png" alt="Logo BAPETEN" class="w-20 mx-auto mb-2">
+                <h2 class="text-2xl font-black text-slate-900">I-RDMS Login</h2>
+                <p class="text-xs text-slate-500">Indonesia Radiation Data Monitoring System</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Username</label>
+                    <input id="username" type="text" placeholder="Masukkan username" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
+                    <input id="password" type="password" placeholder="Masukkan password" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                </div>
+
+                <div id="loginError" class="hidden text-xs text-red-600 font-bold text-center bg-red-50 py-2 rounded-lg border border-red-200">
+                    Username atau Password salah
+                </div>
+
+                <div class="flex justify-between gap-3 pt-2">
+                    <button onclick="closeLogin()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-lg text-xs transition-colors">
+                        Batal
+                    </button>
+                    <button onclick="login()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-bold py-2 rounded-lg text-xs transition-colors shadow-md">
+                        Login
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
-  </div>
-
-  <!-- MAIN CONTENT -->
-  <div id="mainContent">
-    <div id="map"></div>
-  </div>
-
-</div>
-
-
-
-<div class="panel-box">
-<div class="title">Average Dose Rate in Last 7 Days (nSv/h)</div>
-<canvas id="avgBarChart"></canvas>
-</div>
-
-</div>
-  
-<div id="statusTicker" class="status-green">
-    <marquee id="tickerText" scrollamount="6"></marquee>
-</div>
-  <div id="loginModal">
-
-<div id="loginBox">
-
-<div style="text-align:center">
-
-<img src="logo/logo-bapeten.png"
-style="width:90px;margin-bottom:10px;">
-
-<h2 style="
-margin:5px 0;
-color:#0b1e3f;
-font-size:34px;">
-I-RDMS Login
-</h2>
-
-<div style="
-color:#666;
-margin-bottom:25px;">
-Indonesia Radiation Data Monitoring System
-</div>
-
-</div>
-
-<input
-id="username"
-placeholder="Username">
-
-<input
-id="password"
-type="password"
-placeholder="Password">
-
-<div
-id="loginError"
-style="
-display:none;
-color:#d00000;
-font-weight:bold;
-text-align:center;
-margin-bottom:15px;">
-Username atau Password salah
-</div>
-
-<div style="
-display:flex;
-justify-content:space-between;">
-
-<button
-onclick="closeLogin()">
-Cancel
-</button>
-
-<button
-onclick="login()">
-Login
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-<div id="tsModal">
-<div id="tsBox">
-
-<div id="tsHeader">
-<div id="tsTitle">Time Series</div>
-<button onclick="closeTS()" style="background:#c00;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer">Close</button>
-</div>
-
-<div id="tsContent" style="display:flex;gap:20px;align-items:stretch">
-
-<!-- LEFT -->
-<div style="width:260px;display:flex;flex-direction:column">
-
-<img id="tsImage" src="" 
-style="width:98%;border-radius:8px;margin-bottom:10px;border:1px solid rgba(0,0,0,0.2);box-shadow:0 2px 6px rgba(0,0,0,0.15)">
-
-<div id="tsMeta" style="font-size:13px;line-height:1.5"></div>
-
-</div>
-
-<!-- RIGHT -->
-<div style="flex:1;display:flex;flex-direction:column">
-
-<div style="flex:3;position:relative">
-
-<!-- DATE PICKER (OUTSIDE CHART) -->
-<div id="datePickerBar">
-  <div class="date-group">
-    <label>From</label>
-   <input type="date" id="dateFrom">
-  </div>
-
-  <div class="date-group">
-    <label>To</label>
-    <input type="date" id="dateTo">
-  </div>
-</div>
-
-<!-- CHART -->
-<div style="flex:3;position:relative">
-  <canvas id="tsChart"></canvas>
-</div>
-
-  <input type="range" id="timeSlider">
-  <div id="selectedTime"></div>
-  <div id="tsStats"></div>
-
-</div>
-
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
-
-// BASEMAP
-
-function normalizeName(name){
-return (name || "").toString().trim().toLowerCase().replace(/\s+/g," ");
-}
-
-window.stationIndex = {};
-window.profileIndex = {};
-
-// function loadProfile()
-// function loadCSV()
-// function openTS()
-// dll
-
-const zoomOffsets = {
-    "cilacap":      {lat:-0.12, lon:-0.18},
-    "banjarnegara": {lat: 0.12, lon: 0.18}
-};
-
-function applyZoomOffset(name, lat, lon){
-
-    if(map.getZoom() >= 8){
-        return {lat, lon};
-    }
-
-    const o = zoomOffsets[normalizeName(name)];
-
-    if(!o){
-        return {lat, lon};
-    }
-
-    return {
-        lat: lat + o.lat,
-        lon: lon + o.lon
-    };
-}
-function loadProfile(){
-
-fetch("profile.csv?nocache="+Date.now())
-.then(r=>r.text())
-.then(text=>{
-
-var data = Papa.parse(text,{
-header:true,
-skipEmptyLines:true
-}).data;
-console.log("PROFILE CSV:", data);
-
-window.profileIndex = {};
-
-data.forEach(r=>{
-var key = normalizeName(r["station"]);
-window.profileIndex[key] = r;
-});
-
-console.log("Profile ready");
-
-});
-
-}
-  
-var osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-var dark=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png');
-var googleHybrid=L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']});
-var googleSat=L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']});
-var esriGray=L.tileLayer(
-'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-{maxZoom:16,attribution:'Esri'}
-);
-
-var esriGrayLabel=L.tileLayer(
-'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
-{maxZoom:16}
-);
-
-// MAP
-
-var map=L.map('map',{
-zoomControl:true,
-layers:[esriGray], 
-zoomSnap:0.25,
-zoomDelta:0.25,
-wheelPxPerZoomLevel:120
-});
-map.zoomControl.setPosition('topright');
-map.attributionControl.addAttribution("© DKKN-BAPETEN 2026");
-
-var indonesiaBounds=[[-11,94],[6,141]];
-map.fitBounds(indonesiaBounds);
-// LAYERS
-loadProfile();
-
-map.whenReady(function(){
-  loadCSV();
-  updateSidePanel();
-  setInterval(updateSidePanel,30000);
-});
-  
-var polygonLayer=L.layerGroup().addTo(map);
-var labelLayer=L.layerGroup().addTo(map);
-
-// LAYER CONTROL
-
-L.control.layers(
-{
-"OpenStreetMap":osm,
-"Dark":dark,
-"Google Hybrid":googleHybrid,
-"Google Satellite":googleSat,
-"ESRI Light Gray":esriGray
-},
-{
-"ESRI Labels":esriGrayLabel,
-"Station Polygons":polygonLayer,
-"Station Labels":labelLayer
-}
-).addTo(map);
-
-// RADIUS
-
-function getRadius(){
-var zoom=map.getZoom();
-var base=40000;
-return Math.max(base/Math.pow(2,zoom-5),80);
-}
-
-// HEXAGON
-
-function createHex(lat,lon,radius,color,options={}){
-
-var coords=[];
-
-for(var i=0;i<6;i++){
-
-var angle=(Math.PI/180)*(60*i);
-var dx=radius*Math.cos(angle);
-var dy=radius*Math.sin(angle);
-
-coords.push([
-lat+(dy/111111),
-lon+(dx/(111111*Math.cos(lat*Math.PI/180)))
-]);
-
-}
-
-return L.polygon(coords,{
-color:options.stroke || "#222",
-weight:options.weight || 1,
-fillColor:color,
-fillOpacity:options.opacity || 0.85
-});
-
-}
-
-// COLOR
-
-function getColor(d){
-
-if(!d || d==="Out of service") return "#2b83ba";
-
-d=parseFloat(d);
-
-if(isNaN(d)) return "#2b83ba";
-
-if(d<1000) return "#2b83ba";
-if(d<100000) return "#ffe600";
-if(d<1000000) return "#ff9b00";
-return "#ff2b2b";
-
-}
-
-// AGGREGATION GRID
-
-function aggregateData(data,gridSize){
-
-var grid={};
-
-data.forEach(row=>{
-
-var lat=parseFloat(row["LATITUDE"]);
-var lon=parseFloat(row["LONGITUDE"]);
-var dose=row["Gamma Dose Rate (nSv/h)"];
-
-if(isNaN(lat)||isNaN(lon)) return;
-
-var gx=Math.floor(lat/gridSize);
-var gy=Math.floor(lon/gridSize);
-
-var key=gx+"_"+gy;
-
-if(!grid[key]){
-grid[key]={
-latSum:0,
-lonSum:0,
-doseSum:0,
-count:0,
-stations:[]
-};
-}
-
-grid[key].latSum+=lat;
-grid[key].lonSum+=lon;
-grid[key].count++;
-
-var doseNum=parseFloat(dose);
-
-if(!isNaN(doseNum)){
-grid[key].doseSum+=doseNum;
-}
-
-grid[key].stations.push({
-name:row["NAMA UNIT"],
-dose:dose,
-time:row["LAST UPDATE (WIB)"]
-});
-
-});
-
-var result=[];
-
-Object.values(grid).forEach(g=>{
-
-var sum = 0;
-var count = 0;
-
-g.stations.forEach(s=>{
-var key = normalizeName(s.name);
-var ts = window.latestTS[key];
-
-if(ts){
-sum += ts.dose;
-count++;
-}
-});
-
-var avgDose = count > 0 ? sum / count : null;
-
-result.push({
-lat:g.latSum/g.count,
-lon:g.lonSum/g.count,
-dose:avgDose,
-count:g.count,
-stations:g.stations
-});
-
-});
-
-return result;
-
-}
-
-
-window.latestTS = {};
-
-function loadLatestTimeseries(callback){
-
-fetch("timeseries.csv?nocache="+Date.now())
-.then(r=>r.text())
-.then(text=>{
-
-var data = Papa.parse(text,{header:true}).data;
-
-var latest = {};
-
-data.forEach(r=>{
-
-var key = normalizeName(r.station);
-var t = new Date(r.time);
-var v = parseFloat(r.dose);
-
-if(isNaN(v)) return;
-
-if(!latest[key] || t > latest[key].time){
-latest[key] = {
-dose: v,
-time: t,
-timeStr: r.time,
-name: r.station   
-};
-}
-
-});
-
-window.latestTS = latest;
-
-if(callback) callback();
-
-});
-
-}
-// LOAD CSV
-function loadCSV(){
-
-loadLatestTimeseries(()=>{
-
-fetch("output.csv?nocache="+Date.now())
-.then(r=>r.text())
-.then(text=>{
-
-polygonLayer.clearLayers();
-labelLayer.clearLayers();
-
-var radius=getRadius();
-
-var rawData=Papa.parse(text,{
-header:true,
-skipEmptyLines:true
-}).data;
-window.stationIndex = {};
-
-rawData.forEach(r=>{
-var key = normalizeName(r["NAMA UNIT"]);
-window.stationIndex[key] = r;
-});
-  
-var zoom=map.getZoom();
-
-var data;
-
-if(zoom<6){
-data=aggregateData(rawData,1);
-}else if(zoom<8){
-data=aggregateData(rawData,0.5);
-}else{
-data=rawData;
-}
-
-data.forEach(row=>{
-
-var lat = row.lat || parseFloat(row["LATITUDE"]);
-var lon = row.lon || parseFloat(row["LONGITUDE"]);
-
-var stationName = row["NAMA UNIT"] ||
-                  (row.stations ? row.stations[0].name : "");
-
-var pos = applyZoomOffset(stationName, lat, lon);
-
-lat = pos.lat;
-lon = pos.lon
-var key = normalizeName(row["NAMA UNIT"]);
-var ts = window.latestTS[key];
-
-var dose = ts ? ts.dose : null;
-
-if(isNaN(lat)||isNaN(lon)) return;
-
-var color;
-
-if(row.stations){
-
-var hasOOS=row.stations.some(s=>s.dose==="Out of service");
-
-if(hasOOS){
-color="#2b83ba";
-}else{
-color=getColor(dose);
-}
-
-}else{
-
-color=getColor(dose);
-
-}
-
-var hex;
-
-// ===== AGGREGATED GRID =====
-if(row.stations){
-
-var hasOOS = row.stations.some(s=>{
-var key = normalizeName(s.name);
-return !window.latestTS[key];
-});
-
-var valid = row.stations.some(s=>{
-var key = normalizeName(s.name);
-return window.latestTS[key];
-});
-
-if(!valid){
-
-hex=createHex(lat,lon,radius,"#8fb9e3",{
-opacity:0.6,
-stroke:"#4a90c2",
-weight:1
-});
-
-}else{
-
-hex=createHex(lat,lon,radius,color,{
-opacity:0.85,
-stroke:"#222",
-weight:1
-});
-
-}
-
-}else{
-
-if(dose==="Out of service"){
-
-hex=createHex(lat,lon,radius,"#8fb9e3",{
-opacity:0.55,
-stroke:"#4a90c2",
-weight:1
-});
-
-}else{
-
-hex=createHex(lat,lon,radius,color,{
-opacity:0.85,
-stroke:"#222",
-weight:1
-});
-
-}
-
-}
-  
-var popupContent = "";
-
-// ===== ZOOM JAUH (AGGREGATED) =====
-if(row.count){
-
-  var listHTML = "<div style='max-height:180px;overflow-y:auto'>";
-
-  row.stations.forEach(s=>{
-
-    var key = normalizeName(s.name);
-    var ts = window.latestTS[key];
-
-    var doseText = ts ? ts.dose.toFixed(2)+" nSv/h" : "No data";
-    var timeText = ts ? ts.timeStr : "-";
-
-    listHTML +=
-    "<div style='border-bottom:1px solid #ddd;padding:6px 0'>"+
-    "<b>"+s.name+"</b><br>"+
-    "Dose Rate: "+doseText+"<br>"+
-    "Update: "+timeText+"<br>"+
-    "<a href='#' onclick=\"openTS('"+s.name+"')\">View Time Series</a>"+
-    "</div>";
-
-  });
-
-  listHTML += "</div>";
-  popupContent = listHTML;
-}
-
-// ===== ZOOM DEKAT (1 STATION) =====
-else{
-
-  var stationName = row["NAMA UNIT"];
-  var key = normalizeName(stationName);
-  var ts = window.latestTS[key];
-
-  var doseText = ts ? ts.dose.toFixed(2)+" nSv/h" : "No data";
-  var timeText = ts ? ts.timeStr : "-";
-
-  popupContent =
-  "<b>"+stationName+"</b><br>"+
-  "Dose Rate: "+doseText+"<br>"+
-  "Update: "+timeText+"<br>"+
-  "<a href='#' onclick=\"openTS('"+stationName+"')\">View Time Series</a>";
-}
-  
-hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
-  hex.on('click', function(){
-  this.openPopup();
-});
-hex.addTo(polygonLayer);
-
-if(!row.count || map.getZoom() >= 5){
-
-  var labelOffsetLat = lat + (radius/111111)*0.9;
-  var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
-
-  // 🔥 FIX NAMA (ANTI UNDEFINED)
-  var labelName = "";
-
-  if(row["NAMA UNIT"]){
-    labelName = row["NAMA UNIT"];
-  }else if(row.stations && row.stations.length > 0){
-    labelName = row.stations[0].name;
-  }else{
-    labelName = "-";
-  }
-
-  var label = L.marker([labelOffsetLat,labelOffsetLon],{
-    icon: L.divIcon({
-      className:'',
-      html:'<div class="unit-label">'+labelName+'</div>',
-      iconSize:null
-    })
-  });
-
-  label.addTo(labelLayer);
-}
-
-});
-
-});
-});
-}
-
-loadProfile();
-map.whenReady(function(){
-  loadCSV();
-});
-
-setInterval(loadCSV,30000);
-map.on("zoomend",loadCSV);
-
- function updateSidePanel(){
-
-loadLatestTimeseries(()=>{
-var latestTime = null;
-
-Object.values(window.latestTS).forEach(v=>{
-  if(!latestTime || v.time > latestTime){
-    latestTime = v.time;
-  }
-});
-
-if(latestTime){
-document.getElementById("lastUpdate").innerHTML =
-  "Last Updated : " +
-  latestTime.toLocaleString("id-ID",{
-      day:"2-digit",
-      month:"2-digit",
-      year:"numeric",
-      hour:"2-digit",
-      minute:"2-digit",
-      second:"2-digit",
-      hour12:false,
-      timeZone:"Asia/Jakarta"
-  }) + " WIB";
-}
-var data = Object.keys(window.latestTS).map(k=>{
-return {
-station:window.latestTS[k].name,
-dose:window.latestTS[k].dose
-};
-});
-
-if(data.length===0) return;
-
-// MAX
-var maxRow = data.reduce((a,b)=> a.dose > b.dose ? a : b);
-
-// MIN
-var minRow = data.reduce((a,b)=> a.dose < b.dose ? a : b);
-
-// SET UI
-document.getElementById("maxValue").innerHTML =
-maxRow.dose.toFixed(2);
-
-document.getElementById("maxStation").innerHTML =
-maxRow.station;
-
-document.getElementById("minValue").innerHTML =
-minRow.dose.toFixed(2);
-
-document.getElementById("minStation").innerHTML =
-minRow.station;
-
-drawAvgChart();
-
-updateStatusTicker();
-
-});
-
-}
-window.lastChartData = "";
-function drawAvgChart(){
-
-fetch("timeseries.csv?nocache="+Date.now())
-.then(r=>r.text())
-.then(text=>{
-
-var data = Papa.parse(text,{header:true}).data;
-
-// FILTER 7 HARI
-const now = new Date();
-const sevenDaysAgo = new Date();
-sevenDaysAgo.setDate(now.getDate() - 7);
-
-var grouped = {};
-// Daftar stasiun yang masih aktif di peta
-const activeStations = new Set(
-    Object.keys(window.stationIndex)
-);
-data.forEach(r=>{
-var t = new Date(r.time);
-var v = parseFloat(r.dose);
-
-if(t >= sevenDaysAgo && t <= now && !isNaN(v)){
-
-var key = normalizeName(r.station);
-
-// Lewati jika stasiun tidak ada di output.csv
-if(!activeStations.has(key)){
-    return;
-}
-
-if(!grouped[r.station]){
-    grouped[r.station] = [];
-}
-
-grouped[r.station].push(v);
-}
-});
-
-// HITUNG AVG
-var result = [];
-
-Object.keys(grouped).forEach(station=>{
-var arr = grouped[station];
-var avg = arr.reduce((a,b)=>a+b,0) / arr.length;
-
-result.push({name:station,avg:avg});
-});
-
-
-// 🔥 DETEKSI LEBAR LAYAR
-let screenWidth = window.innerWidth;
-
-// 🔥 RULE
-let topN = 5;
-if(screenWidth > 1366){
-  topN = 10;
-}
-console.log("WIDTH:", screenWidth, "TOP:", topN);
-// SORT
-result.sort((a,b)=>b.avg - a.avg);
-var top = result.slice(0, topN);
-
-var labels = top.map(r=>r.name);
-var values = top.map(r=>r.avg);
-
-
-var currentData = JSON.stringify({
-  values: values,
-  topN: topN  
-});
-
-if(window.lastChartData === currentData){
-  return;
-}
-window.lastChartData = currentData;
-
-
-
-if(!window.avgChart){
-
-window.avgChart = new Chart(document.getElementById("avgBarChart"),{
-type:'bar',
-data:{
-labels:labels,
-datasets:[{
-data:values,
-backgroundColor:'#2b83ba',
-
-
-barThickness: topN === 10 ? 8 : 12,
-categoryPercentage: topN === 10 ? 0.7 : 1.0,
-barPercentage: topN === 10 ? 0.8 : 1.0
-
-}]
-},
-options:{
-indexAxis:'y',
-responsive:true,
-maintainAspectRatio:false,
-animation:false, 
-
-plugins:{
-  legend:{display:false},
-
-  tooltip:{
-    enabled:true,
-
-    mode:'nearest',
-    intersect:true,   
-
-    position:'average', 
-
-    xAlign:'right',    
-    yAlign:'center',
-
-    callbacks:{
-      label:function(ctx){
-        return ctx.raw.toFixed(2) + " nSv/h";
-      }
-    }
-  }
-},
-
-layout:{
-padding:{left:10,right:10}
-},
-
-scales:{
-x:{
-beginAtZero:true,
-max:75,   
-title:{display:true,text:"nSv/h"}
-},
-y:{
-offset:true,
-ticks:{
-autoSkip:false,
-font:{size:10},
-padding:4,
-
-callback:function(value){
-
-let label = this.getLabelForValue(value);
-
-
-label = label
-.replace(/\./g, " ")   
-.replace(/\s+/g, " ")  
-.trim();
-
-let words = label.split(" ");
-
-
-if(words.length === 1 && label.length > 12){
-return [
-label.substring(0,12),
-label.substring(12)
-];
-}
-
-
-if(words.length >= 2){
-return [
-words.slice(0, Math.ceil(words.length/2)).join(" "),
-words.slice(Math.ceil(words.length/2)).join(" ")
-];
-}
-
-return label;
-}
-},
-grid:{display:false}
-}
-}
-}
-});
-
-}else{
-
-
-window.avgChart.data.labels = labels;
-window.avgChart.data.datasets[0].data = values;
-
-window.avgChart.update('none'); 
-
-}
-
-});
-}
-  
-// TIME SERIES
-
-var tsChart=null;
-var allLabels=[];
-var allValues=[];
-var filteredLabels=[];
-var filteredValues=[];
-var isFiltered = false;
-function login(){
-
-    const user =
-    document.getElementById("username").value.trim();
-
-    const pass =
-    document.getElementById("password").value;
-
-    if(user==="dkkn" && pass==="sos123"){
-
-        sessionStorage.setItem("login","true");
-
-        window.location.href="backend.html";
-
-    }else{
-
-        document.getElementById("loginError").style.display="block";
-
-        document.getElementById("password").value="";
-
-    }
-
-}
-function openTS(station){
-isFiltered = false;
-var key = normalizeName(station);
-
-var stationData = window.stationIndex[key];
-var profileData = window.profileIndex[key];
-
-
-console.log("STATION:", station);
-console.log("KEY:", key);
-console.log("PROFILE INDEX:", window.profileIndex);
-console.log("PROFILE DATA:", profileData);
-  
-document.getElementById("tsModal").style.display="block";
-document.getElementById("tsTitle").innerHTML="Time Series - "+station;
-
-allLabels=[];
-allValues=[];
-
-if(tsChart){
-tsChart.destroy();
-tsChart=null;
-}
-
-document.getElementById("selectedTime").innerHTML="";
-document.getElementById("tsStats").innerHTML="";
-
-// IMAGE
-var img = document.getElementById("tsImage");
-
-var url = profileData?.["IMAGE_URL"];
-
-if(url){
-url = url.trim();
-img.src = url;
-
-img.onerror = function(){
-this.src = "https://via.placeholder.com/250x150?text=Image+Error";
-};
-
-}else{
-
-img.src = "https://via.placeholder.com/250x150?text=No+Image";
-
-}
-
-// STATUS
-var statusText = stationData?.["Gamma Dose Rate (nSv/h)"] === "Out of service"
-? "<span class='status-oos'>Out of Service</span>"
-: "<span class='status-online'>Online</span>";
-
-// META
-document.getElementById("tsMeta").innerHTML =
-"<b>"+station+"</b><br><br>"+
-
-"Address: "+(profileData?.["Address"] || profileData?.["ADDRESS"] || "-")+"<br>"+
-
-"Province: "+(profileData?.["Province"] || profileData?.["PROVINCE"] || "-")+"<br>"+
-
-"Lat: "+(profileData?.["Latitude"] || profileData?.["LATITUDE"] || "-")+"<br>"+
-
-"Lon: "+(profileData?.["Longitude"] || profileData?.["LONGITUDE"] || "-")+"<br>"+
-
-"Status: "+statusText;
-  
-fetch("timeseries.csv?nocache="+Date.now())
-.then(r=>r.text())
-.then(text=>{
-
-var data=Papa.parse(text,{header:true}).data;
-
-const now = new Date();
-const oneMonthAgo = new Date();
-oneMonthAgo.setMonth(now.getMonth() - 1);
-
-var dailyGroup = {};
-
-data.forEach(r=>{
-
-if(normalizeName(r.station) === normalizeName(station)){
-
-var t = new Date(r.time);
-var v = parseFloat(r.dose);
-
-if(t >= oneMonthAgo && t <= now && !isNaN(v)){
-
-// 🔥 GROUP PER HARI
-var dayKey = t.toISOString().split("T")[0];
-
-if(!dailyGroup[dayKey]){
-dailyGroup[dayKey] = [];
-}
-
-dailyGroup[dayKey].push(v);
-}
-}
-});
-
-// 🔥 HITUNG RATA2 HARIAN
-allLabels = [];
-allValues = [];
-
-Object.keys(dailyGroup).sort().forEach(day=>{
-
-var arr = dailyGroup[day];
-var avg = arr.reduce((a,b)=>a+b,0) / arr.length;
-
-// label jadi tanggal saja
-allLabels.push(day);
-allValues.push(avg);
-
-});
-
-if(allValues.length===0){
-document.getElementById("tsStats").innerHTML="No data available";
-return;
-}
-// ===== DATE PICKER INIT =====
-var fromInput = document.getElementById("dateFrom");
-var toInput = document.getElementById("dateTo");
-
-if(allLabels.length > 0){
-  fromInput.value = allLabels[0].replace(" ", "T");
-  toInput.value = allLabels[allLabels.length-1].replace(" ", "T");
-}
-
-// EVENT
-fromInput.onchange = applyDateFilter;
-toInput.onchange = applyDateFilter;
-var slider=document.getElementById("timeSlider");
-
-var lastIndex=allValues.length-1;
-
-slider.min=0;
-slider.max=lastIndex;
-slider.step=1;
-slider.value=lastIndex;
-
-updateChartUnified(lastIndex);
-
-slider.oninput=function(){
-updateChartUnified(parseInt(this.value));
-};
-
-});
-
-}
-function snapToNearest(dateStr){
-  return dateStr;
-}
-function applyDateFilter(){
-
-  var fromVal = document.getElementById("dateFrom").value;
-  var toVal = document.getElementById("dateTo").value;
-
-  if(!fromVal || !toVal) return;
-
-var fromDate = new Date(fromVal);
-var toDate = new Date(toVal);
-
-  filteredLabels = [];
-  filteredValues = [];
-
-  for(let i=0;i<allLabels.length;i++){
-    let t = new Date(allLabels[i]);
-
-    if(t >= fromDate && t <= toDate){
-      filteredLabels.push(allLabels[i]);
-      filteredValues.push(allValues[i]);
-    }
-  }
-
-  if(filteredValues.length === 0) return;
-
-  isFiltered = true;
-
-  var slider = document.getElementById("timeSlider");
-
-  slider.min = 0;
-  slider.max = filteredValues.length - 1;
-  slider.value = filteredValues.length - 1;
-
-  slider.oninput = function(){
-    updateChartUnified(parseInt(this.value));
-  };
-
-  updateChartUnified(slider.value);
-}
-function updateChart(index){
-
-var labels=allLabels.slice(0,index+1);
-var values=allValues.slice(0,index+1);
-
-var startTime=labels[0];
-var endTime=labels[labels.length-1];
-
-document.getElementById("selectedTime").innerHTML=
-"Selected Time : "+startTime+" – "+endTime;
-
-var sum=values.reduce((a,b)=>a+b,0);
-var avg=sum/values.length;
-var min=Math.min(...values);
-var max=Math.max(...values);
-
-var ymin=min-(max-min)*0.2;
-var ymax=max+(max-min)*0.2;
-
-if(ymin<0) ymin=0;
-
-if(tsChart) tsChart.destroy();
-
-tsChart=new Chart(document.getElementById("tsChart"),{
-
-type:'line',
-
-data:{
-labels:allLabels,
-datasets:[{
-data:allValues,
-borderColor:'#2b83ba',
-backgroundColor:'rgba(43,131,186,0.15)',
-tension:0.25,
-pointRadius:2,
-fill:true
-}]
-},
-
-options:{
-responsive:true,
-maintainAspectRatio:false, 
-
-layout:{
-padding:{
-right:0
-}
-},
-
-plugins:{
-legend:{display:false},
-tooltip:{
-callbacks:{
-title:function(items){
-return items[0].label; 
-}
-}
-}
-},
-
-scales:{
-x:{
-type:'category',
-
-min:0,
-max:index,
-
-offset:false, 
-
-ticks:{
-autoSkip:false,
-maxRotation:0,
-minRotation:0,
-
-callback:function(value, i){
-
-const mid = Math.floor(index / 2);
-
-if(i === 0 || i === mid || i === index){
-return labels[i];
-}
-
-return "";
-}
-},
-
-grid:{display:false}
-},
-y:{
-min:ymin,
-max:ymax,
-title:{display:true,text:"nSv/h"},
-grid:{color:"rgba(0,0,0,0.08)"} 
-}
-}
-}
-
-});
-
-document.getElementById("tsStats").innerHTML=
-"<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
-"<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
-"<b>Max:</b> "+max.toFixed(2)+" nSv/h";
-
-  
-document.getElementById("dateFrom").value = labels[0].replace(" ", "T");
-document.getElementById("dateTo").value = labels[labels.length-1].replace(" ", "T");
-}
-function updateChartFiltered(index){
-
-  var labels = filteredLabels.slice(0,index+1);
-  var values = filteredValues.slice(0,index+1);
-
-  var startTime = labels[0];
-  var endTime = labels[labels.length-1];
-
-  document.getElementById("selectedTime").innerHTML =
-  "Selected Time : "+startTime+" – "+endTime;
-
-  var sum = values.reduce((a,b)=>a+b,0);
-  var avg = sum/values.length;
-  var min = Math.min(...values);
-  var max = Math.max(...values);
-
-  var ymin = min-(max-min)*0.2;
-  var ymax = max+(max-min)*0.2;
-  if(ymin<0) ymin=0;
-
-  if(tsChart) tsChart.destroy();
-
-  tsChart = new Chart(document.getElementById("tsChart"),{
-    type:'line',
-    data:{
-      labels: filteredLabels,
-      datasets:[{
-        data: filteredValues,
-        borderColor:'#2b83ba',
-        backgroundColor:'rgba(43,131,186,0.15)',
-        tension:0.25,
-        pointRadius:2,
-        fill:true
-      }]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{
-        x:{min:0,max:index},
-        y:{min:ymin,max:ymax}
-      }
-    }
-  });
-
-  document.getElementById("tsStats").innerHTML =
-  "<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
-  "<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
-  "<b>Max:</b> "+max.toFixed(2)+" nSv/h";
-}
-function updateChartUnified(index){
-
-  var labels, values;
-
-  if(isFiltered){
-    labels = filteredLabels;
-    values = filteredValues;
-  }else{
-    labels = allLabels;
-    values = allValues;
-  }
-
-  if(labels.length === 0) return;
-
-  var slicedLabels = labels.slice(0,index+1);
-  var slicedValues = values.slice(0,index+1);
-
-  if(slicedLabels.length === 0) return;
-
-  var startTime = slicedLabels[0];
-  var endTime = slicedLabels[slicedLabels.length-1];
-
-  document.getElementById("selectedTime").innerHTML =
-  "Selected Time : "+startTime+" – "+endTime;
-
-  var sum = slicedValues.reduce((a,b)=>a+b,0);
-  var avg = sum/slicedValues.length;
-  var min = Math.min(...slicedValues);
-  var max = Math.max(...slicedValues);
-
-
-var range = max - min;
-
-
-var minRange = 50;
-
-
-if(range < minRange){
-  var mid = (max + min) / 2;
-  ymin = mid - minRange;
-  ymax = mid + minRange;
-}else{
-  var padding = range * 1.0; 
-  ymin = min - padding;
-  ymax = max + padding;
-}
-
-// safety
-if(ymin < 0) ymin = 0;
-
-if(ymin < 0) ymin = 0;
-  if(ymin<0) ymin=0;
-
-  if(tsChart) tsChart.destroy();
-
-  tsChart = new Chart(document.getElementById("tsChart"),{
-
-    type:'line',
-
-    data:{
-      labels: labels,
-      datasets:[{
-        data: values,
-        borderColor:'#2b83ba',
-        backgroundColor:'rgba(43,131,186,0.15)',
-        tension:0.25,
-        pointRadius:2,
-        fill:true
-      }]
-    },
-
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          callbacks:{
-            title:function(items){
-              return items[0].label;
-            }
-          }
+    <!-- Time Series Modal (Trend Analysis) -->
+    <div id="tsModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[99999] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Header -->
+            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center flex-shrink-0">
+                <div id="tsTitle" class="font-bold text-sm sm:text-base text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line"></i> Time Series
+                </div>
+                <button onclick="closeTS()" class="bg-red-600 hover:bg-red-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-colors">
+                    <i class="fa-solid fa-xmark mr-1"></i> Tutup
+                </button>
+            </div>
+
+            <!-- Content Container -->
+            <div class="p-6 flex flex-col md:flex-row gap-6 overflow-y-auto custom-scrollbar">
+                <!-- Left Panel: Profile & Metadata -->
+                <div class="w-full md:w-64 flex flex-col gap-3 flex-shrink-0">
+                    <img id="tsImage" src="" alt="Station Photo" class="w-full h-40 object-cover rounded-xl border border-slate-200 shadow-sm">
+                    <div id="tsMeta" class="bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-xs space-y-1.5 text-slate-700"></div>
+                </div>
+
+                <!-- Right Panel: Chart & Date Filter Controls -->
+                <div class="flex-1 flex flex-col gap-4 min-w-0">
+                    <!-- Date Picker Bar -->
+                    <div id="datePickerBar" class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-wrap items-center justify-end gap-3 text-xs">
+                        <div class="flex items-center gap-2">
+                            <label class="font-semibold text-slate-600">Dari:</label>
+                            <input type="datetime-local" id="dateFrom" class="bg-white border border-slate-200 px-2 py-1 rounded-md text-xs">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="font-semibold text-slate-600">Sampai:</label>
+                            <input type="datetime-local" id="dateTo" class="bg-white border border-slate-200 px-2 py-1 rounded-md text-xs">
+                        </div>
+                    </div>
+
+                    <!-- Chart Canvas Box -->
+                    <div class="h-64 sm:h-72 w-full relative">
+                        <canvas id="tsChart"></canvas>
+                    </div>
+
+                    <!-- Time Slider & Range Info -->
+                    <div class="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <input type="range" id="timeSlider" class="w-full accent-sky-600 cursor-pointer">
+                        <div id="selectedTime" class="text-xs text-slate-500 font-medium"></div>
+                        <div id="tsStats" class="text-xs font-semibold text-slate-800"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // INDEX & CACHE
+        window.stationIndex = {};
+        window.profileIndex = {};
+        window.latestTS = {};
+        window.lastChartData = "";
+
+        const zoomOffsets = {
+            "cilacap":      {lat:-0.12, lon:-0.18},
+            "banjarnegara": {lat: 0.12, lon: 0.18}
+        };
+
+        function normalizeName(name){
+            return (name || "").toString().trim().toLowerCase().replace(/\s+/g," ");
         }
-      },
 
-      scales:{
-        x:{
-          type:'category',
-          min:0,
-          max:index,
-          offset:false,
-
-          ticks:{
-            autoSkip:false,
-            maxRotation:0,
-            minRotation:0,
-
-            callback:function(value, i){
-              const mid = Math.floor(index / 2);
-
-              if(i === 0 || i === mid || i === index){
-                return labels[i];
-              }
-              return "";
+        function applyZoomOffset(name, lat, lon){
+            if(map.getZoom() >= 8){
+                return {lat, lon};
             }
-          },
-
-          grid:{display:false}
-        },
-
-        y:{
-          min:ymin,
-          max:ymax,
-          title:{display:true,text:"nSv/h"},
-          grid:{color:"rgba(0,0,0,0.08)"}
+            const o = zoomOffsets[normalizeName(name)];
+            if(!o){
+                return {lat, lon};
+            }
+            return {
+                lat: lat + o.lat,
+                lon: lon + o.lon
+            };
         }
-      }
-    }
-
-  });
-
-  document.getElementById("tsStats").innerHTML =
-  "<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
-  "<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
-  "<b>Max:</b> "+max.toFixed(2)+" nSv/h";
-
-document.getElementById("dateFrom").value = slicedLabels[0];
-document.getElementById("dateTo").value = slicedLabels[slicedLabels.length-1];
-  document.getElementById("dateFrom").value = slicedLabels[0].replace(" ", "T");
-  document.getElementById("dateTo").value = slicedLabels[slicedLabels.length-1].replace(" ", "T");
-}
-function closeTS(){
-document.getElementById("tsModal").style.display="none";
-}
-var panelVisible = false; 
-
-function togglePanel(){
-
-  var panel = document.getElementById("sidePanel");
-
-  var isOpen = !panel.classList.contains("collapsed");
-
-  panel.classList.toggle("collapsed");
-  const ticker = document.getElementById("statusTicker");
-
-if(panel.classList.contains("collapsed")){
-    ticker.style.left = "0px";
-}else{
-    ticker.style.left = panel.offsetWidth + "px";
-}
-
-  if(!isOpen){
-   
-    map.removeControl(legend);
-    moveLegendToSidebar();
-  }else{
- 
-
-    var existing = document.getElementById("legendInside");
-    if(existing) existing.remove();
-
-    legend.addTo(map);
-  }
-
-  setTimeout(()=>{
-    map.invalidateSize();
-  },300);
-
-}
-// LEGEND
-var legendVisible = true;
-var legend = L.control({position:"bottomleft"});
 
-legend.onAdd = function(){
-
-var div = L.DomUtil.create("div","legend");
-
-div.innerHTML = `
-
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-  <b>IAEA Operational Intervention Levels</b>
-
-  <div id="infoIcon" style="
-    
-    cursor:pointer;
-    background:#0b1e3f;
-    color:white;
-    width:18px;
-    height:18px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:12px;
-    font-weight:bold;
-  ">i</div>
-</div>
-
-<div id="legendTooltip" style="
-display:none;
-position:fixed;
-bottom:140px;
-left:10px;
-
-width:240px;
-background:white;
-border-radius:8px;
-padding:10px;
-box-shadow:0 4px 12px rgba(0,0,0,0.25);
-font-size:12px;
-
-z-index:100000;
-pointer-events:auto;
-
-
-transform: translateZ(9999px);
-">
-
-<b>Keterangan:</b><br>
-<div style="margin-bottom:3px;">
-<span style="color:#2b83ba;font-weight:bold;">■ Biru</span><br>
-Laju dosis dibawah OILs
-</div>
-
-<div style="margin-bottom:6px;">
-<span style="color:#ffe600;font-weight:bold;">■ Kuning</span><br>
-OILs kontaminasi s.d OILs relokasi
-</div>
-
-<div style="margin-bottom:6px;">
-<span style="color:#ff9b00;font-weight:bold;">■ Orange</span><br>
-OILs relokasi s.d OILs evakuasi
-</div>
-
-<div>
-<span style="color:#ff2b2b;font-weight:bold;">■ Merah</span><br>
-OILs evakuasi
-</div>
-
-
-<hr style="border:none;border-top:1px solid #ddd;margin:8px 0;">
-
-
-<div style="font-size:11px;line-height:1.4;">
-<b>Operational Intervention Level (OIL) : </b><br>
-Nilai ambang laju dosis radiasi untuk menentukan tindakan proteksi darurat.
-</div>
-
-</div>
-
-<div style="width:260px;height:14px;
-background:linear-gradient(to right,#2b83ba,#ffe600,#ff9b00,#ff2b2b);
-margin-bottom:6px;border:1px solid #999;"></div>
-
-<div style="display:flex;justify-content:space-between;width:260px;font-size:11px;">
-<span>0</span>
-<span>1.000</span>
-<span>100.000</span>
-<span>1.000.000</span>
-</div>
-
-<div style="font-size:11px;margin-top:4px;">
-Gamma Dose Rate (nSv/h)
-</div>
-
-`;
-
-setTimeout(()=>{
-
-var icon = div.querySelector("#infoIcon");
-var tooltip = div.querySelector("#legendTooltip");
-
-if(icon && tooltip){
-icon.onmouseenter = ()=> tooltip.style.display="block";
-icon.onmouseleave = ()=> tooltip.style.display="none";
-}
-
-},50);
-
-return div;
-};
-
-legend.addTo(map);
-window.addEventListener("resize", ()=>{
-  drawAvgChart();
-});
-  function moveLegendToSidebar(){
-
-  var panel = document.getElementById("sidePanel");
-
-  if(!panel.querySelector("#legendInside")){
-
-    var legendDiv = legend.onAdd(map);
-    legendDiv.id = "legendInside";
-
-    // 🔥 hapus tooltip biar clean
-    var tooltip = legendDiv.querySelector("#legendTooltip");
-    if(tooltip) tooltip.remove();
-
-    panel.appendChild(legendDiv);
-  }
-
-}
-function adjustLegendTooltip(){
-
-  var tooltip = document.getElementById("legendTooltip");
-  if(!tooltip) return;
-
-  if(panelVisible){
-    tooltip.style.left = "300px"; 
-  }else{
-    tooltip.style.left = "80px"; 
-  }
-
-}
-  function updateStatusTicker(){
-
-let maxDose = -1;
-let latestTime = null;
-
-Object.values(window.latestTS).forEach(v=>{
-
-    if(v.dose > maxDose){
-        maxDose = v.dose;
-    }
-
-    if(!latestTime || v.time > latestTime){
-        latestTime = v.time;
-    }
-
-});
-
-if(maxDose < 0) return;
-
-let css="";
-let status="";
-
-if(maxDose < 1000){
-
-    css="status-green";
-    status="Radioaktivitas lingkungan di wilayah NKRI dalam kategori AMAN dan SELAMAT";
-
-}
-else if(maxDose < 100000){
-
-    css="status-yellow";
-    status="Radioaktivitas lingkungan di wilayah NKRI dalam kategori SIAGA";
-
-}
-else if(maxDose < 1000000){
-
-    css="status-orange";
-    status="Radioaktivitas lingkungan di wilayah NKRI dalam kategori WASPADA";
-
-}
-else{
-
-    css="status-red";
-    status="Radioaktivitas lingkungan di wilayah NKRI dalam kategori BAHAYA";
-
-}
-
-let waktu="-";
-
-if(latestTime){
-   waktu = latestTime.toLocaleString("id-ID",{
-    day:"2-digit",
-    month:"2-digit",
-    year:"numeric",
-    hour:"2-digit",
-    minute:"2-digit",
-    second:"2-digit",
-    hour12:false,
-    timeZone:"Asia/Jakarta"
-}) + " WIB";
-}
-
-document.getElementById("statusTicker").className=css;
-
-const msg =
-`[${waktu}] ${status}
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-[${waktu}] ${status}
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-[${waktu}] ${status}
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-[${waktu}] ${status}`;
-
-document.getElementById("tickerText").innerHTML = msg;
-
-}
-
-function openLogin(){
-
-document.getElementById("loginModal").style.display="block";
-
-}
-
-function closeLogin(){
-
-document.getElementById("loginModal").style.display="none";
-
-}
-
-function login(){
-
-    const user = document.getElementById("username").value.trim();
-    const pass = document.getElementById("password").value;
-
-    if(user==="dkkn" && pass==="sos123"){
-
-        sessionStorage.setItem("login","true");
-        window.location.href="backend.html";
-
-    }else{
-
-        document.getElementById("loginError").style.display="block";
-        document.getElementById("password").value="";
-
-    }
-}
-function openLogin(){
-
-    document.getElementById("loginError").style.display="none";
-
-    document.getElementById("username").value="";
-
-    document.getElementById("password").value="";
-
-    document.getElementById("loginModal").style.display="block";
-
-}
-
-function closeLogin(){
-
-    document.getElementById("loginModal").style.display="none";
-
-}
-</script>
-
-
-
+        function loadProfile(){
+            fetch("profile.csv?nocache="+Date.now())
+            .then(r=>r.text())
+            .then(text=>{
+                var data = Papa.parse(text,{header:true,skipEmptyLines:true}).data;
+                window.profileIndex = {};
+                data.forEach(r=>{
+                    var key = normalizeName(r["station"]);
+                    window.profileIndex[key] = r;
+                });
+            }).catch(e=>console.error("Error load profile.csv", e));
+        }
+
+        // MAP BASELAYERS (Esri Satellite sebagai Default)
+        var esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 19,
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        });
+        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: 'OpenStreetMap' });
+        var googleHybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3'], attribution: 'Google'});
+        var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3'], attribution: 'Google'});
+        var esriGray = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,attribution:'Esri'});
+        var esriGrayLabel = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',{maxZoom:16});
+
+        var map = L.map('map',{
+            zoomControl: false,
+            layers: [esriSat], // Default Esri Satellite
+            zoomSnap: 0.25,
+            zoomDelta: 0.25,
+            wheelPxPerZoomLevel: 120
+        });
+
+        L.control.zoom({ position: 'topright' }).addTo(map);
+        map.attributionControl.addAttribution("© DKKN-BAPETEN 2026");
+
+        var indonesiaBounds = [[-11,94],[6,141]];
+        map.fitBounds(indonesiaBounds);
+
+        // North Arrow Control
+        const northArrowControl = L.control({ position: 'topright' });
+        northArrowControl.onAdd = function() {
+            const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control north-compass-box');
+            div.innerHTML = `
+                <span style="font-size: 11px; font-weight: 800; color: #d97706; margin-bottom: 2px;">N</span>
+                <svg width="20" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L17 12H12V2Z" fill="#ef4444"/>
+                    <path d="M12 2L7 12H12V2Z" fill="#f87171"/>
+                    <path d="M12 22L17 12H12V22Z" fill="#64748b"/>
+                    <path d="M12 22L7 12H12V22Z" fill="#94a3b8"/>
+                </svg>
+            `;
+            return div;
+        };
+        northArrowControl.addTo(map);
+
+        var polygonLayer = L.layerGroup().addTo(map);
+        var labelLayer = L.layerGroup().addTo(map);
+
+        L.control.layers(
+            {
+                "Esri Satellite": esriSat,
+                "ESRI Light Gray": esriGray,
+                "OpenStreetMap": osm,
+                "Google Hybrid": googleHybrid,
+                "Google Satellite": googleSat
+            },
+            {
+                "ESRI Labels": esriGrayLabel,
+                "Station Polygons": polygonLayer,
+                "Station Labels": labelLayer
+            },
+            { position: 'topright' }
+        ).addTo(map);
+
+        function getRadius(){
+            var zoom = map.getZoom();
+            var base = 40000;
+            return Math.max(base/Math.pow(2,zoom-5),80);
+        }
+
+        // Hexagon dibuat lebih catchy dengan garis tepi tegas & efek bayangan
+        function createHex(lat,lon,radius,color,options={}){
+            var coords = [];
+            for(var i=0;i<6;i++){
+                var angle = (Math.PI/180)*(60*i);
+                var dx = radius*Math.cos(angle);
+                var dy = radius*Math.sin(angle);
+                coords.push([
+                    lat+(dy/111111),
+                    lon+(dx/(111111*Math.cos(lat*Math.PI/180)))
+                ]);
+            }
+            return L.polygon(coords,{
+                color: options.stroke || "#ffffff",
+                weight: options.weight || 2,
+                fillColor: color,
+                fillOpacity: options.opacity || 0.85,
+                className: 'hex-catchy',
+                lineJoin: 'round'
+            });
+        }
+
+        function getColor(d){
+            if(!d || d==="Out of service") return "#2b83ba";
+            d = parseFloat(d);
+            if(isNaN(d)) return "#2b83ba";
+            if(d<1000) return "#2b83ba";
+            if(d<100000) return "#ffe600";
+            if(d<1000000) return "#ff9b00";
+            return "#ff2b2b";
+        }
+
+        function aggregateData(data, gridSize){
+            var grid = {};
+            data.forEach(row=>{
+                var lat = parseFloat(row["LATITUDE"]);
+                var lon = parseFloat(row["LONGITUDE"]);
+                var dose = row["Gamma Dose Rate (nSv/h)"];
+                if(isNaN(lat)||isNaN(lon)) return;
+
+                var gx = Math.floor(lat/gridSize);
+                var gy = Math.floor(lon/gridSize);
+                var key = gx+"_"+gy;
+
+                if(!grid[key]){
+                    grid[key]={ latSum:0, lonSum:0, doseSum:0, count:0, stations:[] };
+                }
+
+                grid[key].latSum += lat;
+                grid[key].lonSum += lon;
+                grid[key].count++;
+
+                var doseNum = parseFloat(dose);
+                if(!isNaN(doseNum)){ grid[key].doseSum += doseNum; }
+
+                grid[key].stations.push({
+                    name: row["NAMA UNIT"],
+                    dose: dose,
+                    time: row["LAST UPDATE (WIB)"]
+                });
+            });
+
+            var result = [];
+            Object.values(grid).forEach(g=>{
+                var sum = 0;
+                var count = 0;
+                g.stations.forEach(s=>{
+                    var key = normalizeName(s.name);
+                    var ts = window.latestTS[key];
+                    if(ts){ sum += ts.dose; count++; }
+                });
+                var avgDose = count > 0 ? sum / count : null;
+                result.push({
+                    lat: g.latSum/g.count,
+                    lon: g.lonSum/g.count,
+                    dose: avgDose,
+                    count: g.count,
+                    stations: g.stations
+                });
+            });
+            return result;
+        }
+
+        function loadLatestTimeseries(callback){
+            fetch("timeseries.csv?nocache="+Date.now())
+            .then(r=>r.text())
+            .then(text=>{
+                var data = Papa.parse(text,{header:true}).data;
+                var latest = {};
+                data.forEach(r=>{
+                    var key = normalizeName(r.station);
+                    var t = new Date(r.time);
+                    var v = parseFloat(r.dose);
+                    if(isNaN(v)) return;
+                    if(!latest[key] || t > latest[key].time){
+                        latest[key] = {
+                            dose: v,
+                            time: t,
+                            timeStr: r.time,
+                            name: r.station   
+                        };
+                    }
+                });
+                window.latestTS = latest;
+                if(callback) callback();
+            }).catch(e=>console.error("Error timeseries.csv", e));
+        }
+
+        function loadCSV(){
+            loadLatestTimeseries(()=>{
+                fetch("output.csv?nocache="+Date.now())
+                .then(r=>r.text())
+                .then(text=>{
+                    polygonLayer.clearLayers();
+                    labelLayer.clearLayers();
+
+                    var radius = getRadius();
+                    var rawData = Papa.parse(text,{header:true,skipEmptyLines:true}).data;
+                    window.stationIndex = {};
+
+                    rawData.forEach(r=>{
+                        var key = normalizeName(r["NAMA UNIT"]);
+                        window.stationIndex[key] = r;
+                    });
+                    
+                    var zoom = map.getZoom();
+                    var data;
+
+                    if(zoom<6){
+                        data = aggregateData(rawData,1);
+                    }else if(zoom<8){
+                        data = aggregateData(rawData,0.5);
+                    }else{
+                        data = rawData;
+                    }
+
+                    data.forEach(row=>{
+                        var lat = row.lat || parseFloat(row["LATITUDE"]);
+                        var lon = row.lon || parseFloat(row["LONGITUDE"]);
+                        var stationName = row["NAMA UNIT"] || (row.stations ? row.stations[0].name : "");
+                        var pos = applyZoomOffset(stationName, lat, lon);
+
+                        lat = pos.lat;
+                        lon = pos.lon;
+                        var key = normalizeName(stationName);
+                        var ts = window.latestTS[key];
+                        var dose = ts ? ts.dose : null;
+
+                        if(isNaN(lat)||isNaN(lon)) return;
+
+                        var color;
+                        if(row.stations){
+                            var hasOOS = row.stations.some(s=>s.dose==="Out of service");
+                            color = hasOOS ? "#2b83ba" : getColor(dose);
+                        }else{
+                            color = getColor(dose);
+                        }
+
+                        var hex;
+                        if(row.stations){
+                            var valid = row.stations.some(s=>{
+                                return window.latestTS[normalizeName(s.name)];
+                            });
+                            hex = createHex(lat,lon,radius, valid ? color : "#8fb9e3",{
+                                opacity: valid ? 0.9 : 0.65,
+                                stroke: valid ? "#ffffff" : "#cbd5e1",
+                                weight: 2
+                            });
+                        }else{
+                            if(dose==="Out of service"){
+                                hex = createHex(lat,lon,radius,"#8fb9e3",{ opacity:0.65, stroke:"#cbd5e1", weight:2 });
+                            }else{
+                                hex = createHex(lat,lon,radius,color,{ opacity:0.9, stroke:"#ffffff", weight:2 });
+                            }
+                        }
+
+                        var popupContent = "";
+                        if(row.count){
+                            var listHTML = "<div style='max-height:180px;overflow-y:auto;padding:8px;'>";
+                            row.stations.forEach(s=>{
+                                var k = normalizeName(s.name);
+                                var tss = window.latestTS[k];
+                                var doseText = tss ? tss.dose.toFixed(2)+" nSv/h" : "No data";
+                                var timeText = tss ? tss.timeStr : "-";
+
+                                listHTML +=
+                                "<div style='border-bottom:1px solid #e2e8f0;padding:6px 0'>"+
+                                "<b>"+s.name+"</b><br>"+
+                                "Dose Rate: <span style='color:#0284c7;font-weight:bold'>"+doseText+"</span><br>"+
+                                "<span style='font-size:11px;color:#64748b'>Update: "+timeText+"</span><br>"+
+                                "<a href='#' onclick=\"openTS('"+s.name+"')\" style='color:#059669;font-weight:bold;'>View Time Series</a>"+
+                                "</div>";
+                            });
+                            listHTML += "</div>";
+                            popupContent = listHTML;
+                        }else{
+                            var doseText = ts ? ts.dose.toFixed(2)+" nSv/h" : "No data";
+                            var timeText = ts ? ts.timeStr : "-";
+                            popupContent =
+                            "<div style='padding:10px;'>"+
+                            "<h4 style='font-weight:bold;color:#0f172a;margin-bottom:4px;'>"+stationName+"</h4>"+
+                            "Dose Rate: <span style='color:#0284c7;font-weight:bold'>"+doseText+"</span><br>"+
+                            "<span style='font-size:11px;color:#64748b'>Update: "+timeText+"</span><br><br>"+
+                            "<a href='#' onclick=\"openTS('"+stationName+"')\" style='background:#0284c7;color:white;padding:4px 8px;border-radius:4px;text-decoration:none;font-size:11px;display:inline-block;'>View Time Series</a>"+
+                            "</div>";
+                        }
+
+                        hex.bindPopup(popupContent,{maxWidth:280,minWidth:180});
+                        hex.on('click', function(){ this.openPopup(); });
+                        hex.addTo(polygonLayer);
+
+                        if(!row.count || map.getZoom() >= 5){
+                            var labelOffsetLat = lat + (radius/111111)*0.9;
+                            var labelOffsetLon = lon + (radius/(111111*Math.cos(lat*Math.PI/180)))*0.9;
+                            var labelName = row["NAMA UNIT"] || (row.stations && row.stations.length > 0 ? row.stations[0].name : "-");
+
+                            var label = L.marker([labelOffsetLat,labelOffsetLon],{
+                                icon: L.divIcon({
+                                    className:'',
+                                    html:'<div class="unit-label">'+labelName+'</div>',
+                                    iconSize:null
+                                })
+                            });
+                            label.addTo(labelLayer);
+                        }
+                    });
+
+                    renderSidebarStationList();
+                });
+            });
+        }
+
+        function renderSidebarStationList(){
+            const container = document.getElementById("sidebarStationList");
+            if(!container) return;
+
+            const searchVal = (document.getElementById("search-input")?.value || "").toLowerCase();
+            const keys = Object.keys(window.stationIndex);
+            
+            let html = "";
+            let count = 0;
+
+            keys.forEach(k=>{
+                const st = window.stationIndex[k];
+                const name = st["NAMA UNIT"] || k;
+                if(searchVal && !name.toLowerCase().includes(searchVal)) return;
+
+                const ts = window.latestTS[k];
+                const dose = ts ? ts.dose.toFixed(2) + " nSv/h" : "No data";
+                const isOnline = ts ? true : false;
+
+                count++;
+                html += `
+                    <div onclick="focusStation('${name}')" class="p-2.5 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors flex justify-between items-center text-xs">
+                        <div>
+                            <div class="font-bold text-slate-800">${name}</div>
+                            <div class="text-[11px] text-slate-500">${dose}</div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isOnline ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'}">
+                            ${isOnline ? 'Online' : 'OOS'}
+                        </span>
+                    </div>
+                `;
+            });
+
+            document.getElementById("stationCountBadge").innerText = `${count} Stasiun`;
+            container.innerHTML = html || `<div class="text-xs text-slate-400 text-center py-4">Tidak ada stasiun ditemukan</div>`;
+        }
+
+        function filterStationList(){
+            renderSidebarStationList();
+        }
+
+        function focusStation(name){
+            const k = normalizeName(name);
+            const st = window.stationIndex[k];
+            if(st){
+                const lat = parseFloat(st["LATITUDE"]);
+                const lon = parseFloat(st["LONGITUDE"]);
+                if(!isNaN(lat) && !isNaN(lon)){
+                    map.flyTo([lat, lon], 10, { duration: 1.2 });
+                }
+            }
+        }
+
+        function updateSidePanel(){
+            loadLatestTimeseries(()=>{
+                var latestTime = null;
+                Object.values(window.latestTS).forEach(v=>{
+                    if(!latestTime || v.time > latestTime){ latestTime = v.time; }
+                });
+
+                if(latestTime){
+                    document.getElementById("lastUpdate").innerHTML =
+                    "Last Updated : " +
+                    latestTime.toLocaleString("id-ID",{
+                        day:"2-digit", month:"2-digit", year:"numeric",
+                        hour:"2-digit", minute:"2-digit", second:"2-digit",
+                        hour12:false, timeZone:"Asia/Jakarta"
+                    }) + " WIB";
+                }
+
+                var data = Object.keys(window.latestTS).map(k=>({
+                    station: window.latestTS[k].name,
+                    dose: window.latestTS[k].dose
+                }));
+
+                if(data.length > 0){
+                    var maxRow = data.reduce((a,b)=> a.dose > b.dose ? a : b);
+                    var minRow = data.reduce((a,b)=> a.dose < b.dose ? a : b);
+
+                    document.getElementById("maxValue").innerHTML = maxRow.dose.toFixed(2);
+                    document.getElementById("maxStation").innerHTML = maxRow.station;
+                    document.getElementById("minValue").innerHTML = minRow.dose.toFixed(2);
+                    document.getElementById("minStation").innerHTML = minRow.station;
+                }
+
+                drawAvgChart();
+                updateStatusTicker();
+            });
+        }
+
+        function drawAvgChart(){
+            fetch("timeseries.csv?nocache="+Date.now())
+            .then(r=>r.text())
+            .then(text=>{
+                var data = Papa.parse(text,{header:true}).data;
+                const now = new Date();
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(now.getDate() - 7);
+
+                var grouped = {};
+                const activeStations = new Set(Object.keys(window.stationIndex));
+
+                data.forEach(r=>{
+                    var t = new Date(r.time);
+                    var v = parseFloat(r.dose);
+                    if(t >= sevenDaysAgo && t <= now && !isNaN(v)){
+                        var key = normalizeName(r.station);
+                        if(!activeStations.has(key)) return;
+                        if(!grouped[r.station]) grouped[r.station] = [];
+                        grouped[r.station].push(v);
+                    }
+                });
+
+                var result = [];
+                Object.keys(grouped).forEach(station=>{
+                    var arr = grouped[station];
+                    var avg = arr.reduce((a,b)=>a+b,0) / arr.length;
+                    result.push({name:station, avg:avg});
+                });
+
+                let screenWidth = window.innerWidth;
+                let topN = screenWidth > 1366 ? 10 : 5;
+
+                result.sort((a,b)=>b.avg - a.avg);
+                var top = result.slice(0, topN);
+
+                var labels = top.map(r=>r.name);
+                var values = top.map(r=>r.avg);
+
+                var currentData = JSON.stringify({ values: values, topN: topN });
+                if(window.lastChartData === currentData) return;
+                window.lastChartData = currentData;
+
+                if(!window.avgChart){
+                    window.avgChart = new Chart(document.getElementById("avgBarChart"),{
+                        type:'bar',
+                        data:{
+                            labels:labels,
+                            datasets:[{
+                                data:values,
+                                backgroundColor:'#0284c7',
+                                borderRadius:4,
+                                barThickness: topN === 10 ? 8 : 12
+                            }]
+                        },
+                        options:{
+                            indexAxis:'y',
+                            responsive:true,
+                            maintainAspectRatio:false,
+                            animation:false,
+                            plugins:{
+                                legend:{display:false},
+                                tooltip:{
+                                    callbacks:{
+                                        label:function(ctx){ return ctx.raw.toFixed(2) + " nSv/h"; }
+                                    }
+                                }
+                            },
+                            scales:{
+                                x:{ beginAtZero:true, max:75, title:{display:true, text:"nSv/h"} },
+                                y:{ ticks:{ font:{size:10} }, grid:{display:false} }
+                            }
+                        }
+                    });
+                }else{
+                    window.avgChart.data.labels = labels;
+                    window.avgChart.data.datasets[0].data = values;
+                    window.avgChart.update('none');
+                }
+            });
+        }
+
+        // TIME SERIES (TREND)
+        var tsChart = null;
+        var allLabels = [], allValues = [], filteredLabels = [], filteredValues = [];
+        var isFiltered = false;
+
+        function openTS(station){
+            isFiltered = false;
+            var key = normalizeName(station);
+            var stationData = window.stationIndex[key];
+            var profileData = window.profileIndex[key];
+
+            document.getElementById("tsModal").classList.remove("hidden");
+            document.getElementById("tsTitle").innerHTML = "<i class='fa-solid fa-chart-line mr-2'></i> Time Series — " + station;
+
+            allLabels = []; allValues = [];
+            if(tsChart){ tsChart.destroy(); tsChart = null; }
+
+            document.getElementById("selectedTime").innerHTML = "";
+            document.getElementById("tsStats").innerHTML = "";
+
+            var img = document.getElementById("tsImage");
+            var url = profileData?.["IMAGE_URL"];
+            if(url){
+                img.src = url.trim();
+                img.onerror = function(){ this.src = "https://via.placeholder.com/250x150?text=Gambar+Tidak+Tersedia"; };
+            }else{
+                img.src = "https://via.placeholder.com/250x150?text=Gambar+Tidak+Tersedia";
+            }
+
+            var statusText = stationData?.["Gamma Dose Rate (nSv/h)"] === "Out of service"
+                ? "<span class='status-oos'>Out of Service</span>"
+                : "<span class='status-online'>Online</span>";
+
+            document.getElementById("tsMeta").innerHTML =
+                "<div class='font-bold text-slate-900 text-sm mb-1'>"+station+"</div>"+
+                "<b>Alamat:</b> "+(profileData?.["Address"] || profileData?.["ADDRESS"] || "-")+"<br>"+
+                "<b>Provinsi:</b> "+(profileData?.["Province"] || profileData?.["PROVINCE"] || "-")+"<br>"+
+                "<b>Latitude:</b> "+(profileData?.["Latitude"] || profileData?.["LATITUDE"] || "-")+"<br>"+
+                "<b>Longitude:</b> "+(profileData?.["Longitude"] || profileData?.["LONGITUDE"] || "-")+"<br>"+
+                "<b>Status:</b> "+statusText;
+
+            fetch("timeseries.csv?nocache="+Date.now())
+            .then(r=>r.text())
+            .then(text=>{
+                var data = Papa.parse(text,{header:true}).data;
+                const now = new Date();
+                const oneMonthAgo = new Date();
+                oneMonthAgo.setMonth(now.getMonth() - 1);
+
+                var dailyGroup = {};
+                data.forEach(r=>{
+                    if(normalizeName(r.station) === normalizeName(station)){
+                        var t = new Date(r.time);
+                        var v = parseFloat(r.dose);
+                        if(t >= oneMonthAgo && t <= now && !isNaN(v)){
+                            var dayKey = t.toISOString().split("T")[0];
+                            if(!dailyGroup[dayKey]) dailyGroup[dayKey] = [];
+                            dailyGroup[dayKey].push(v);
+                        }
+                    }
+                });
+
+                allLabels = []; allValues = [];
+                Object.keys(dailyGroup).sort().forEach(day=>{
+                    var arr = dailyGroup[day];
+                    var avg = arr.reduce((a,b)=>a+b,0) / arr.length;
+                    allLabels.push(day);
+                    allValues.push(avg);
+                });
+
+                if(allValues.length===0){
+                    document.getElementById("tsStats").innerHTML = "No data available";
+                    return;
+                }
+
+                var fromInput = document.getElementById("dateFrom");
+                var toInput = document.getElementById("dateTo");
+                if(allLabels.length > 0){
+                    fromInput.value = allLabels[0].replace(" ", "T");
+                    toInput.value = allLabels[allLabels.length-1].replace(" ", "T");
+                }
+
+                fromInput.onchange = applyDateFilter;
+                toInput.onchange = applyDateFilter;
+
+                var slider = document.getElementById("timeSlider");
+                var lastIndex = allValues.length - 1;
+                slider.min = 0; slider.max = lastIndex; slider.step = 1; slider.value = lastIndex;
+
+                updateChartUnified(lastIndex);
+                slider.oninput = function(){ updateChartUnified(parseInt(this.value)); };
+            });
+        }
+
+        function applyDateFilter(){
+            var fromVal = document.getElementById("dateFrom").value;
+            var toVal = document.getElementById("dateTo").value;
+            if(!fromVal || !toVal) return;
+
+            var fromDate = new Date(fromVal);
+            var toDate = new Date(toVal);
+
+            filteredLabels = []; filteredValues = [];
+            for(let i=0; i<allLabels.length; i++){
+                let t = new Date(allLabels[i]);
+                if(t >= fromDate && t <= toDate){
+                    filteredLabels.push(allLabels[i]);
+                    filteredValues.push(allValues[i]);
+                }
+            }
+
+            if(filteredValues.length === 0) return;
+            isFiltered = true;
+
+            var slider = document.getElementById("timeSlider");
+            slider.min = 0;
+            slider.max = filteredValues.length - 1;
+            slider.value = filteredValues.length - 1;
+
+            slider.oninput = function(){ updateChartUnified(parseInt(this.value)); };
+            updateChartUnified(slider.value);
+        }
+
+        function updateChartUnified(index){
+            var labels = isFiltered ? filteredLabels : allLabels;
+            var values = isFiltered ? filteredValues : allValues;
+
+            if(labels.length === 0) return;
+
+            var slicedLabels = labels.slice(0, index+1);
+            var slicedValues = values.slice(0, index+1);
+            if(slicedLabels.length === 0) return;
+
+            var startTime = slicedLabels[0];
+            var endTime = slicedLabels[slicedLabels.length-1];
+
+            document.getElementById("selectedTime").innerHTML = "Selected Time : " + startTime + " – " + endTime;
+
+            var sum = slicedValues.reduce((a,b)=>a+b,0);
+            var avg = sum / slicedValues.length;
+            var min = Math.min(...slicedValues);
+            var max = Math.max(...slicedValues);
+
+            var range = max - min;
+            var minRange = 50;
+            var ymin, ymax;
+
+            if(range < minRange){
+                var mid = (max + min) / 2;
+                ymin = mid - minRange; ymax = mid + minRange;
+            }else{
+                var padding = range * 0.5;
+                ymin = min - padding; ymax = max + padding;
+            }
+            if(ymin < 0) ymin = 0;
+
+            if(tsChart) tsChart.destroy();
+
+            tsChart = new Chart(document.getElementById("tsChart"),{
+                type:'line',
+                data:{
+                    labels: labels,
+                    datasets:[{
+                        data: values,
+                        borderColor:'#0284c7',
+                        backgroundColor:'rgba(2, 132, 199, 0.15)',
+                        tension:0.25,
+                        pointRadius:3,
+                        fill:true
+                    }]
+                },
+                options:{
+                    responsive:true,
+                    maintainAspectRatio:false,
+                    plugins:{
+                        legend:{display:false},
+                        tooltip:{ callbacks:{ title:function(items){ return items[0].label; } } }
+                    },
+                    scales:{
+                        x:{
+                            type:'category',
+                            min:0, max:index,
+                            ticks:{
+                                autoSkip:false, maxRotation:0,
+                                callback:function(val, i){
+                                    const mid = Math.floor(index / 2);
+                                    if(i === 0 || i === mid || i === index){ return labels[i]; }
+                                    return "";
+                                }
+                            },
+                            grid:{display:false}
+                        },
+                        y:{
+                            min:ymin, max:ymax,
+                            title:{display:true, text:"nSv/h"},
+                            grid:{color:"rgba(0,0,0,0.05)"}
+                        }
+                    }
+                }
+            });
+
+            document.getElementById("tsStats").innerHTML =
+                "<b>Average:</b> "+avg.toFixed(2)+" nSv/h | "+
+                "<b>Min:</b> "+min.toFixed(2)+" nSv/h | "+
+                "<b>Max:</b> "+max.toFixed(2)+" nSv/h";
+
+            document.getElementById("dateFrom").value = slicedLabels[0].replace(" ", "T");
+            document.getElementById("dateTo").value = slicedLabels[slicedLabels.length-1].replace(" ", "T");
+        }
+
+        function closeTS(){
+            document.getElementById("tsModal").classList.add("hidden");
+        }
+
+        // SIDEBAR TOGGLE & RUNNING TICKER RESIZE FIX
+        function toggleSidebar(){
+            const sidebar = document.getElementById("sidePanel");
+            const showBtn = document.getElementById("show-sidebar-btn");
+            const ticker = document.getElementById("statusTicker");
+
+            const isCollapsed = sidebar.classList.contains("-translate-x-full");
+
+            if(isCollapsed){
+                sidebar.classList.remove("-translate-x-full");
+                showBtn.classList.add("-translate-x-12", "opacity-0", "pointer-events-none");
+                
+                const sidebarWidth = sidebar.offsetWidth || 384;
+                ticker.style.left = sidebarWidth + "px";
+                ticker.style.width = `calc(100% - ${sidebarWidth}px)`;
+            }else{
+                sidebar.classList.add("-translate-x-full");
+                showBtn.classList.remove("-translate-x-12", "opacity-0", "pointer-events-none");
+                
+                ticker.style.left = "0px";
+                ticker.style.width = "100%";
+            }
+
+            let start = null;
+            function animateMapResize(timestamp) {
+                if (!start) start = timestamp;
+                let progress = timestamp - start;
+                if (map) map.invalidateSize();
+                if (progress < 400) { window.requestAnimationFrame(animateMapResize); }
+            }
+            window.requestAnimationFrame(animateMapResize);
+        }
+
+        // IAEA LEGEND
+        var legend = L.control({position:"bottomleft"});
+        legend.onAdd = function(){
+            var div = L.DomUtil.create("div","legend");
+            div.innerHTML = `
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                    <b style="color:#0f172a;">IAEA Operational Intervention Levels</b>
+                    <div id="infoIcon" style="cursor:pointer;background:#0f172a;color:white;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;">i</div>
+                </div>
+
+                <div id="legendTooltip" style="display:none;position:fixed;bottom:140px;left:10px;width:240px;background:white;border-radius:8px;padding:10px;box-shadow:0 4px 15px rgba(0,0,0,0.2);font-size:12px;z-index:100000;border:1px solid #cbd5e1;">
+                    <b>Keterangan:</b><br>
+                    <div style="margin-bottom:3px;"><span style="color:#2b83ba;font-weight:bold;">■ Biru</span>: Laju dosis dibawah OILs</div>
+                    <div style="margin-bottom:3px;"><span style="color:#eab308;font-weight:bold;">■ Kuning</span>: OILs kontaminasi s.d OILs relokasi</div>
+                    <div style="margin-bottom:3px;"><span style="color:#ea580c;font-weight:bold;">■ Orange</span>: OILs relokasi s.d OILs evakuasi</div>
+                    <div><span style="color:#dc2626;font-weight:bold;">■ Merah</span>: OILs evakuasi</div>
+                    <hr style="border:none;border-top:1px solid #e2e8f0;margin:8px 0;">
+                    <div style="font-size:11px;line-height:1.4;color:#475569;">
+                        <b>Operational Intervention Level (OIL) :</b> Nilai ambang laju dosis radiasi untuk menentukan tindakan proteksi darurat.
+                    </div>
+                </div>
+
+                <div style="width:240px;height:12px;background:linear-gradient(to right,#2b83ba,#ffe600,#ff9b00,#ff2b2b);margin-bottom:6px;border-radius:3px;"></div>
+                <div style="display:flex;justify-content:space-between;width:240px;font-size:10px;color:#64748b;font-weight:bold;">
+                    <span>0</span><span>1.000</span><span>100.000</span><span>1.000.000</span>
+                </div>
+                <div style="font-size:10px;margin-top:4px;color:#475569;font-weight:bold;">Gamma Dose Rate (nSv/h)</div>
+            `;
+
+            setTimeout(()=>{
+                var icon = div.querySelector("#infoIcon");
+                var tooltip = div.querySelector("#legendTooltip");
+                if(icon && tooltip){
+                    icon.onmouseenter = ()=> tooltip.style.display="block";
+                    icon.onmouseleave = ()=> tooltip.style.display="none";
+                }
+            },50);
+            return div;
+        };
+        legend.addTo(map);
+
+        // STATUS TICKER
+        function updateStatusTicker(){
+            let maxDose = -1;
+            let latestTime = null;
+
+            Object.values(window.latestTS).forEach(v=>{
+                if(v.dose > maxDose){ maxDose = v.dose; }
+                if(!latestTime || v.time > latestTime){ latestTime = v.time; }
+            });
+
+            if(maxDose < 0) return;
+
+            let css = "";
+            let status = "";
+
+            if(maxDose < 1000){
+                css = "status-green";
+                status = "Radioaktivitas lingkungan di wilayah NKRI dalam kategori AMAN dan SELAMAT";
+            }else if(maxDose < 100000){
+                css = "status-yellow";
+                status = "Radioaktivitas lingkungan di wilayah NKRI dalam kategori SIAGA";
+            }else if(maxDose < 1000000){
+                css = "status-orange";
+                status = "Radioaktivitas lingkungan di wilayah NKRI dalam kategori WASPADA";
+            }else{
+                css = "status-red";
+                status = "Radioaktivitas lingkungan di wilayah NKRI dalam kategori BAHAYA";
+            }
+
+            let waktu = "-";
+            if(latestTime){
+                waktu = latestTime.toLocaleString("id-ID",{
+                    day:"2-digit", month:"2-digit", year:"numeric",
+                    hour:"2-digit", minute:"2-digit", second:"2-digit",
+                    hour12:false, timeZone:"Asia/Jakarta"
+                }) + " WIB";
+            }
+
+            document.getElementById("statusTicker").className = css;
+            const msg = `[${waktu}] ${status} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [${waktu}] ${status} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [${waktu}] ${status}`;
+            document.getElementById("tickerText").innerHTML = msg;
+        }
+
+        // AUTHENTICATION
+        function openLogin(){
+            document.getElementById("loginError").classList.add("hidden");
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+            document.getElementById("loginModal").classList.remove("hidden");
+        }
+
+        function closeLogin(){
+            document.getElementById("loginModal").classList.add("hidden");
+        }
+
+        function login(){
+            const user = document.getElementById("username").value.trim();
+            const pass = document.getElementById("password").value;
+
+            if(user === "dkkn" && pass === "sos123"){
+                sessionStorage.setItem("login","true");
+                window.location.href = "backend.html";
+            }else{
+                document.getElementById("loginError").classList.remove("hidden");
+                document.getElementById("password").value = "";
+            }
+        }
+
+        // INITIALIZATION
+        window.onload = function(){
+            loadProfile();
+            loadCSV();
+            updateSidePanel();
+
+            // Penyesuaian posisi awal ticker saat panel tertutup default
+            const sidebar = document.getElementById("sidePanel");
+            const ticker = document.getElementById("statusTicker");
+            if (sidebar && ticker) {
+                if (sidebar.classList.contains("-translate-x-full")) {
+                    ticker.style.left = "0px";
+                    ticker.style.width = "100%";
+                } else {
+                    const sidebarWidth = sidebar.offsetWidth || 384;
+                    ticker.style.left = sidebarWidth + "px";
+                    ticker.style.width = `calc(100% - ${sidebarWidth}px)`;
+                }
+            }
+
+            setInterval(loadCSV, 30000);
+            setInterval(updateSidePanel, 30000);
+
+            map.on("zoomend", loadCSV);
+            window.addEventListener("resize", ()=>{ 
+                drawAvgChart(); 
+                const isCollapsed = sidebar.classList.contains("-translate-x-full");
+                if (!isCollapsed) {
+                    const sidebarWidth = sidebar.offsetWidth || 384;
+                    ticker.style.left = sidebarWidth + "px";
+                    ticker.style.width = `calc(100% - ${sidebarWidth}px)`;
+                } else {
+                    ticker.style.left = "0px";
+                    ticker.style.width = "100%";
+                }
+            });
+        };
+    </script>
 </body>
 </html>
