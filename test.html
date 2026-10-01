@@ -43,14 +43,14 @@
 
         /* Marker & Hexagon Styling */
         .unit-label {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 6px;
             padding: 2px 6px;
             font-size: 11px;
             font-weight: 700;
             color: #0f172a;
             border: 1px solid rgba(0, 0, 0, 0.15);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
             white-space: nowrap;
         }
 
@@ -71,12 +71,12 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
         .north-compass-box {
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(0, 0, 0, 0.15);
             border-radius: 8px;
             padding: 6px 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -102,8 +102,8 @@
             font-weight: 700;
             color: #fff;
             z-index: 9999;
-            box-shadow: 0 -2px 10px rgba(0,0,0,.3);
-            transition: left .3s;
+            box-shadow: 0 -2px 10px rgba(0,0,0,.2);
+            transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         #statusTicker marquee {
@@ -135,18 +135,18 @@
         }
     </style>
 </head>
-<body class="bg-slate-900 flex flex-col h-full w-full overflow-hidden text-slate-800">
+<body class="bg-slate-100 flex flex-col h-full w-full overflow-hidden text-slate-800">
 
-    <!-- Header Navigation -->
-    <header class="h-16 bg-slate-900 border-b border-slate-800 text-white flex items-center justify-between px-4 z-[9999] shadow-lg flex-shrink-0">
+    <!-- Header Navigation (Putih) -->
+    <header class="h-16 bg-white border-b border-slate-200 text-slate-800 flex items-center justify-between px-4 z-[9999] shadow-sm flex-shrink-0">
         <div class="flex items-center gap-3">
-            <button onclick="toggleSidebar()" class="bg-slate-800 hover:bg-slate-700 text-white p-2.5 rounded-lg transition-colors border border-slate-700" title="Toggle Sidebar">
+            <button onclick="toggleSidebar()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2.5 rounded-lg transition-colors border border-slate-200" title="Toggle Sidebar">
                 <i class="fa-solid fa-bars text-lg text-amber-500"></i>
             </button>
             <img src="logo/logo-bapeten.png" alt="Logo BAPETEN" class="h-9 w-auto">
             <div>
-                <h1 class="font-bold text-sm sm:text-lg tracking-wide text-white leading-tight">Indonesia Radiation Data Monitoring System</h1>
-                <p class="text-[10px] text-slate-400 font-medium hidden sm:block">Direktorat Ketanggapdaruratan dan Fasilitas Nuklir — BAPETEN</p>
+                <h1 class="font-bold text-sm sm:text-lg tracking-wide text-slate-900 leading-tight">Indonesia Radiation Data Monitoring System</h1>
+                <p class="text-[10px] text-slate-500 font-medium hidden sm:block">Direktorat Keteknikan dan Kesiapsiagaan Nuklir — BAPETEN</p>
             </div>
         </div>
 
@@ -226,8 +226,8 @@
         </aside>
 
         <!-- Map Canvas Area -->
-        <main class="w-full h-full relative bg-slate-900 overflow-hidden">
-            <button id="show-sidebar-btn" onclick="toggleSidebar()" class="absolute top-4 left-4 z-[1000] bg-slate-900/90 text-white px-3.5 py-2.5 rounded-lg shadow-2xl hover:bg-slate-800 transition-all duration-300 flex items-center space-x-2 border border-slate-700 backdrop-blur-sm transform -translate-x-12 opacity-0 pointer-events-none">
+        <main class="w-full h-full relative bg-slate-100 overflow-hidden">
+            <button id="show-sidebar-btn" onclick="toggleSidebar()" class="absolute top-4 left-4 z-[1000] bg-white/90 text-slate-800 px-3.5 py-2.5 rounded-lg shadow-xl hover:bg-white transition-all duration-300 flex items-center space-x-2 border border-slate-200 backdrop-blur-sm transform -translate-x-12 opacity-0 pointer-events-none">
                 <i class="fa-solid fa-bars text-amber-500"></i>
                 <span class="text-xs font-semibold">Tampilkan Panel</span>
             </button>
@@ -372,17 +372,18 @@
             }).catch(e=>console.error("Error load profile.csv", e));
         }
 
-        // MAP BASELAYERS
-        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-        var dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png');
-        var googleHybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']});
-        var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']});
+        // MAP BASELAYERS (Standardized Basemaps)
+        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: 'OpenStreetMap' });
+        var cartoPositron = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: 'CartoDB' });
+        var dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: 'CartoDB Dark' });
+        var googleHybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3'], attribution: 'Google'});
+        var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3'], attribution: 'Google'});
         var esriGray = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,attribution:'Esri'});
         var esriGrayLabel = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',{maxZoom:16});
 
         var map = L.map('map',{
             zoomControl: false,
-            layers: [esriGray], 
+            layers: [cartoPositron], 
             zoomSnap: 0.25,
             zoomDelta: 0.25,
             wheelPxPerZoomLevel: 120
@@ -399,12 +400,12 @@
         northArrowControl.onAdd = function() {
             const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control north-compass-box');
             div.innerHTML = `
-                <span style="font-size: 11px; font-weight: 800; color: #f59e0b; margin-bottom: 2px;">N</span>
+                <span style="font-size: 11px; font-weight: 800; color: #d97706; margin-bottom: 2px;">N</span>
                 <svg width="20" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2L17 12H12V2Z" fill="#ef4444"/>
                     <path d="M12 2L7 12H12V2Z" fill="#f87171"/>
-                    <path d="M12 22L17 12H12V22Z" fill="#94a3b8"/>
-                    <path d="M12 22L7 12H12V22Z" fill="#cbd5e1"/>
+                    <path d="M12 22L17 12H12V22Z" fill="#64748b"/>
+                    <path d="M12 22L7 12H12V22Z" fill="#94a3b8"/>
                 </svg>
             `;
             return div;
@@ -416,9 +417,10 @@
 
         L.control.layers(
             {
+                "Carto Light": cartoPositron,
                 "ESRI Light Gray": esriGray,
                 "OpenStreetMap": osm,
-                "Dark": dark,
+                "Dark Matter": dark,
                 "Google Hybrid": googleHybrid,
                 "Google Satellite": googleSat
             },
@@ -1051,7 +1053,7 @@
             document.getElementById("tsModal").classList.add("hidden");
         }
 
-        // SIDEBAR TOGGLE
+        // SIDEBAR TOGGLE & RUNNING TICKER RESIZE FIX
         function toggleSidebar(){
             const sidebar = document.getElementById("sidePanel");
             const showBtn = document.getElementById("show-sidebar-btn");
@@ -1062,11 +1064,17 @@
             if(isCollapsed){
                 sidebar.classList.remove("-translate-x-full");
                 showBtn.classList.add("-translate-x-12", "opacity-0", "pointer-events-none");
-                ticker.style.left = sidebar.offsetWidth + "px";
+                
+                // Menyesuaikan posisi dan lebar running text agar tidak terpotong di kanan
+                const sidebarWidth = sidebar.offsetWidth || 384;
+                ticker.style.left = sidebarWidth + "px";
+                ticker.style.width = `calc(100% - ${sidebarWidth}px)`;
             }else{
                 sidebar.classList.add("-translate-x-full");
                 showBtn.classList.remove("-translate-x-12", "opacity-0", "pointer-events-none");
+                
                 ticker.style.left = "0px";
+                ticker.style.width = "100%";
             }
 
             let start = null;
@@ -1193,11 +1201,29 @@
             loadProfile();
             loadCSV();
             updateSidePanel();
+
+            // Set initial ticker position based on default open sidebar
+            const sidebar = document.getElementById("sidePanel");
+            const ticker = document.getElementById("statusTicker");
+            if (sidebar && ticker && !sidebar.classList.contains("-translate-x-full")) {
+                const sidebarWidth = sidebar.offsetWidth || 384;
+                ticker.style.left = sidebarWidth + "px";
+                ticker.style.width = `calc(100% - ${sidebarWidth}px)`;
+            }
+
             setInterval(loadCSV, 30000);
             setInterval(updateSidePanel, 30000);
 
             map.on("zoomend", loadCSV);
-            window.addEventListener("resize", ()=>{ drawAvgChart(); });
+            window.addEventListener("resize", ()=>{ 
+                drawAvgChart(); 
+                const isCollapsed = sidebar.classList.contains("-translate-x-full");
+                if (!isCollapsed) {
+                    const sidebarWidth = sidebar.offsetWidth || 384;
+                    ticker.style.left = sidebarWidth + "px";
+                    ticker.style.width = `calc(100% - ${sidebarWidth}px)`;
+                }
+            });
         };
     </script>
 </body>
