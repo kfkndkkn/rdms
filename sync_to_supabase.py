@@ -3,8 +3,8 @@ import pandas as pd
 from supabase import create_client, Client
 
 # Ambil kredensial dari Environment Variables (GitHub Secrets)
-url: str = os.environ.get("https://kedpmwibkkzvnuhlszeu.supabase.co")
-key: str = os.environ.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZHBtd2lia2t6dm51aGxzemV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5Mjc2NDgsImV4cCI6MjEwNzUwMzY0OH0.AMLnYZmWaoFGcNEK6j19-3cdJgCAJYh_W4dsGhc5gRg")
+url = os.environ.get("SUPABASE_URL")
+key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 
 if not url or not key:
     raise ValueError("Supabase URL dan Key harus diset pada environment variables.")
