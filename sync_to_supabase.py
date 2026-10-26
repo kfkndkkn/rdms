@@ -19,25 +19,25 @@ def sync_csv_to_supabase():
         print(f"File CSV tidak ditemukan: {csv_path}")
         return
 
-    # Baca CSV menggunakan Pandas
+    # 1. Baca CSV menggunakan Pandas (tanpa mengubah file CSV aslinya)
     df = pd.read_csv(csv_path)
     
-    # Ubah nilai infinity menjadi NaN
+    # 2. Tangani nilai infinity dan NaN agar aman untuk JSON/Supabase
     df = df.replace([np.inf, -np.inf], np.nan)
     
-    # Konversi DataFrame ke format list of dictionaries
+    # Konversi DataFrame ke list of dictionaries
     data_records = df.to_dict(orient="records")
     
-    # Bersihkan setiap baris secara manual agar NaN benar-benar menjadi None (JSON compliant)
     cleaned_records = []
     for row in data_records:
         cleaned_row = {k: (None if pd.isna(v) else v) for k, v in row.items()}
         cleaned_records.append(cleaned_row)
 
-    # Lakukan Upsert ke tabel Supabase 'timeseries_all'
+    # 3. Lakukan Insert/Upsert ke Supabase
+    # Karena kolom 'id' di Supabase bertipe auto-increment (serial/int4) dan bertindak sebagai primary key,
+    # kita tidak perlu menyertakan 'on_conflict' yang spesifik, atau kita bisa insert langsung data baru.
     response = supabase.table("timeseries_all").upsert(
-        cleaned_records, 
-        on_conflict="timestamp" 
+        cleaned_records
     ).execute()
     
     print("Sinkronisasi ke Supabase berhasil:", response)
