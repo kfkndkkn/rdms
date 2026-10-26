@@ -1,10 +1,11 @@
 import os
+import numpy as np
 import pandas as pd
 from supabase import create_client, Client
 
 # Ambil kredensial dari Environment Variables (GitHub Secrets)
-url = os.environ.get("SUPABASE_URL")
-key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+url: str = os.environ.get("SUPABASE_URL")
+key: str = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 
 if not url or not key:
     raise ValueError("Supabase URL dan Key harus diset pada environment variables.")
@@ -12,7 +13,6 @@ if not url or not key:
 supabase: Client = create_client(url, key)
 
 def sync_csv_to_supabase():
-    # Nama file CSV di root repository
     csv_path = "timeseries_all.csv" 
 
     if not os.path.exists(csv_path):
@@ -22,16 +22,21 @@ def sync_csv_to_supabase():
     # Baca CSV menggunakan Pandas
     df = pd.read_csv(csv_path)
     
-    # Tangani nilai kosong (NaN) agar menjadi None yang valid untuk JSON/Supabase
-    df = df.where(pd.notnull(df), None)
+    # Ubah nilai infinity menjadi NaN
+    df = df.replace([np.inf, -np.inf], np.nan)
     
     # Konversi DataFrame ke format list of dictionaries
     data_records = df.to_dict(orient="records")
+    
+    # Bersihkan setiap baris secara manual agar NaN benar-benar menjadi None (JSON compliant)
+    cleaned_records = []
+    for row in data_records:
+        cleaned_row = {k: (None if pd.isna(v) else v) for k, v in row.items()}
+        cleaned_records.append(cleaned_row)
 
     # Lakukan Upsert ke tabel Supabase 'timeseries_all'
-    # Catatan: Pastikan 'on_conflict' diisi kolom unik/primary key di tabel Anda (misal: 'timestamp' atau 'id')
     response = supabase.table("timeseries_all").upsert(
-        data_records, 
+        cleaned_records, 
         on_conflict="timestamp" 
     ).execute()
     
