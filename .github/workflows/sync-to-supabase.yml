@@ -28,9 +28,9 @@ jobs:
         run: |
           pip install pandas supabase
 
-      # 4. Jalankan skrip Python sinkronisasi
+  # 4. Jalankan skrip Python sinkronisasi
       - name: Run Supabase Sync Script
         env:
-          SUPABASE_URL: ${{ secrets.https://kedpmwibkkzvnuhlszeu.supabase.co }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZHBtd2lia2t6dm51aGxzemV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5Mjc2NDgsImV4cCI6MjEwNzUwMzY0OH0.AMLnYZmWaoFGcNEK6j19-3cdJgCAJYh_W4dsGhc5gRg }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python sync_to_supabase.py
