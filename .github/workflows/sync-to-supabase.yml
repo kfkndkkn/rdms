@@ -1,1 +1,36 @@
+name: Sync CSV to Supabase
 
+on:
+  push:
+    branches:
+      - main  # Ganti dengan 'master' jika branch utama repository Anda bernama master
+    paths:
+      - 'timeseries_all.csv'  # Workflow HANYA akan berjalan jika file ini yang di-push
+  workflow_dispatch:          # Memungkinkan Anda menjalankan secara manual dari tab Actions di GitHub
+
+jobs:
+  sync-to-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Ambil kode terbaru dari repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Siapkan environment Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      # 3. Install library yang dibutuhkan Python (Pandas dan Supabase)
+      - name: Install dependencies
+        run: |
+          pip install pandas supabase
+
+      # 4. Jalankan skrip Python sinkronisasi
+      - name: Run Supabase Sync Script
+        env:
+          SUPABASE_URL: ${{ secrets.https://kedpmwibkkzvnuhlszeu.supabase.co }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZHBtd2lia2t6dm51aGxzemV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5Mjc2NDgsImV4cCI6MjEwNzUwMzY0OH0.AMLnYZmWaoFGcNEK6j19-3cdJgCAJYh_W4dsGhc5gRg }}
+        run: python sync_to_supabase.py
