@@ -1,35 +1,34 @@
-name: Update CSV and Sync to Supabase
+name: Sync CSV to Supabase
 
 on:
-  schedule:
-    - cron: '0 * * * *' # Berjalan setiap 1 jam sekali (bisa diubah sesuai kebutuhan)
-  workflow_dispatch:     # Memungkinkan Anda menjalankan manual lewat tab Actions di GitHub
+  push:
+    branches:
+      - main  # Ganti dengan 'master' jika branch utama repository Anda bernama master
+    paths:
+      - 'timeseries_all.csv'  # Workflow HANYA akan berjalan jika file ini yang di-push
+  workflow_dispatch:          # Memungkinkan Anda menjalankan secara manual dari tab Actions di GitHub
 
 jobs:
-  run-sync:
+  sync-to-supabase:
     runs-on: ubuntu-latest
     steps:
+      # 1. Ambil kode terbaru dari repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 1. Setup Python
+      # 2. Siapkan environment Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
           cache: 'pip'
 
-      # 2. Install dependencies yang dibutuhkan (Pandas & Supabase client)
+      # 3. Install library yang dibutuhkan Python (Pandas dan Supabase)
       - name: Install dependencies
-        uses: py-actions/dependency-review-action@v3 # Opsional, atau langsung pip install:
         run: |
-          pip install pandas supabase requests
+          pip install pandas supabase
 
-      # 3. Jalankan skrip pembuat/pembaharu CSV Anda yang sudah ada
-      - name: Run CSV Generator Script
-        run: python generate_csv.py # Ganti dengan nama file skrip pembuat CSV Anda
-
-      # 4. Jalankan skrip sinkronisasi ke Supabase
+      # 4. Jalankan skrip Python sinkronisasi
       - name: Run Supabase Sync Script
         env:
           SUPABASE_URL: ${{ secrets.https://kedpmwibkkzvnuhlszeu.supabase.co }}
