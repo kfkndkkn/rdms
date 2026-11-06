@@ -33,14 +33,17 @@ def sync_csv_to_supabase():
         cleaned_row = {k: (None if pd.isna(v) else v) for k, v in row.items()}
         cleaned_records.append(cleaned_row)
 
-    # 3. Lakukan Insert/Upsert ke Supabase
-    # Karena kolom 'id' di Supabase bertipe auto-increment (serial/int4) dan bertindak sebagai primary key,
-    # kita tidak perlu menyertakan 'on_conflict' yang spesifik, atau kita bisa insert langsung data baru.
-    response = supabase.table("timeseries_all").upsert(
+    print("Menghapus seluruh data lama di tabel Supabase...")
+    # 3. Kosongkan tabel terlebih dahulu (.neq("id", 0) berarti menghapus semua baris di mana id tidak sama dengan 0)
+    supabase.table("timeseries_all").delete().neq("id", 0).execute()
+
+    print("Memasukkan data baru dari CSV ke Supabase...")
+    # 4. Masukkan data yang baru dari CSV
+    response = supabase.table("timeseries_all").insert(
         cleaned_records
     ).execute()
     
-    print("Sinkronisasi ke Supabase berhasil:", response)
+    print("Sinkronisasi (Replace total) ke Supabase berhasil:", response)
 
 if __name__ == "__main__":
     sync_csv_to_supabase()
