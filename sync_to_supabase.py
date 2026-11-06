@@ -19,7 +19,7 @@ def sync_csv_to_supabase():
         print(f"File CSV tidak ditemukan: {csv_path}")
         return
 
-    # 1. Baca CSV menggunakan Pandas (tanpa mengubah file CSV aslinya)
+    # 1. Baca CSV menggunakan Pandas
     df = pd.read_csv(csv_path)
     
     # 2. Tangani nilai infinity dan NaN agar aman untuk JSON/Supabase
@@ -33,9 +33,9 @@ def sync_csv_to_supabase():
         cleaned_row = {k: (None if pd.isna(v) else v) for k, v in row.items()}
         cleaned_records.append(cleaned_row)
 
-    print("Menghapus seluruh data lama di tabel Supabase...")
-    # 3. Kosongkan tabel terlebih dahulu (.neq("id", 0) berarti menghapus semua baris di mana id tidak sama dengan 0)
-    supabase.table("timeseries_all").delete().neq("id", 0).execute()
+    print("Mengosongkan tabel Supabase (Truncate)...")
+    # 3. Kosongkan tabel secara instan menggunakan fungsi RPC Supabase
+    supabase.rpc("truncate_timeseries").execute()
 
     print("Memasukkan data baru dari CSV ke Supabase...")
     # 4. Masukkan data yang baru dari CSV
